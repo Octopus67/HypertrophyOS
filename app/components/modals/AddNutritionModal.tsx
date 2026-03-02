@@ -1174,7 +1174,17 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
             <View style={{ marginTop: spacing[2] }}>
               <View style={{ flexDirection: 'row', gap: spacing[1] }}>
                 <TextInput
-                  style={[styles.searchInput, { flex: 1 }]}
+                  style={{
+                    flex: 1,
+                    height: 40,
+                    borderWidth: 1,
+                    borderColor: colors.accent.primary,
+                    borderRadius: radius.sm,
+                    paddingHorizontal: 12,
+                    color: colors.text.primary,
+                    fontSize: typography.size.md,
+                    backgroundColor: 'transparent',
+                  }}
                   placeholder="Enter barcode (8-14 digits)"
                   placeholderTextColor={colors.text.muted}
                   value={manualBarcodeValue}
@@ -1182,9 +1192,8 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                     setManualBarcodeValue(t);
                     setManualBarcodeError('');
                   }}
-                  keyboardType="numeric"
+                  keyboardType={Platform.OS === 'web' ? 'default' : 'numeric'}
                   maxLength={14}
-                  autoFocus
                 />
                 <TouchableOpacity
                   style={[styles.barcodeBtn, { opacity: manualBarcodeLoading ? 0.5 : 1 }]}
