@@ -79,6 +79,7 @@ const activeSetArb: fc.Arbitrary<ActiveSet> = fc.record({
   weight: fc.constantFrom('50', '60', '80', '100', ''),
   reps: fc.constantFrom('5', '8', '10', '12', ''),
   rpe: fc.constantFrom('7', '8', '9', ''),
+  rir: fc.constant(''),
   setType: setTypeArb,
   completed: fc.boolean(),
   completedAt: fc.constant(null),
@@ -224,6 +225,7 @@ describe('Volume Aggregator — Property Tests', () => {
                 weight: '60',
                 reps: '10',
                 rpe: '',
+            rir: '',
                 setType: 'warm-up',
                 completed: true,
                 completedAt: null,
@@ -234,6 +236,7 @@ describe('Volume Aggregator — Property Tests', () => {
                 weight: '80',
                 reps: '5',
                 rpe: '',
+            rir: '',
                 setType: 'drop-set',
                 completed: true,
                 completedAt: null,
@@ -242,13 +245,11 @@ describe('Volume Aggregator — Property Tests', () => {
           },
         ];
 
-        const result = aggregateVolume(exercises, exercises, EXERCISES);
-        // Wait — first arg is weeklyData, not exercises. Let me fix:
-        const resultCorrect = aggregateVolume(weeklyData, exercises, EXERCISES);
+        const result = aggregateVolume(weeklyData, exercises, EXERCISES);
 
         // Chest count should equal API count (no normal sets completed)
         const chestApi = weeklyData.find((e) => e.muscleGroup === 'Chest');
-        const chestResult = resultCorrect.find(
+        const chestResult = result.find(
           (e) => e.muscleGroup === 'Chest',
         );
 
@@ -277,6 +278,7 @@ describe('Volume Aggregator — Property Tests', () => {
                 weight: '100',
                 reps: '10',
                 rpe: '',
+            rir: '',
                 setType: 'normal',
                 completed: true,
                 completedAt: null,
@@ -353,6 +355,7 @@ describe('Volume Aggregator — Unit Tests', () => {
             weight: '80',
             reps: '8',
             rpe: '8',
+            rir: '',
             setType: 'normal',
             completed: true,
             completedAt: '2024-01-01T10:00:00Z',
@@ -363,6 +366,7 @@ describe('Volume Aggregator — Unit Tests', () => {
             weight: '80',
             reps: '8',
             rpe: '8',
+            rir: '',
             setType: 'normal',
             completed: true,
             completedAt: '2024-01-01T10:05:00Z',
@@ -373,6 +377,7 @@ describe('Volume Aggregator — Unit Tests', () => {
             weight: '80',
             reps: '8',
             rpe: '',
+            rir: '',
             setType: 'normal',
             completed: false,
             completedAt: null,
@@ -403,6 +408,7 @@ describe('Volume Aggregator — Unit Tests', () => {
             weight: '80',
             reps: '8',
             rpe: '',
+            rir: '',
             setType: 'normal',
             completed: true,
             completedAt: null,
@@ -419,6 +425,7 @@ describe('Volume Aggregator — Unit Tests', () => {
             weight: '30',
             reps: '10',
             rpe: '',
+            rir: '',
             setType: 'normal',
             completed: true,
             completedAt: null,
@@ -429,6 +436,7 @@ describe('Volume Aggregator — Unit Tests', () => {
             weight: '30',
             reps: '10',
             rpe: '',
+            rir: '',
             setType: 'normal',
             completed: true,
             completedAt: null,
@@ -456,6 +464,7 @@ describe('Volume Aggregator — Unit Tests', () => {
             weight: '70',
             reps: '8',
             rpe: '',
+            rir: '',
             setType: 'normal',
             completed: false,
             completedAt: null,
@@ -466,6 +475,7 @@ describe('Volume Aggregator — Unit Tests', () => {
             weight: '70',
             reps: '8',
             rpe: '',
+            rir: '',
             setType: 'normal',
             completed: false,
             completedAt: null,
