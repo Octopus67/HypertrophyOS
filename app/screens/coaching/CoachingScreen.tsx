@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  Alert,
-  TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, TextInput, Alert, TouchableOpacity, Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -113,6 +107,23 @@ export function CoachingScreen() {
         </View>
 
         {error && <ErrorBanner message={error} onRetry={loadData} onDismiss={() => setError(null)} />}
+
+        {/* 1:1 Coaching */}
+        <Card style={styles.coachingCard}>
+          <Text style={styles.coachingTitle}>1:1 Personal Coaching</Text>
+          <Text style={styles.coachingDesc}>
+            Get personalized training and nutrition guidance from an experienced coach. Available for premium members.
+          </Text>
+          <TouchableOpacity
+            onPress={() => Linking.openURL('https://t.me/repwise')}
+            style={styles.dmButton}
+            activeOpacity={0.8}
+          >
+            <Icon name="chat" size={18} color={colors.accent.primary} />
+            <Text style={styles.dmButtonText}>Message on Telegram</Text>
+          </TouchableOpacity>
+          <Text style={styles.comingSoonNote}>Full in-app messaging — coming soon</Text>
+        </Card>
 
         {/* Request form */}
         <Text style={styles.sectionTitle}>New Request</Text>
@@ -225,6 +236,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   itemCard: { marginBottom: spacing[3] },
+  coachingCard: { marginBottom: spacing[2], padding: spacing[4] },
+  coachingTitle: { color: colors.text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, marginBottom: spacing[2] },
+  coachingDesc: { color: colors.text.secondary, fontSize: typography.size.sm, lineHeight: 20, marginBottom: spacing[3] },
+  dmButton: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], backgroundColor: colors.accent.primaryMuted, paddingVertical: spacing[3], paddingHorizontal: spacing[4], borderRadius: radius.md, alignSelf: 'flex-start' },
+  dmButtonText: { color: colors.accent.primary, fontSize: typography.size.sm, fontWeight: typography.weight.semibold },
+  comingSoonNote: { color: colors.text.muted, fontSize: typography.size.xs, marginTop: spacing[2] },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
