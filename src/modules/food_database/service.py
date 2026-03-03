@@ -92,7 +92,8 @@ class FoodDatabaseService:
         offset = pagination.offset
 
         # Sanitize query for FTS5: remove special chars, collapse whitespace
-        safe_query = "".join(c if c.isalnum() or c.isspace() else " " for c in query).strip()
+        import re
+        safe_query = re.sub(r'["*(){}\[\]^~<>]', ' ', query).strip()
         if not safe_query:
             return PaginatedResult(items=[], total_count=0, page=pagination.page, limit=limit)
 

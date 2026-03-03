@@ -43,6 +43,7 @@ class NutritionService:
         entry = NutritionEntry(
             user_id=user_id,
             meal_name=data.meal_name,
+            food_name=data.food_name,
             calories=data.calories,
             protein_g=data.protein_g,
             carbs_g=data.carbs_g,
@@ -222,7 +223,7 @@ class NutritionService:
         source_entries = await self.get_entries(
             user_id=user_id,
             filters=DateRangeFilter(start_date=source_date, end_date=source_date),
-            pagination=PaginationParams(page=1, limit=100),
+            pagination=PaginationParams(page=1, limit=500),
         )
 
         copied: list[NutritionEntry] = []
@@ -230,12 +231,14 @@ class NutritionService:
             new_entry = NutritionEntry(
                 user_id=user_id,
                 meal_name=entry.meal_name,
+                food_name=entry.food_name,
                 calories=entry.calories,
                 protein_g=entry.protein_g,
                 carbs_g=entry.carbs_g,
                 fat_g=entry.fat_g,
                 micro_nutrients=entry.micro_nutrients,
                 entry_date=target_date,
+                source_meal_id=entry.source_meal_id,
             )
             self.session.add(new_entry)
             copied.append(new_entry)

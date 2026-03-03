@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 from typing import Optional
+import logging
 
 import uuid
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, model_validator
+
+_logger = logging.getLogger(__name__)
 
 
 class NutritionEntryCreate(BaseModel):
@@ -17,6 +20,7 @@ class NutritionEntryCreate(BaseModel):
     """
 
     meal_name: str = Field(..., min_length=1, max_length=255)
+    food_name: Optional[str] = Field(default=None, max_length=500)
     calories: float = Field(..., ge=0, le=50000)
     protein_g: float = Field(..., ge=0, le=5000)
     carbs_g: float = Field(..., ge=0, le=5000)
@@ -35,6 +39,18 @@ class NutritionEntryCreate(BaseModel):
                     raise ValueError(f'micro_nutrient value must be >= 0: {key}')
         return self
 
+    @model_validator(mode='after')
+    def warn_macro_calorie_mismatch(self) -> 'NutritionEntryCreate':
+        computed = self.protein_g * 4 + self.carbs_g * 4 + self.fat_g * 9
+        if self.calories > 0 and computed > 0:
+            ratio = computed / self.calories
+            if ratio > 2.0 or ratio < 0.25:
+                _logger.warning(
+                    'Macro-calorie mismatch: declared=%s, computed=%s (ratio=%.2f)',
+                    self.calories, computed, ratio,
+                )
+        return self
+
 
 class NutritionEntryUpdate(BaseModel):
     """Schema for updating an existing nutrition entry.
@@ -43,6 +59,7 @@ class NutritionEntryUpdate(BaseModel):
     """
 
     meal_name: Optional[str] = Field(default=None, min_length=1, max_length=255)
+    food_name: Optional[str] = Field(default=None, max_length=500)
     calories: Optional[float] = Field(default=None, ge=0, le=50000)
     protein_g: Optional[float] = Field(default=None, ge=0, le=5000)
     carbs_g: Optional[float] = Field(default=None, ge=0, le=5000)
@@ -50,6 +67,16 @@ class NutritionEntryUpdate(BaseModel):
     micro_nutrients: Optional[dict[str, float]] = None
     entry_date: Optional[date] = None
     source_meal_id: Optional[uuid.UUID] = None
+
+    @model_validator(mode='after')
+    def validate_micro_nutrients(self) -> 'NutritionEntryUpdate':
+        if self.micro_nutrients:
+            for key, val in self.micro_nutrients.items():
+                if len(key) > 100:
+                    raise ValueError(f'micro_nutrient key too long: {key[:20]}...')
+                if val < 0:
+                    raise ValueError(f'micro_nutrient value must be >= 0: {key}')
+        return self
 
 
 class NewlyUnlockedAchievement(BaseModel):
@@ -68,6 +95,7 @@ class NutritionEntryResponse(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
     meal_name: str
+    food_name: Optional[str] = None
     calories: float
     protein_g: float
     carbs_g: float

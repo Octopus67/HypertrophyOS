@@ -71,7 +71,7 @@ async def get_entries(
     if start_date and end_date:
         filters = DateRangeFilter(start_date=start_date, end_date=end_date)
     elif start_date:
-        filters = DateRangeFilter(start_date=start_date, end_date=start_date)
+        filters = DateRangeFilter(start_date=start_date, end_date=date.today())
     elif end_date:
         filters = DateRangeFilter(start_date=end_date, end_date=end_date)
 
@@ -134,3 +134,32 @@ async def copy_entries(
         target_date=data.target_date,
     )
     return [NutritionEntryResponse.model_validate(e) for e in entries]
+
+
+# ─── Micronutrient Dashboard ─────────────────────────────────────────────────
+
+
+@router.get("/micronutrient-dashboard")
+async def get_micronutrient_dashboard(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    start_date: Optional[date] = Query(default=None),
+    end_date: Optional[date] = Query(default=None),
+    sex: str = Query(default="male"),
+) -> dict:
+    """Get consolidated micronutrient dashboard with scores and deficiency alerts.
+
+    Defaults to the last 7 days if no dates provided.
+    """
+    from dataclasses import asdict
+    from datetime import timedelta
+    from src.modules.nutrition.micro_dashboard_service import MicronutrientDashboardService
+
+    if end_date is None:
+        end_date = date.today()
+    if start_date is None:
+        start_date = end_date - timedelta(days=6)
+
+    svc = MicronutrientDashboardService(db)
+    dashboard = await svc.get_dashboard(user.id, start_date, end_date, sex)
+    return asdict(dashboard)

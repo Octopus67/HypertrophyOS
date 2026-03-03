@@ -27,6 +27,7 @@ class NutritionEntry(Base, SoftDeleteMixin, AuditLogMixin):
 
     user_id: Mapped[uuid.UUID] = mapped_column(index=True)
     meal_name: Mapped[str] = mapped_column(String(255))
+    food_name: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     calories: Mapped[float] = mapped_column(Float)
     protein_g: Mapped[float] = mapped_column(Float)
     carbs_g: Mapped[float] = mapped_column(Float)

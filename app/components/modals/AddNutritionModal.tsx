@@ -389,6 +389,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
       await api.post('nutrition/entries', {
         entry_date: selectedDate,
         meal_name: selectedRecipe.name,
+        food_name: selectedRecipe.name,
         calories: Math.round(scaled.calories),
         protein_g: Math.round(scaled.protein_g * 10) / 10,
         carbs_g: Math.round(scaled.carbs_g * 10) / 10,
@@ -696,6 +697,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
       await api.post('nutrition/entries', {
         entry_date: selectedDate,
         meal_name: notes.trim() || (hasWater && !hasMacros ? 'Water' : 'Quick entry'),
+        food_name: selectedFood?.name ?? null,
         calories: Number(calories) || 0,
         protein_g: Number(protein) || 0,
         carbs_g: Number(carbs) || 0,

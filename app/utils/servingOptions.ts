@@ -25,7 +25,7 @@ export function scaleToServing(
   selectedServingGrams: number,
   value: number,
 ): number {
-  if (baseServingGrams <= 0) return value;
+  if (baseServingGrams <= 0) baseServingGrams = 100;
   return Math.round(((value * selectedServingGrams) / baseServingGrams) * 10) / 10;
 }
 

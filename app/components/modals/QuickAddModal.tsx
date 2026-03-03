@@ -44,13 +44,14 @@ export function QuickAddModal({ visible, onClose, onSuccess, targetDate }: Quick
     if (loading) return; // guard against double-submit from Alert callback
     setLoading(true);
     try {
+      const safeNum = (v: string) => { const n = Number(v); return isNaN(n) || !isFinite(n) ? 0 : Math.max(0, n); };
       await api.post('nutrition/entries', {
         entry_date: targetDate,
         meal_name: 'Quick add',
         calories: Number(calories),
-        protein_g: Number(protein) || 0,
-        carbs_g: Number(carbs) || 0,
-        fat_g: Number(fat) || 0,
+        protein_g: safeNum(protein),
+        carbs_g: safeNum(carbs),
+        fat_g: safeNum(fat),
       });
       reset();
       onSuccess();

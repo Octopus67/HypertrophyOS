@@ -52,6 +52,15 @@ async def search_food_items(
     service: FoodDatabaseService = Depends(_get_service),
 ) -> PaginatedResult[FoodItemResponse]:
     """Search food items by name with optional category/region filters."""
+    # Guard against empty queries
+    if not q or not q.strip():
+        return PaginatedResult(
+            items=[],
+            total_count=0,
+            page=page,
+            limit=limit,
+        )
+    
     # Load user Food DNA preferences for search personalization
     from src.modules.user.models import UserProfile
     from sqlalchemy import select as sa_select
