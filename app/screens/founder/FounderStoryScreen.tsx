@@ -26,7 +26,12 @@ export function FounderStoryScreen() {
   const loadContent = async () => {
     try {
       const { data } = await api.get('founder');
-      setContent(data.content ?? data);
+      const parsed = data?.content ?? (Array.isArray(data) ? data[0]?.content : data);
+      if (parsed && typeof parsed === 'object' && parsed.narrative) {
+        setContent(parsed);
+        return;
+      }
+      throw new Error('No content');
     } catch {
       // Use fallback content
       setContent({
