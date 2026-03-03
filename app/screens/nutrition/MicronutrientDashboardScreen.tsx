@@ -31,21 +31,26 @@ import {
 import { getWeekStart, formatWeekRange, getAdjacentWeek, isCurrentOrFutureWeek } from '../../utils/muscleVolumeLogic';
 
 function NutrientRow({ nutrient }: { nutrient: NutrientSummary }) {
-  const barWidth = clampPct(nutrient.rda_pct);
-  const barColor = getStatusColor(nutrient.status);
+  const hasData = nutrient.status !== 'no_data' && (nutrient as any).has_data !== false;
+  const barWidth = hasData ? clampPct(nutrient.rda_pct) : 0;
+  const barColor = hasData ? getStatusColor(nutrient.status) : '#6B7280';
 
   return (
     <View style={styles.nutrientRow}>
       <View style={styles.nutrientHeader}>
         <Text style={styles.nutrientLabel}>{nutrient.label}</Text>
         <Text style={styles.nutrientValue}>
-          {formatNutrientValue(nutrient.daily_average, nutrient.unit)} / {formatNutrientValue(nutrient.rda, nutrient.unit)}
+          {hasData
+            ? `${formatNutrientValue(nutrient.daily_average, nutrient.unit)} / ${formatNutrientValue(nutrient.rda, nutrient.unit)}`
+            : 'No data'}
         </Text>
       </View>
       <View style={styles.barBg}>
         <View style={[styles.barFill, { width: `${barWidth}%`, backgroundColor: barColor }]} />
       </View>
-      <Text style={[styles.rdaPct, { color: barColor }]}>{nutrient.rda_pct.toFixed(0)}% RDA</Text>
+      <Text style={[styles.rdaPct, { color: barColor }]}>
+        {hasData ? `${nutrient.rda_pct.toFixed(0)}% RDA` : 'Not in your foods'}
+      </Text>
     </View>
   );
 }
@@ -162,6 +167,7 @@ export function MicronutrientDashboardScreen() {
           <Text style={[styles.scoreLabel, { color: scoreColor }]}>{scoreLabel}</Text>
           <Text style={styles.scoreSubtext}>
             Nutrient Quality Score · {data.days_with_data}/{data.days_tracked} days tracked
+            {data.nutrients_with_data != null && ` · ${data.nutrients_with_data}/${data.total_nutrients} nutrients tracked`}
           </Text>
         </View>
       </View>

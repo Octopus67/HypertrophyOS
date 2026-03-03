@@ -9,7 +9,8 @@ export interface NutrientSummary {
   daily_average: number;
   rda: number;
   rda_pct: number;
-  status: 'deficient' | 'low' | 'adequate' | 'excess';
+  status: 'deficient' | 'low' | 'adequate' | 'excess' | 'no_data';
+  has_data: boolean;
 }
 
 export interface DeficiencyAlert {
@@ -28,6 +29,8 @@ export interface MicroDashboardData {
   days_tracked: number;
   days_with_data: number;
   nutrient_score: number;
+  nutrients_with_data: number;
+  total_nutrients: number;
   nutrients: NutrientSummary[];
   deficiencies: DeficiencyAlert[];
   top_nutrients: NutrientSummary[];

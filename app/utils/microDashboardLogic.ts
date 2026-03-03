@@ -2,7 +2,7 @@
  * Pure logic functions for the micronutrient dashboard.
  */
 
-export type NutrientStatus = 'deficient' | 'low' | 'adequate' | 'excess';
+export type NutrientStatus = 'deficient' | 'low' | 'adequate' | 'excess' | 'no_data';
 
 export function getStatusColor(status: NutrientStatus): string {
   switch (status) {
@@ -10,6 +10,7 @@ export function getStatusColor(status: NutrientStatus): string {
     case 'low': return '#F59E0B';
     case 'adequate': return '#22C55E';
     case 'excess': return '#3B82F6';
+    case 'no_data': return '#6B7280';
   }
 }
 
@@ -19,6 +20,7 @@ export function getStatusLabel(status: NutrientStatus): string {
     case 'low': return 'Low';
     case 'adequate': return 'Adequate';
     case 'excess': return 'Excess';
+    case 'no_data': return 'No Data';
   }
 }
 

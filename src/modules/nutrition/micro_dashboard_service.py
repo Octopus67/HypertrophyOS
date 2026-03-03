@@ -69,6 +69,7 @@ class NutrientSummary:
     rda: float
     rda_pct: float  # 0-100+
     status: str  # "deficient" (<50%), "low" (50-79%), "adequate" (80-119%), "excess" (120%+)
+    has_data: bool = True  # False if no food in the period had this nutrient
 
 
 @dataclass
@@ -91,10 +92,12 @@ class MicronutrientDashboard:
     days_tracked: int
     days_with_data: int
     nutrient_score: float  # 0-100
+    nutrients_with_data: int  # how many of 27 nutrients had actual intake data
+    total_nutrients: int  # always 27
     nutrients: list[NutrientSummary]
     deficiencies: list[DeficiencyAlert]
-    top_nutrients: list[NutrientSummary]  # best 5 by RDA%
-    worst_nutrients: list[NutrientSummary]  # worst 5 by RDA%
+    top_nutrients: list[NutrientSummary]
+    worst_nutrients: list[NutrientSummary]
 
 
 # ─── Nutrient Metadata ────────────────────────────────────────────────────────
@@ -146,22 +149,20 @@ def _classify_status(rda_pct: float) -> str:
 def compute_nutrient_score(nutrients: list[NutrientSummary]) -> float:
     """Compute overall nutrient quality score (0-100).
 
-    Score = average of min(rda_pct, 100) across all nutrients with RDA > 0.
-    Excess doesn't boost score above 100 per nutrient.
-    Sodium is inverted (lower is better — penalize excess).
+    Score = average of min(rda_pct, 100) across nutrients WITH DATA and RDA > 0.
+    Nutrients with no intake data are excluded (not penalized).
+    Sodium/cholesterol inverted (lower is better).
     """
     if not nutrients:
         return 0.0
 
     scores = []
     for n in nutrients:
-        if n.rda <= 0:
+        if n.rda <= 0 or not n.has_data:
             continue
         if n.key == "sodium_mg":
-            # Sodium: penalize excess, reward staying under
             scores.append(max(0, min(100, 100 - max(0, n.rda_pct - 100))))
         elif n.key == "cholesterol_mg":
-            # Cholesterol: similar — lower is better
             scores.append(max(0, min(100, 100 - max(0, n.rda_pct - 100))))
         else:
             scores.append(min(n.rda_pct, 100))
@@ -176,19 +177,22 @@ def aggregate_micros(
 ) -> list[NutrientSummary]:
     """Aggregate micronutrient entries into daily averages with RDA comparison."""
     totals: dict[str, float] = defaultdict(float)
+    seen_keys: set[str] = set()
 
     for entry in entries:
         micros = entry.get("micro_nutrients") or {}
         for key, val in micros.items():
             if isinstance(val, (int, float)) and key in NUTRIENT_META:
                 totals[key] += val
+                seen_keys.add(key)
 
     results = []
     for key, (label, unit, group) in NUTRIENT_META.items():
         daily_avg = totals.get(key, 0.0) / max(num_days, 1)
         rda_entry = RDA_VALUES.get(key, {})
         rda = rda_entry.get(sex, rda_entry.get("male", 0))
-        rda_pct = (daily_avg / rda * 100) if rda > 0 else 0.0
+        has_data = key in seen_keys
+        rda_pct = (daily_avg / rda * 100) if rda > 0 and has_data else 0.0
 
         results.append(NutrientSummary(
             key=key,
@@ -198,7 +202,8 @@ def aggregate_micros(
             daily_average=round(daily_avg, 2),
             rda=rda,
             rda_pct=round(rda_pct, 1),
-            status=_classify_status(rda_pct),
+            status=_classify_status(rda_pct) if has_data else "no_data",
+            has_data=has_data,
         ))
 
     return results
@@ -306,9 +311,11 @@ class MicronutrientDashboardService:
         else:
             score = compute_nutrient_score(nutrients)
 
+        nutrients_with_data = sum(1 for n in nutrients if n.has_data)
+
         sorted_by_rda = sorted(nutrients, key=lambda n: n.rda_pct, reverse=True)
-        top_5 = [n for n in sorted_by_rda if n.rda > 0 and n.key not in ("sodium_mg", "cholesterol_mg")][:5]
-        worst_5 = [n for n in reversed(sorted_by_rda) if n.rda > 0 and n.key not in ("sodium_mg", "cholesterol_mg")][:5]
+        top_5 = [n for n in sorted_by_rda if n.rda > 0 and n.has_data and n.key not in ("sodium_mg", "cholesterol_mg")][:5]
+        worst_5 = [n for n in reversed(sorted_by_rda) if n.rda > 0 and n.has_data and n.key not in ("sodium_mg", "cholesterol_mg")][:5]
 
         return MicronutrientDashboard(
             start_date=start_date,
@@ -316,6 +323,8 @@ class MicronutrientDashboardService:
             days_tracked=num_days,
             days_with_data=days_with_data,
             nutrient_score=score,
+            nutrients_with_data=nutrients_with_data,
+            total_nutrients=len(NUTRIENT_META),
             nutrients=nutrients,
             deficiencies=deficiencies,
             top_nutrients=top_5,

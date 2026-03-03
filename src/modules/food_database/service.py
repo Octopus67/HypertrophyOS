@@ -208,8 +208,9 @@ class FoodDatabaseService:
         if user_prefs:
             items = self._personalize_results(items, user_prefs)
 
-        # Re-rank: exact match → starts-with → contains, then by name length
+        # Re-rank: exact match → starts-with → contains, prefer USDA/verified, then by name length
         q_lower = query.lower()
+        source_order = {"usda": 0, "verified": 1, "community": 2, "custom": 3}
         def _rank(item: FoodItem) -> tuple:
             n = item.name.lower()
             if n == q_lower:
@@ -218,7 +219,7 @@ class FoodDatabaseService:
                 tier = 1
             else:
                 tier = 2
-            return (tier, len(item.name), item.name)
+            return (tier, source_order.get(item.source, 9), len(item.name), item.name)
         items.sort(key=_rank)
 
         return PaginatedResult(
