@@ -12,10 +12,11 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import api from '../../services/api';
 import { colors, spacing, typography, radius } from '../../theme/tokens';
 import { getVolumeColor, VolumeColor } from '../../utils/intelligenceLayerLogic';
+import { HUExplainerSheet } from '../education/HUExplainerSheet';
 
 interface MuscleVolumeData {
   muscle_group: string;
@@ -23,6 +24,10 @@ interface MuscleVolumeData {
   mev: number;
   mav: number;
   mrv: number;
+  // WNS fields
+  hypertrophy_units?: number;
+  mav_low?: number;
+  mav_high?: number;
 }
 
 interface VolumeIndicatorPillProps {
@@ -44,7 +49,9 @@ const BG_COLOR_MAP: Record<VolumeColor, string> = {
 
 export function VolumeIndicatorPill({ muscleGroups, completedSetCounts }: VolumeIndicatorPillProps) {
   const [volumeData, setVolumeData] = useState<Record<string, MuscleVolumeData>>({});
+  const [isWNS, setIsWNS] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [explainerVisible, setExplainerVisible] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,14 +59,19 @@ export function VolumeIndicatorPill({ muscleGroups, completedSetCounts }: Volume
       try {
         const { data } = await api.get('training/analytics/muscle-volume');
         if (!cancelled && data) {
+          const wns = data.engine === 'wns';
+          setIsWNS(wns);
           const mapped: Record<string, MuscleVolumeData> = {};
-          for (const item of data) {
+          for (const item of data.muscle_groups ?? data ?? []) {
             mapped[item.muscle_group.toLowerCase()] = {
               muscle_group: item.muscle_group,
-              current_sets: item.current_sets ?? 0,
-              mev: item.mev ?? 0,
-              mav: item.mav ?? 10,
-              mrv: item.mrv ?? 20,
+              current_sets: item.effective_sets ?? 0,
+              mev: item.landmarks?.mev ?? item.mev ?? 0,
+              mav: item.landmarks?.mav_high ?? item.mav ?? 10,
+              mrv: item.landmarks?.mrv ?? item.mrv ?? 20,
+              hypertrophy_units: item.hypertrophy_units,
+              mav_low: item.landmarks?.mav_low,
+              mav_high: item.landmarks?.mav_high,
             };
           }
           setVolumeData(mapped);
@@ -78,6 +90,7 @@ export function VolumeIndicatorPill({ muscleGroups, completedSetCounts }: Volume
   const uniqueGroups = [...new Set(muscleGroups.map(g => g.toLowerCase()))];
 
   return (
+    <>
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
@@ -95,15 +108,34 @@ export function VolumeIndicatorPill({ muscleGroups, completedSetCounts }: Volume
         const bgColor = BG_COLOR_MAP[color];
         const displayName = group.charAt(0).toUpperCase() + group.slice(1);
 
+        // WNS: show HU + local increment estimate, legacy: show sets
+        // In WNS mode, each completed set at ~RIR 2 adds roughly 3 stim reps × diminishing factor
+        const estimatedLocalHU = localIncrement > 0 ? localIncrement * 2.0 : 0;
+        const label = isWNS && data.hypertrophy_units != null
+          ? `${displayName}: ${(data.hypertrophy_units + estimatedLocalHU).toFixed(1)} HU`
+          : `${displayName}: ${totalSets}/${data.mav} sets`;
+
         return (
           <View key={group} style={[styles.pill, { backgroundColor: bgColor }]}>
             <Text style={[styles.pillText, { color: textColor }]}>
-              {displayName}: {totalSets}/{data.mav} sets
+              {label}
             </Text>
           </View>
         );
       })}
+      {isWNS && (
+        <TouchableOpacity
+          onPress={() => setExplainerVisible(true)}
+          style={styles.infoButton}
+          accessibilityLabel="How Hypertrophy Units work"
+          accessibilityRole="button"
+        >
+          <Text style={styles.infoIcon}>ⓘ</Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
+    <HUExplainerSheet visible={explainerVisible} onClose={() => setExplainerVisible(false)} />
+    </>
   );
 }
 
@@ -125,5 +157,13 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
+  },
+  infoButton: {
+    justifyContent: 'center',
+    paddingHorizontal: spacing[1],
+  },
+  infoIcon: {
+    fontSize: typography.size.base,
+    color: colors.text.muted,
   },
 });

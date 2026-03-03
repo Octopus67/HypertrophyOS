@@ -16,11 +16,16 @@ interface MuscleGroupVolume {
   mev: number;
   mav: number;
   mrv: number;
+  // WNS fields (present when engine='wns')
+  hypertrophy_units?: number;
+  gross_stimulus?: number;
+  atrophy_effect?: number;
 }
 
 export function HeatMapCard() {
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [volumes, setVolumes] = useState<MuscleGroupVolume[]>([]);
+  const [isWNS, setIsWNS] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null);
@@ -34,6 +39,7 @@ export function HeatMapCard() {
         params: { week_start: ws },
       });
       setVolumes(data.muscle_groups ?? []);
+      setIsWNS(data.engine === 'wns');
     } catch {
       setError(true);
       setVolumes([]);
@@ -53,9 +59,19 @@ export function HeatMapCard() {
 
   // Show top muscle groups with volume > 0 as frequency summary
   const activeGroups = volumes
-    .filter((v) => v.effective_sets > 0)
-    .sort((a, b) => b.effective_sets - a.effective_sets)
+    .filter((v) => isWNS ? (v.hypertrophy_units ?? 0) > 0 : v.effective_sets > 0)
+    .sort((a, b) => isWNS
+      ? (b.hypertrophy_units ?? 0) - (a.hypertrophy_units ?? 0)
+      : b.effective_sets - a.effective_sets)
     .slice(0, 6);
+
+  const formatSummary = (v: MuscleGroupVolume) => {
+    const name = v.muscle_group.charAt(0).toUpperCase() + v.muscle_group.slice(1);
+    if (isWNS) {
+      return `${name}: ${v.frequency}×/week, ${(v.hypertrophy_units ?? 0).toFixed(1)} HU`;
+    }
+    return formatFrequency(name, v.frequency, Math.round(v.effective_sets));
+  };
 
   return (
     <Card>
@@ -81,11 +97,7 @@ export function HeatMapCard() {
             <View style={styles.frequencyList}>
               {activeGroups.map((v) => (
                 <Text key={v.muscle_group} style={styles.frequencyItem}>
-                  {formatFrequency(
-                    v.muscle_group.charAt(0).toUpperCase() + v.muscle_group.slice(1),
-                    v.frequency,
-                    Math.round(v.effective_sets),
-                  )}
+                  {formatSummary(v)}
                 </Text>
               ))}
             </View>
@@ -98,6 +110,7 @@ export function HeatMapCard() {
         muscleGroup={selectedMuscle}
         weekStart={weekStart}
         onClose={() => setModalVisible(false)}
+        wnsVolumes={isWNS ? volumes : undefined}
       />
     </Card>
   );

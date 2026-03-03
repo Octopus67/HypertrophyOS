@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { ModalContainer } from '../common/ModalContainer';
 import { colors, spacing, typography, radius } from '../../theme/tokens';
 import { getStatusColor, getStatusLabel } from '../../utils/muscleVolumeLogic';
+import { HUExplainerSheet } from '../education/HUExplainerSheet';
 import api from '../../services/api';
 
 interface SetDetail {
@@ -17,6 +18,11 @@ interface ExerciseDetail {
   working_sets: number;
   effective_sets: number;
   sets: SetDetail[];
+  // WNS fields
+  coefficient?: number;
+  stimulating_reps_total?: number;
+  contribution_hu?: number;
+  sets_count?: number;
 }
 
 interface DetailData {
@@ -28,6 +34,13 @@ interface DetailData {
   mav: number;
   mrv: number;
   exercises: ExerciseDetail[];
+  // WNS fields
+  hypertrophy_units?: number;
+  gross_stimulus?: number;
+  atrophy_effect?: number;
+  net_stimulus?: number;
+  status?: string;
+  landmarks?: { mv: number; mev: number; mav_low: number; mav_high: number; mrv: number };
 }
 
 interface DrillDownModalProps {
@@ -35,28 +48,51 @@ interface DrillDownModalProps {
   muscleGroup: string | null;
   weekStart: string;
   onClose: () => void;
+  wnsVolumes?: any[];  // WNS muscle volume data from HeatMapCard
 }
 
-export function DrillDownModal({ visible, muscleGroup, weekStart, onClose }: DrillDownModalProps) {
+export function DrillDownModal({ visible, muscleGroup, weekStart, onClose, wnsVolumes }: DrillDownModalProps) {
   const [data, setData] = useState<DetailData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [explainerVisible, setExplainerVisible] = useState(false);
 
   useEffect(() => {
     if (!visible) {
-      // Reset stale data so reopening doesn't flash previous muscle's content
       setData(null);
       return;
     }
     if (!muscleGroup) return;
+
+    // If WNS data is available from parent, use it directly for the summary
+    const wnsMatch = wnsVolumes?.find(
+      (v: any) => v.muscle_group === muscleGroup
+    );
+
     setLoading(true);
     api
       .get(`training/analytics/muscle-volume/${encodeURIComponent(muscleGroup)}/detail`, {
         params: { week_start: weekStart },
       })
-      .then((res) => setData(res.data))
-      .catch(() => setData(null))
+      .then((res) => {
+        const merged = { ...res.data };
+        // Overlay WNS fields from the weekly endpoint if available
+        if (wnsMatch) {
+          merged.hypertrophy_units = wnsMatch.hypertrophy_units;
+          merged.gross_stimulus = wnsMatch.gross_stimulus;
+          merged.atrophy_effect = wnsMatch.atrophy_effect;
+          merged.net_stimulus = wnsMatch.net_stimulus;
+          merged.status = wnsMatch.status;
+          merged.landmarks = wnsMatch.landmarks;
+          // Use WNS exercise contributions if the detail endpoint doesn't have them
+          if (wnsMatch.exercises?.length && !merged.exercises?.[0]?.contribution_hu) {
+            merged.exercises = wnsMatch.exercises;
+          }
+        }
+        setData(merged);
+      })
+      .catch(() => setData(wnsMatch ?? null))
       .finally(() => setLoading(false));
-  }, [visible, muscleGroup, weekStart]);
+  }, [visible, muscleGroup, weekStart, wnsVolumes]);
 
   const title = muscleGroup
     ? muscleGroup.charAt(0).toUpperCase() + muscleGroup.slice(1)
@@ -73,25 +109,49 @@ export function DrillDownModal({ visible, muscleGroup, weekStart, onClose }: Dri
           <>
             {/* Summary */}
             <View style={styles.summaryRow}>
-              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(data.volume_status) }]}>
-                <Text style={styles.statusText}>{getStatusLabel(data.volume_status)}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(data.status ?? data.volume_status) }]}>
+                <Text style={styles.statusText}>{getStatusLabel(data.status ?? data.volume_status)}</Text>
               </View>
-              <Text style={styles.setsText}>{data.effective_sets} effective sets</Text>
+              <Text style={styles.setsText}>
+                {data.hypertrophy_units != null
+                  ? `${data.hypertrophy_units} HU`
+                  : `${data.effective_sets} effective sets`}
+              </Text>
             </View>
-            <Text style={styles.landmarkText}>
-              MEV {data.mev} · MAV {data.mav} · MRV {data.mrv}
-            </Text>
+            {data.landmarks ? (
+              <Text style={styles.landmarkText}>
+                MEV {data.landmarks.mev} · MAV {data.landmarks.mav_low}–{data.landmarks.mav_high} · MRV {data.landmarks.mrv} HU
+              </Text>
+            ) : (
+              <Text style={styles.landmarkText}>
+                MEV {data.mev} · MAV {data.mav} · MRV {data.mrv}
+              </Text>
+            )}
+            {data.gross_stimulus != null && (
+              <Text style={styles.landmarkText}>
+                Gross stimulus: {data.gross_stimulus} · Atrophy: −{data.atrophy_effect}
+              </Text>
+            )}
 
             {/* Exercises */}
             {data.exercises.map((ex) => (
               <View key={ex.exercise_name} style={styles.exerciseBlock}>
                 <View style={styles.exerciseHeader}>
-                  <Text style={styles.exerciseName}>{ex.exercise_name}</Text>
+                  <Text style={styles.exerciseName}>
+                    {ex.exercise_name}
+                    {ex.coefficient != null && (
+                      <Text style={styles.coeffBadge}>
+                        {' '}{ex.coefficient === 1.0 ? '(Direct)' : `(${ex.coefficient}×)`}
+                      </Text>
+                    )}
+                  </Text>
                   <Text style={styles.exerciseSets}>
-                    {ex.working_sets} sets · {ex.effective_sets} eff
+                    {ex.contribution_hu != null
+                      ? `${ex.contribution_hu} HU · ${ex.sets_count ?? ex.working_sets} sets`
+                      : `${ex.working_sets} sets · ${ex.effective_sets} eff`}
                   </Text>
                 </View>
-                {ex.sets.map((s, i) => (
+                {ex.sets?.map((s, i) => (
                   <View key={i} style={styles.setRow}>
                     <Text style={styles.setDetail}>
                       {s.weight_kg}kg × {s.reps}
@@ -105,6 +165,17 @@ export function DrillDownModal({ visible, muscleGroup, weekStart, onClose }: Dri
           </>
         )}
       </ScrollView>
+      {data?.hypertrophy_units != null && (
+        <TouchableOpacity
+          onPress={() => setExplainerVisible(true)}
+          style={styles.explainerLink}
+          accessibilityLabel="How Hypertrophy Units are calculated"
+          accessibilityRole="button"
+        >
+          <Text style={styles.explainerText}>ⓘ How is this calculated?</Text>
+        </TouchableOpacity>
+      )}
+      <HUExplainerSheet visible={explainerVisible} onClose={() => setExplainerVisible(false)} />
     </ModalContainer>
   );
 }
@@ -172,4 +243,7 @@ const styles = StyleSheet.create({
   },
   setDetail: { color: colors.text.secondary, fontSize: typography.size.xs },
   setEffort: { color: colors.text.muted, fontSize: typography.size.xs },
+  coeffBadge: { color: colors.text.muted, fontSize: typography.size.xs, fontWeight: typography.weight.regular },
+  explainerLink: { paddingVertical: spacing[3], alignItems: 'center' },
+  explainerText: { color: colors.accent.primary, fontSize: typography.size.sm },
 });

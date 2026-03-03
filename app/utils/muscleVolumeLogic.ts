@@ -23,11 +23,14 @@ export function formatFrequency(muscleGroup: string, frequency: number, sets: nu
 
 /** Get the Monday (ISO week start) for a given date. */
 export function getWeekStart(d: Date): string {
-  const copy = new Date(d);
+  const copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const day = copy.getDay();
   const diff = day === 0 ? -6 : 1 - day;
   copy.setDate(copy.getDate() + diff);
-  return copy.toISOString().split('T')[0];
+  const y = copy.getFullYear();
+  const m = String(copy.getMonth() + 1).padStart(2, '0');
+  const dd = String(copy.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
 }
 
 /** Check if a week start date is the current or a future week. */
@@ -75,5 +78,19 @@ export function getHeatMapColor(effectiveSets: number, mev: number, mrv: number)
   if (clamped < mev) return colors.heatmap.belowMev;
   if (clamped <= mrv * 0.8) return colors.heatmap.optimal;
   if (clamped <= mrv) return colors.heatmap.nearMrv;
+  return colors.heatmap.aboveMrv;
+}
+
+// ─── WNS Heat Map Color ──────────────────────────────────────────────────────
+
+import type { WNSLandmarks } from '../types/volume';
+
+/** 5-tier heat-map color based on HU relative to WNS landmarks. */
+export function getWNSHeatMapColor(hu: number, landmarks: WNSLandmarks): string {
+  if (landmarks.mev <= 0 || landmarks.mrv <= 0) return colors.heatmap.untrained;
+  if (hu === 0) return colors.heatmap.untrained;
+  if (hu < landmarks.mev) return colors.heatmap.belowMev;
+  if (hu <= landmarks.mav_high) return colors.heatmap.optimal;
+  if (hu <= landmarks.mrv) return colors.heatmap.nearMrv;
   return colors.heatmap.aboveMrv;
 }
