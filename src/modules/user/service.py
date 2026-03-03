@@ -129,7 +129,21 @@ class UserService:
     async def log_bodyweight(
         self, user_id: uuid.UUID, data: BodyweightLogCreate
     ) -> BodyweightLogResponse:
-        """Append a bodyweight entry."""
+        """Log or update a bodyweight entry (upsert by date)."""
+        # Check for existing entry on the same date
+        stmt = select(BodyweightLog).where(
+            BodyweightLog.user_id == user_id,
+            BodyweightLog.recorded_date == data.recorded_date,
+        )
+        result = await self.db.execute(stmt)
+        existing = result.scalar_one_or_none()
+
+        if existing:
+            existing.weight_kg = data.weight_kg
+            await self.db.flush()
+            await self.db.refresh(existing)
+            return BodyweightLogResponse.model_validate(existing)
+
         log = BodyweightLog(
             user_id=user_id,
             weight_kg=data.weight_kg,

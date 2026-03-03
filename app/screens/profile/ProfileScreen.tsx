@@ -58,11 +58,10 @@ export function ProfileScreen() {
   const loadProfile = useCallback(async () => {
     setError(null);
     try {
-      const [profileRes, metricsRes, goalsRes, targetsRes] = await Promise.allSettled([
+      const [profileRes, metricsRes, goalsRes] = await Promise.allSettled([
         api.get('users/profile'),
         api.get('users/metrics/history', { params: { limit: 1 } }),
         api.get('users/goals'),
-        api.get('adaptive/snapshots', { params: { limit: 1 } }),
       ]);
       if (profileRes.status === 'fulfilled') {
         const d = profileRes.value.data;
@@ -71,6 +70,7 @@ export function ProfileScreen() {
           avatarUrl: d.avatar_url, timezone: d.timezone,
           preferredCurrency: d.preferred_currency, region: d.region,
           preferences: d.preferences, coachingMode: d.coaching_mode,
+          createdAt: d.created_at,
         });
       }
       if (metricsRes.status === 'fulfilled') {
@@ -90,16 +90,6 @@ export function ProfileScreen() {
           id: g.id, userId: g.user_id, goalType: g.goal_type,
           targetWeightKg: g.target_weight_kg, goalRatePerWeek: g.goal_rate_per_week,
         });
-      }
-      if (targetsRes.status === 'fulfilled') {
-        const raw = targetsRes.value.data;
-        const t = raw?.items?.[0] ?? (Array.isArray(raw) ? raw[0] : raw);
-        if (t && t.target_calories != null) {
-          store.setAdaptiveTargets({
-            calories: t.target_calories, protein_g: t.target_protein_g,
-            carbs_g: t.target_carbs_g, fat_g: t.target_fat_g,
-          });
-        }
       }
       // Show error if the critical profile request failed
       if (profileRes.status === 'rejected') {

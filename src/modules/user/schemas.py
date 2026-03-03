@@ -18,7 +18,7 @@ from src.shared.types import ActivityLevel, GoalType
 class UserProfileUpdate(BaseModel):
     """Fields a user may update on their profile."""
 
-    display_name: Optional[str] = Field(None, max_length=100)
+    display_name: Optional[str] = Field(None, min_length=1, max_length=100)
     avatar_url: Optional[str] = Field(None, max_length=500)
     timezone: Optional[str] = Field(None, max_length=50)
     preferred_currency: Optional[str] = Field(None, max_length=3)

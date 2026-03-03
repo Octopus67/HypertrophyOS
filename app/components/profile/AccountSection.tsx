@@ -39,7 +39,7 @@ export function AccountSection({ onLogout }: AccountSectionProps) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await api.delete('users/account');
+              await api.delete('account/');
               store.clearAuth();
             } catch {
               Alert.alert('Error', 'Failed to delete account. Please try again.');

@@ -33,6 +33,7 @@ export interface UserProfile {
     };
     [key: string]: unknown;
   } | null;
+  createdAt?: string;
 }
 
 // ─── Subscription types ──────────────────────────────────────────────────────
