@@ -14,6 +14,8 @@ from src.modules.training.analytics_schemas import PersonalRecord
 class TrainingMetrics(BaseModel):
     total_volume: float = Field(default=0.0, ge=0, le=1_000_000)
     volume_by_muscle_group: dict[str, float] = Field(default_factory=dict)
+    sets_by_muscle_group: Optional[dict[str, int]] = None
+    wns_hypertrophy_units: Optional[dict[str, float]] = None
     session_count: int = Field(default=0, ge=0, le=100)
     personal_records: list[PersonalRecord] = Field(default_factory=list)
 
@@ -44,12 +46,14 @@ class WeeklyReportResponse(BaseModel):
     nutrition: NutritionMetrics
     body: BodyMetrics
     recommendations: list[str] = Field(default_factory=list)
+    nutrient_score: Optional[float] = None
 
 
 @dataclass(frozen=True)
 class ReportContext:
     volume_by_muscle_group: dict[str, float] = field(default_factory=dict)
     sets_by_muscle_group: dict[str, int] = field(default_factory=dict)
+    wns_hypertrophy_units: dict[str, float] = field(default_factory=dict)
     session_count: int = 0
     prs: list[PersonalRecord] = field(default_factory=list)
     avg_calories: float = 0.0
@@ -60,3 +64,4 @@ class ReportContext:
     goal_rate_per_week: Optional[float] = None
     days_logged_nutrition: int = 0
     days_logged_training: int = 0
+    nutrient_score: Optional[float] = None

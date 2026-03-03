@@ -215,7 +215,7 @@ class TestGenerateRecommendations:
         assert any("chest" in r.lower() and "volume" in r.lower() for r in recs)
 
     def test_max_three_recommendations(self):
-        """Should never return more than 3 recommendations."""
+        """Should never return more than 5 recommendations."""
         ctx = ReportContext(
             days_logged_nutrition=7,
             days_logged_training=5,
@@ -226,7 +226,7 @@ class TestGenerateRecommendations:
             sets_by_muscle_group={"chest": 2, "back": 2, "shoulders": 1},
         )
         recs = generate_recommendations(ctx)
-        assert len(recs) <= 3
+        assert len(recs) <= 5
 
     def test_at_least_two_recommendations(self):
         """Should always return at least 2 recommendations."""

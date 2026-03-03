@@ -42,10 +42,22 @@ class WeeklyReportService:
         body = await self._build_body_metrics(user_id, week_start, week_end)
         goal_type, goal_rate = await self._fetch_goal(user_id)
 
+        # Micronutrient score
+        nutrient_score: float | None = None
+        try:
+            from src.modules.nutrition.micro_dashboard_service import MicronutrientDashboardService
+            micro_svc = MicronutrientDashboardService(self.session)
+            dashboard = await micro_svc.get_dashboard(user_id, week_start, week_end)
+            if dashboard.days_with_data > 0:
+                nutrient_score = dashboard.nutrient_score
+        except Exception:
+            logger.debug("Micronutrient data unavailable for report")
+
         # --- Recommendations ---
         ctx = ReportContext(
             volume_by_muscle_group=dict(training.volume_by_muscle_group),
-            sets_by_muscle_group={},  # populated below
+            sets_by_muscle_group=dict(training.sets_by_muscle_group or {}),
+            wns_hypertrophy_units=training.wns_hypertrophy_units or {},
             session_count=training.session_count,
             prs=training.personal_records,
             avg_calories=nutrition.avg_calories,
@@ -56,6 +68,7 @@ class WeeklyReportService:
             goal_rate_per_week=goal_rate,
             days_logged_nutrition=days_logged,
             days_logged_training=training.session_count,
+            nutrient_score=nutrient_score,
         )
         recs = generate_recommendations(ctx)
 
@@ -68,12 +81,13 @@ class WeeklyReportService:
             nutrition=nutrition,
             body=body,
             recommendations=recs,
+            nutrient_score=nutrient_score,
         )
 
     async def _build_training_metrics(
         self, user_id: uuid.UUID, week_start: date, week_end: date
     ) -> TrainingMetrics:
-        """Aggregate training data for the week."""
+        """Aggregate training data for the week using WNS engine when available."""
         analytics = TrainingAnalyticsService(self.session)
         try:
             sessions = await analytics._fetch_sessions(user_id, week_start, week_end)
@@ -83,6 +97,7 @@ class WeeklyReportService:
 
         total_volume = 0.0
         volume_by_mg: dict[str, float] = defaultdict(float)
+        sets_by_mg: dict[str, int] = defaultdict(int)
         session_dates: set[date] = set()
         prs: list[PersonalRecord] = []
 
@@ -91,17 +106,39 @@ class WeeklyReportService:
             for ex in exercises:
                 mg = get_muscle_group(ex.get("exercise_name", ""))
                 for s in ex.get("sets", []):
+                    if s.get("set_type", "normal") == "warm-up":
+                        continue
                     reps = s.get("reps", 0) or 0
                     weight = s.get("weight_kg", 0.0) or 0.0
                     vol = reps * weight
                     total_volume += vol
                     volume_by_mg[mg] += vol
+                    sets_by_mg[mg] += 1
+
+        # Try to get WNS HU data for richer insights
+        wns_data: dict[str, float] = {}
+        try:
+            from src.modules.feature_flags.service import FeatureFlagService
+            ff = FeatureFlagService(self.session)
+            # Check flag without user context (system-level)
+            flag = await ff._get_flag("wns_engine")
+            if flag and flag.is_enabled:
+                from src.modules.training.wns_volume_service import WNSVolumeService
+                wns_svc = WNSVolumeService(self.session)
+                wns_results = await wns_svc.get_weekly_muscle_volume(user_id, week_start)
+                for r in wns_results:
+                    if r.hypertrophy_units > 0:
+                        wns_data[r.muscle_group] = r.hypertrophy_units
+        except Exception:
+            logger.debug("WNS data unavailable for report, using legacy volume")
 
         return TrainingMetrics(
             total_volume=round(total_volume, 2),
             volume_by_muscle_group={k: round(v, 2) for k, v in volume_by_mg.items()},
             session_count=len(session_dates),
             personal_records=prs,
+            sets_by_muscle_group=dict(sets_by_mg),
+            wns_hypertrophy_units=wns_data if wns_data else None,
         )
 
     async def _build_nutrition_metrics(
@@ -165,7 +202,7 @@ class WeeklyReportService:
         compliant_days = 0
         if target_cal > 0 and days_logged > 0:
             for day_cal in daily_cals.values():
-                if abs(day_cal - target_cal) / target_cal <= 0.05:
+                if abs(day_cal - target_cal) / target_cal <= 0.10:
                     compliant_days += 1
         compliance_pct = round((compliant_days / days_logged) * 100, 1) if days_logged else 0.0
 
