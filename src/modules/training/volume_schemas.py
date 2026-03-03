@@ -76,6 +76,7 @@ class WeeklyVolumeResponse(BaseModel):
     week_start: date
     week_end: date
     muscle_groups: list[MuscleGroupVolume]
+    engine: Literal["legacy"] = "legacy"
 
 
 class LandmarkUpdateRequest(BaseModel):
@@ -97,3 +98,46 @@ class LandmarkConfigResponse(BaseModel):
     """Response containing all landmarks for a user."""
 
     landmarks: list[VolumeLandmark]
+
+
+# ─── WNS Schemas ──────────────────────────────────────────────────────────────
+
+
+class WNSLandmarks(BaseModel):
+    """WNS volume landmark thresholds in Hypertrophy Units."""
+    mv: float = Field(ge=0, description="Maintenance Volume in HU")
+    mev: float = Field(ge=0, description="Minimum Effective Volume in HU")
+    mav_low: float = Field(ge=0, description="MAV lower bound in HU")
+    mav_high: float = Field(ge=0, description="MAV upper bound in HU")
+    mrv: float = Field(ge=0, description="Maximum Recoverable Volume in HU")
+
+
+class WNSExerciseContribution(BaseModel):
+    """Per-exercise contribution to muscle group stimulus."""
+    exercise_name: str
+    coefficient: float = Field(ge=0, le=1.0)
+    sets_count: int = Field(ge=0)
+    stimulating_reps_total: float = Field(ge=0)
+    contribution_hu: float = Field(ge=0)
+
+
+class WNSMuscleVolume(BaseModel):
+    """Weekly Net Stimulus volume for a single muscle group."""
+    muscle_group: str
+    gross_stimulus: float = Field(ge=0)
+    atrophy_effect: float = Field(ge=0)
+    net_stimulus: float = Field(ge=0)
+    hypertrophy_units: float = Field(ge=0)
+    status: VolumeStatus
+    session_count: int = Field(ge=0)
+    frequency: int = Field(ge=0, le=14)
+    landmarks: WNSLandmarks
+    exercises: list[WNSExerciseContribution]
+
+
+class WNSWeeklyResponse(BaseModel):
+    """Response for the WNS weekly muscle volume endpoint."""
+    week_start: date
+    week_end: date
+    muscle_groups: list[WNSMuscleVolume]
+    engine: Literal["wns"] = "wns"

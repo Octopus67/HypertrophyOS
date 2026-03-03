@@ -1,7 +1,7 @@
 """Training routes — CRUD for training sessions."""
 
 from __future__ import annotations
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import uuid
 from datetime import date
@@ -53,6 +53,7 @@ from src.modules.training.volume_schemas import (
     MuscleGroupDetail,
     VolumeLandmark,
     WeeklyVolumeResponse,
+    WNSWeeklyResponse,
 )
 from src.modules.training.volume_service import VolumeCalculatorService, validate_week_start
 from src.modules.training.landmark_store import LandmarkStore
@@ -498,29 +499,44 @@ def _default_week_start() -> date:
     return today - __import__("datetime").timedelta(days=today.weekday())
 
 
-@router.get("/analytics/muscle-volume", response_model=WeeklyVolumeResponse)
+@router.get("/analytics/muscle-volume")
 async def get_muscle_volume(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
     week_start: Optional[date] = Query(default=None),
-) -> WeeklyVolumeResponse:
+) -> Union[WeeklyVolumeResponse, WNSWeeklyResponse]:
     """Get weekly muscle group volume with landmark comparisons."""
     from datetime import timedelta
 
     if week_start is None:
         week_start = _default_week_start()
     else:
-        try:
-            validate_week_start(week_start)
-        except ValueError:
-            from src.shared.errors import UnprocessableError
-            raise UnprocessableError("week_start must be a Monday date")
+        # Auto-correct to Monday
+        if week_start.weekday() != 0:
+            week_start = week_start - timedelta(days=week_start.weekday())
+
+    week_end = week_start + timedelta(days=6)
+
+    # Check WNS feature flag
+    from src.modules.feature_flags.service import FeatureFlagService
+    ff_svc = FeatureFlagService(db)
+    use_wns = await ff_svc.is_feature_enabled("wns_engine", user)
+
+    if use_wns:
+        from src.modules.training.wns_volume_service import WNSVolumeService
+        wns_svc = WNSVolumeService(db)
+        muscle_groups = await wns_svc.get_weekly_muscle_volume(user.id, week_start)
+        return WNSWeeklyResponse(
+            week_start=week_start,
+            week_end=week_end,
+            muscle_groups=muscle_groups,
+        )
 
     svc = VolumeCalculatorService(db)
     muscle_groups = await svc.get_weekly_muscle_volume(user.id, week_start)
     return WeeklyVolumeResponse(
         week_start=week_start,
-        week_end=week_start + timedelta(days=6),
+        week_end=week_end,
         muscle_groups=muscle_groups,
     )
 
@@ -539,11 +555,10 @@ async def get_muscle_volume_detail(
     if week_start is None:
         week_start = _default_week_start()
     else:
-        try:
-            validate_week_start(week_start)
-        except ValueError:
-            from src.shared.errors import UnprocessableError
-            raise UnprocessableError("week_start must be a Monday date")
+        # Auto-correct to Monday
+        from datetime import timedelta as _td
+        if week_start.weekday() != 0:
+            week_start = week_start - _td(days=week_start.weekday())
 
     svc = VolumeCalculatorService(db)
     return await svc.get_muscle_group_detail(user.id, muscle_group, week_start)
