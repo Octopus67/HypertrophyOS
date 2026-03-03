@@ -69,10 +69,16 @@ NUTRIENT_MAP = {
     "404": "thiamin_mg",
     "405": "riboflavin_mg",
     "406": "niacin_mg",
+    "410": "pantothenic_acid_mg",
     "415": "vitamin_b6_mg",
     "417": "folate_mcg",
     "418": "vitamin_b12_mcg",
     "601": "cholesterol_mg",
+    # Omega fatty acids (sum of individual components)
+    "621": "omega_3_g",   # DHA
+    "629": "omega_3_g",   # EPA (additive with DHA)
+    "851": "omega_3_g",   # ALA (additive)
+    "618": "omega_6_g",   # Linoleic acid
 }
 
 MACRO_FIELDS = {"calories", "protein_g", "fat_g", "carbs_g"}
@@ -211,7 +217,11 @@ def parse_foods(data_dir: Path, dataset_type: str = "sr_legacy") -> list[dict]:
             if field in MACRO_FIELDS:
                 food[field] = round(amount, 2)
             else:
-                food["micro_nutrients"][field] = round(amount, 2)
+                # Additive fields (omega-3 components sum together)
+                if field in ("omega_3_g", "omega_6_g") and field in food["micro_nutrients"]:
+                    food["micro_nutrients"][field] = round(food["micro_nutrients"][field] + amount, 4)
+                else:
+                    food["micro_nutrients"][field] = round(amount, 2)
 
             rows_processed += 1
 
