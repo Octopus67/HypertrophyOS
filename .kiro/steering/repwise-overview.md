@@ -100,6 +100,11 @@ service.py     → Business logic (async, takes AsyncSession)
 ## Running the App
 
 ```bash
+# Quick start — opens two Terminal windows (backend + frontend)
+./dev.sh
+
+# Or manually:
+
 # Backend
 .venv/bin/python -m uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
