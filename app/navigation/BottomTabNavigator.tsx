@@ -21,6 +21,7 @@ import { HealthReportsScreen } from '../screens/health/HealthReportsScreen';
 import { ExercisePickerScreen } from '../screens/exercise-picker/ExercisePickerScreen';
 import { ProgressPhotosScreen } from '../screens/profile/ProgressPhotosScreen';
 import { NutritionReportScreen } from '../screens/nutrition/NutritionReportScreen';
+import { MicronutrientDashboardScreen } from '../screens/nutrition/MicronutrientDashboardScreen';
 import { MealPlanScreen } from '../screens/meal-prep/MealPlanScreen';
 import { ShoppingListView } from '../screens/meal-prep/ShoppingListView';
 import { PrepSundayFlow } from '../screens/meal-prep/PrepSundayFlow';
@@ -50,6 +51,7 @@ export type LogsStackParamList = {
 export type AnalyticsStackParamList = {
   AnalyticsHome: undefined;
   NutritionReport: undefined;
+  MicronutrientDashboard: undefined;
   WeeklyReport: undefined;
 };
 
@@ -223,6 +225,7 @@ function AnalyticsStackScreen() {
     <AnalyticsStack.Navigator screenOptions={stackScreenOptions}>
       <AnalyticsStack.Screen name="AnalyticsHome" component={AnalyticsScreen} />
       <AnalyticsStack.Screen name="NutritionReport" component={NutritionReportScreen} />
+      <AnalyticsStack.Screen name="MicronutrientDashboard" component={MicronutrientDashboardScreen} />
       <AnalyticsStack.Screen name="WeeklyReport" component={WeeklyReportScreen} />
     </AnalyticsStack.Navigator>
     </ErrorBoundary>

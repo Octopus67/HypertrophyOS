@@ -297,6 +297,16 @@ export function AnalyticsScreen() {
               <Text style={styles.nutritionReportArrow}>›</Text>
             </TouchableOpacity>
 
+            {/* Micronutrient Dashboard link */}
+            <TouchableOpacity
+              testID="analytics-micro-dashboard-link"
+              style={styles.nutritionReportBtn}
+              onPress={() => navigation.navigate('MicronutrientDashboard')}
+            >
+              <Text style={styles.nutritionReportText}><Icon name="salad" /> Micronutrient Dashboard</Text>
+              <Text style={styles.nutritionReportArrow}>›</Text>
+            </TouchableOpacity>
+
             {/* Calorie trend */}
             <Text style={styles.sectionTitle}>Calorie Trend</Text>
             <View testID="analytics-calorie-chart">
