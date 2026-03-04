@@ -4,10 +4,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
   StyleSheet,
 } from 'react-native';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { colors, radius, spacing, typography } from '../../theme/tokens';
 
 interface ExercisePickerSheetProps {
@@ -17,6 +16,10 @@ interface ExercisePickerSheetProps {
   exercises?: string[];
   recentExercises?: string[];
 }
+
+type ListItem =
+  | { type: 'header'; label: string }
+  | { type: 'exercise'; name: string };
 
 export function ExercisePickerSheet({
   visible,
@@ -30,22 +33,12 @@ export function ExercisePickerSheet({
   const [searchInput, setSearchInput] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounce search input
   useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      setSearch(searchInput);
-    }, 200);
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setSearch(searchInput), 200);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [searchInput]);
 
-  // Reset search when sheet opens/closes
   useEffect(() => {
     if (visible) {
       setSearch('');
@@ -57,49 +50,60 @@ export function ExercisePickerSheet({
   }, [visible]);
 
   const handleSheetChange = useCallback(
-    (index: number) => {
-      if (index === -1 && visible) {
-        onClose();
-      }
-    },
+    (index: number) => { if (index === -1 && visible) onClose(); },
     [visible, onClose],
   );
 
-  const handleSelect = useCallback(
-    (name: string) => {
-      onSelect(name);
-    },
-    [onSelect],
-  );
+  const handleSelect = useCallback((name: string) => onSelect(name), [onSelect]);
 
   const query = search.trim().toLowerCase();
-
   const queryWords = query ? query.split(/\s+/).filter(Boolean) : [];
-  const filteredExercises = queryWords.length
+
+  // Build a single flat list: optional "Recent" section + results
+  const listData: ListItem[] = [];
+
+  if (!query && recentExercises.length > 0) {
+    listData.push({ type: 'header', label: 'Recent' });
+    recentExercises.forEach((name) => listData.push({ type: 'exercise', name }));
+    if (exercises.length > 0) {
+      listData.push({ type: 'header', label: 'All Exercises' });
+    }
+  }
+
+  const filtered = queryWords.length
     ? exercises.filter((e) => {
         const name = e.toLowerCase();
         return queryWords.every((w) => name.includes(w));
       })
     : exercises;
 
-  const showRecent = !query && recentExercises.length > 0;
+  filtered.forEach((name) => listData.push({ type: 'exercise', name }));
 
   const renderItem = useCallback(
-    ({ item }: { item: string }) => (
-      <TouchableOpacity
-        style={styles.exerciseItem}
-        onPress={() => handleSelect(item)}
-        accessibilityLabel={`Select ${item}`}
-        accessibilityRole="button"
-        activeOpacity={0.7}
-      >
-        <Text style={styles.exerciseName}>{item}</Text>
-      </TouchableOpacity>
-    ),
+    ({ item }: { item: ListItem }) => {
+      if (item.type === 'header') {
+        return <Text style={styles.sectionTitle}>{item.label}</Text>;
+      }
+      return (
+        <TouchableOpacity
+          style={styles.exerciseItem}
+          onPress={() => handleSelect(item.name)}
+          accessibilityLabel={`Select ${item.name}`}
+          accessibilityRole="button"
+          activeOpacity={0.7}
+        >
+          <Text style={styles.exerciseName}>{item.name}</Text>
+        </TouchableOpacity>
+      );
+    },
     [handleSelect],
   );
 
-  const keyExtractor = useCallback((item: string, index: number) => `${item}-${index}`, []);
+  const keyExtractor = useCallback(
+    (item: ListItem, index: number) =>
+      item.type === 'header' ? `header-${item.label}` : `${item.name}-${index}`,
+    [],
+  );
 
   return (
     <BottomSheet
@@ -111,8 +115,7 @@ export function ExercisePickerSheet({
       backgroundStyle={styles.sheetBackground}
       handleIndicatorStyle={styles.handleIndicator}
     >
-      <BottomSheetView style={styles.content}>
-        {/* Search */}
+      <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Search exercises…"
@@ -124,44 +127,23 @@ export function ExercisePickerSheet({
           returnKeyType="search"
           accessibilityLabel="Search exercises"
         />
+      </View>
 
-        {/* Recent exercises */}
-        {showRecent && (
-          <View style={styles.recentSection}>
-            <Text style={styles.sectionTitle}>Recent</Text>
-            {recentExercises.map((name) => (
-              <TouchableOpacity
-                key={name}
-                style={styles.exerciseItem}
-                onPress={() => handleSelect(name)}
-                accessibilityLabel={`Select recent exercise ${name}`}
-                accessibilityRole="button"
-                activeOpacity={0.7}
-              >
-                <Text style={styles.exerciseName}>{name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        {/* Exercise list */}
-        <FlatList
-          data={filteredExercises}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          style={styles.list}
-          keyboardShouldPersistTaps="handled"
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>
-              {query ? 'No exercises found' : 'No exercises available'}
-            </Text>
-          }
-        />
-      </BottomSheetView>
+      <BottomSheetFlatList
+        data={listData}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>
+            {query ? 'No exercises found' : 'No exercises available'}
+          </Text>
+        }
+      />
     </BottomSheet>
   );
 }
-
 
 const styles = StyleSheet.create({
   sheetBackground: {
@@ -170,9 +152,9 @@ const styles = StyleSheet.create({
   handleIndicator: {
     backgroundColor: colors.text.muted,
   },
-  content: {
-    flex: 1,
+  searchContainer: {
     paddingHorizontal: spacing[4],
+    paddingBottom: spacing[2],
   },
   searchInput: {
     backgroundColor: colors.bg.surface,
@@ -183,22 +165,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     color: colors.text.primary,
     fontSize: typography.size.base,
-    marginBottom: spacing[3],
   },
-  recentSection: {
-    marginBottom: spacing[3],
+  listContent: {
+    paddingHorizontal: spacing[4],
+    paddingBottom: spacing[8],
   },
   sectionTitle: {
     color: colors.text.muted,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
-    lineHeight: typography.lineHeight.xs,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: spacing[2],
-  },
-  list: {
-    flex: 1,
+    paddingVertical: spacing[2],
+    marginTop: spacing[2],
   },
   exerciseItem: {
     paddingVertical: spacing[3],
