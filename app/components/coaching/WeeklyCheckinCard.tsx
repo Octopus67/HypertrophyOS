@@ -208,7 +208,15 @@ export function WeeklyCheckinCard({
           </View>
         ) : (
           <>
-            {checkin.new_targets && <TargetRow targets={checkin.new_targets} />}
+            {checkin.new_targets && checkin.previous_targets && (
+              <ComparisonTargetRow 
+                previousTargets={checkin.previous_targets} 
+                newTargets={checkin.new_targets} 
+              />
+            )}
+            {checkin.new_targets && !checkin.previous_targets && (
+              <TargetRow targets={checkin.new_targets} />
+            )}
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={styles.primaryButton}
@@ -259,11 +267,48 @@ function TargetRow({ targets }: { targets: MacroTargets }) {
   );
 }
 
+function ComparisonTargetRow({ previousTargets, newTargets }: { 
+  previousTargets: MacroTargets; 
+  newTargets: MacroTargets; 
+}) {
+  return (
+    <View style={styles.comparisonContainer}>
+      <View style={styles.comparisonRow}>
+        <Text style={styles.comparisonLabel}>Current</Text>
+        <View style={styles.comparisonTargets}>
+          <ComparisonPill label="Cal" value={Math.round(previousTargets.calories)} color={colors.macro.calories} />
+          <ComparisonPill label="P" value={Math.round(previousTargets.protein_g)} color={colors.macro.protein} />
+          <ComparisonPill label="C" value={Math.round(previousTargets.carbs_g)} color={colors.macro.carbs} />
+          <ComparisonPill label="F" value={Math.round(previousTargets.fat_g)} color={colors.macro.fat} />
+        </View>
+      </View>
+      <View style={styles.comparisonRow}>
+        <Text style={styles.comparisonLabel}>Suggested</Text>
+        <View style={styles.comparisonTargets}>
+          <ComparisonPill label="Cal" value={Math.round(newTargets.calories)} color={colors.macro.calories} />
+          <ComparisonPill label="P" value={Math.round(newTargets.protein_g)} color={colors.macro.protein} />
+          <ComparisonPill label="C" value={Math.round(newTargets.carbs_g)} color={colors.macro.carbs} />
+          <ComparisonPill label="F" value={Math.round(newTargets.fat_g)} color={colors.macro.fat} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function TargetPill({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <View style={[styles.pill, { borderColor: color }]}>
       <Text style={[styles.pillLabel, { color }]}>{label}</Text>
       <Text style={styles.pillValue}>{value}</Text>
+    </View>
+  );
+}
+
+function ComparisonPill({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <View style={[styles.comparisonPill, { borderColor: color }]}>
+      <Text style={[styles.comparisonPillLabel, { color }]}>{label}</Text>
+      <Text style={styles.comparisonPillValue}>{value}</Text>
     </View>
   );
 }
@@ -333,5 +378,42 @@ const styles = StyleSheet.create({
     color: colors.text.primary, backgroundColor: colors.bg.surfaceRaised,
     borderRadius: radius.sm, paddingHorizontal: spacing[3], paddingVertical: spacing[1],
     fontSize: typography.size.base, width: 80, textAlign: 'right',
+  },
+  comparisonContainer: { marginBottom: spacing[3] },
+  comparisonRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between',
+    marginBottom: spacing[1] 
+  },
+  comparisonLabel: { 
+    color: colors.text.secondary, 
+    fontSize: typography.size.sm, 
+    fontWeight: typography.weight.medium,
+    lineHeight: typography.size.sm * typography.lineHeight.normal,
+    width: 70
+  },
+  comparisonTargets: { 
+    flexDirection: 'row', 
+    gap: spacing[1], 
+    flex: 1 
+  },
+  comparisonPill: {
+    flex: 1, 
+    alignItems: 'center', 
+    paddingVertical: spacing[1],
+    borderWidth: 1, 
+    borderRadius: radius.sm,
+  },
+  comparisonPillLabel: { 
+    fontSize: typography.size.xs, 
+    fontWeight: typography.weight.medium, 
+    lineHeight: typography.size.xs * typography.lineHeight.normal 
+  },
+  comparisonPillValue: { 
+    color: colors.text.primary, 
+    fontSize: typography.size.sm, 
+    fontWeight: typography.weight.semibold, 
+    lineHeight: typography.size.sm * typography.lineHeight.tight 
   },
 });

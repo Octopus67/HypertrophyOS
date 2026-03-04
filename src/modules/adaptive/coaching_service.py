@@ -8,12 +8,15 @@ Handles three coaching modes:
 
 from __future__ import annotations
 from typing import Optional
+import logging
 
 import uuid
 from datetime import date, datetime, timedelta, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
 
 from src.modules.adaptive.engine import (
     AdaptiveInput,
@@ -215,8 +218,30 @@ class CoachingService:
     ) -> None:
         """Apply proposed targets. Set status='accepted'."""
         suggestion = await self._get_suggestion(user_id, suggestion_id)
+        if suggestion.status != "pending":
+            from src.shared.errors import UnprocessableError
+            raise UnprocessableError("Suggestion already resolved")
+        
+        # Load the associated snapshot
+        snapshot_stmt = select(AdaptiveSnapshot).where(AdaptiveSnapshot.id == suggestion.snapshot_id)
+        snapshot_result = await self.db.execute(snapshot_stmt)
+        snapshot = snapshot_result.scalar_one_or_none()
+        
         suggestion.status = "accepted"
         suggestion.resolved_at = datetime.now(timezone.utc)
+        
+        # APPLY the suggested targets by creating a new snapshot
+        new_snapshot = AdaptiveSnapshot(
+            user_id=user_id,
+            target_calories=suggestion.proposed_calories,
+            target_protein_g=suggestion.proposed_protein_g,
+            target_carbs_g=suggestion.proposed_carbs_g,
+            target_fat_g=suggestion.proposed_fat_g,
+            ema_current=snapshot.ema_current if snapshot else 0,
+            adjustment_factor=snapshot.adjustment_factor if snapshot else 1.0,
+            input_parameters=snapshot.input_parameters if snapshot else {},
+        )
+        self.db.add(new_snapshot)
         await self.db.flush()
 
     async def modify_suggestion(
@@ -227,12 +252,34 @@ class CoachingService:
     ) -> None:
         """Store user's modified values. Set status='modified'."""
         suggestion = await self._get_suggestion(user_id, suggestion_id)
+        if suggestion.status != "pending":
+            from src.shared.errors import UnprocessableError
+            raise UnprocessableError("Suggestion already resolved")
+        
+        # Load the associated snapshot
+        snapshot_stmt = select(AdaptiveSnapshot).where(AdaptiveSnapshot.id == suggestion.snapshot_id)
+        snapshot_result = await self.db.execute(snapshot_stmt)
+        snapshot = snapshot_result.scalar_one_or_none()
+        
         suggestion.status = "modified"
         suggestion.modified_calories = modifications.calories
         suggestion.modified_protein_g = modifications.protein_g
         suggestion.modified_carbs_g = modifications.carbs_g
         suggestion.modified_fat_g = modifications.fat_g
         suggestion.resolved_at = datetime.now(timezone.utc)
+        
+        # Apply modified targets by creating a new snapshot
+        new_snapshot = AdaptiveSnapshot(
+            user_id=user_id,
+            target_calories=modifications.calories or suggestion.proposed_calories,
+            target_protein_g=modifications.protein_g or suggestion.proposed_protein_g,
+            target_carbs_g=modifications.carbs_g or suggestion.proposed_carbs_g,
+            target_fat_g=modifications.fat_g or suggestion.proposed_fat_g,
+            ema_current=snapshot.ema_current if snapshot else 0,
+            adjustment_factor=snapshot.adjustment_factor if snapshot else 1.0,
+            input_parameters=snapshot.input_parameters if snapshot else {},
+        )
+        self.db.add(new_snapshot)
         await self.db.flush()
 
     async def dismiss_suggestion(
