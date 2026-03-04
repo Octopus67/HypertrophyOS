@@ -34,6 +34,15 @@ class RecompService:
         self, user_id: uuid.UUID, data: RecompMeasurementCreate,
     ) -> RecompMeasurement:
         logger.info("Logging recomp measurement for user %s on %s", user_id, data.recorded_date)
+        
+        # Validate measurement units (all should be in cm)
+        if data.waist_cm is not None and (data.waist_cm < 10 or data.waist_cm > 200):
+            raise ValueError("Waist measurement must be between 10-200 cm")
+        if data.arm_cm is not None and (data.arm_cm < 5 or data.arm_cm > 80):
+            raise ValueError("Arm measurement must be between 5-80 cm")  
+        if data.chest_cm is not None and (data.chest_cm < 20 or data.chest_cm > 200):
+            raise ValueError("Chest measurement must be between 20-200 cm")
+        
         entry = RecompMeasurement(
             user_id=user_id,
             recorded_date=data.recorded_date,
@@ -75,6 +84,21 @@ class RecompService:
         waist = [MeasurementPoint(m.recorded_date, m.waist_cm) for m in measurements if m.waist_cm is not None]
         arm = [MeasurementPoint(m.recorded_date, m.arm_cm) for m in measurements if m.arm_cm is not None]
         chest = [MeasurementPoint(m.recorded_date, m.chest_cm) for m in measurements if m.chest_cm is not None]
+
+        # Check for insufficient data points
+        if len(waist) < 2 and len(arm) < 2 and len(chest) < 2:
+            logger.info("Insufficient measurement data for user %s (need at least 2 points)", user_id)
+            from src.modules.recomp.engine import RecompMetricsOutput
+            return RecompMetricsOutput(
+                waist_trend=None,
+                arm_trend=None, 
+                chest_trend=None,
+                weight_trend=None,
+                muscle_gain_indicator=None,
+                fat_loss_indicator=None,
+                recomp_score=None,
+                has_sufficient_data=False,
+            )
 
         # Fetch bodyweight
         bw_stmt = (

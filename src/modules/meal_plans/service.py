@@ -69,18 +69,26 @@ class MealPlanService:
         result = await self.db.execute(stmt)
         snapshot = result.scalar_one_or_none()
         if snapshot is None:
-            raise NotFoundError(
-                "No macro targets available. Complete an adaptive snapshot first."
+            logger.info("No adaptive snapshot found for user %s, using default targets", user_id)
+            daily_targets = MacroSummary(
+                calories=2000.0,
+                protein_g=150.0,
+                carbs_g=200.0,
+                fat_g=67.0,
+            )
+        else:
+            daily_targets = MacroSummary(
+                calories=snapshot.target_calories,
+                protein_g=snapshot.target_protein_g,
+                carbs_g=snapshot.target_carbs_g,
+                fat_g=snapshot.target_fat_g,
             )
 
-        daily_targets = MacroSummary(
-            calories=snapshot.target_calories,
-            protein_g=snapshot.target_protein_g,
-            carbs_g=snapshot.target_carbs_g,
-            fat_g=snapshot.target_fat_g,
-        )
-
         candidates = await self._build_candidates(user_id)
+        if not candidates:
+            raise ValidationError(
+                "No food items available for meal plan generation. Add some favorites or ensure food database has items."
+            )
         logger.info(
             "Generating meal plan for user %s: %d days, %d candidates",
             user_id, num_days, len(candidates),

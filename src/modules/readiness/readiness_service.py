@@ -87,6 +87,11 @@ class ReadinessService:
             score_date = target_date or date.today()
             start = score_date - timedelta(days=30)
 
+            # Validate and clamp negative values
+            hrv_ms = max(0, health_req.hrv_ms) if health_req.hrv_ms is not None else None
+            resting_hr_bpm = max(0, health_req.resting_hr_bpm) if health_req.resting_hr_bpm is not None else None
+            sleep_duration_hours = max(0, health_req.sleep_duration_hours) if health_req.sleep_duration_hours is not None else None
+
             # Fetch 30-day score history for baselines
             stmt = select(ReadinessScore).where(
                 ReadinessScore.user_id == user_id,
@@ -109,12 +114,19 @@ class ReadinessService:
             checkin_row = checkin_result.scalar_one_or_none()
 
             health = HealthMetrics(
-                hrv_ms=health_req.hrv_ms,
-                resting_hr_bpm=health_req.resting_hr_bpm,
-                sleep_duration_hours=health_req.sleep_duration_hours,
+                hrv_ms=hrv_ms,
+                resting_hr_bpm=resting_hr_bpm,
+                sleep_duration_hours=sleep_duration_hours,
             )
-            user_checkin = None
-            if checkin_row:
+            # Return sensible defaults if no check-in data exists
+            if checkin_row is None:
+                logger.info("No check-in data found for user=%s date=%s, using defaults", user_id, score_date)
+                user_checkin = UserCheckin(
+                    soreness=None,
+                    stress=None,
+                    sleep_quality=None,
+                )
+            else:
                 user_checkin = UserCheckin(
                     soreness=checkin_row.soreness,
                     stress=checkin_row.stress,
@@ -139,9 +151,9 @@ class ReadinessService:
 
             if existing_score:
                 existing_score.score = engine_result.score
-                existing_score.hrv_ms = health_req.hrv_ms
-                existing_score.resting_hr_bpm = health_req.resting_hr_bpm
-                existing_score.sleep_duration_hours = health_req.sleep_duration_hours
+                existing_score.hrv_ms = hrv_ms
+                existing_score.resting_hr_bpm = resting_hr_bpm
+                existing_score.sleep_duration_hours = sleep_duration_hours
                 existing_score.sleep_quality = checkin_row.sleep_quality if checkin_row else None
                 existing_score.soreness = checkin_row.soreness if checkin_row else None
                 existing_score.stress = checkin_row.stress if checkin_row else None
@@ -151,9 +163,9 @@ class ReadinessService:
                     user_id=user_id,
                     score=engine_result.score,
                     score_date=score_date,
-                    hrv_ms=health_req.hrv_ms,
-                    resting_hr_bpm=health_req.resting_hr_bpm,
-                    sleep_duration_hours=health_req.sleep_duration_hours,
+                    hrv_ms=hrv_ms,
+                    resting_hr_bpm=resting_hr_bpm,
+                    sleep_duration_hours=sleep_duration_hours,
                     sleep_quality=checkin_row.sleep_quality if checkin_row else None,
                     soreness=checkin_row.soreness if checkin_row else None,
                     stress=checkin_row.stress if checkin_row else None,

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,6 +21,9 @@ from src.modules.notifications.schemas import (
 from src.shared.errors import NotFoundError
 
 logger = logging.getLogger("hypertrophy_os.notifications")
+
+# Simple in-memory dedup cache: {(user_id, notification_type): timestamp}
+_notification_cache: dict[tuple[uuid.UUID, str], datetime] = {}
 
 
 class NotificationService:
@@ -147,6 +151,7 @@ class NotificationService:
         user_id: uuid.UUID,
         title: str,
         body: str,
+        notification_type: str = "general",
     ) -> int:
         """Attempt to deliver a push notification to all active devices.
 
@@ -156,6 +161,15 @@ class NotificationService:
         prefs = await self.get_preferences(user_id)
         if not prefs.push_enabled:
             return 0
+
+        # Check for duplicate notifications within 1 hour
+        now = datetime.now(timezone.utc)
+        cache_key = (user_id, notification_type)
+        if cache_key in _notification_cache:
+            last_sent = _notification_cache[cache_key]
+            if now - last_sent < timedelta(hours=1):
+                logger.info("Skipping duplicate notification for user=%s type=%s", user_id, notification_type)
+                return 0
 
         stmt = (
             select(DeviceToken)
@@ -167,14 +181,24 @@ class NotificationService:
 
         count = 0
         for token in tokens:
-            logger.info(
-                "Push stub: user=%s platform=%s title=%s body=%s token=%s",
-                user_id,
-                token.platform,
-                title,
-                body,
-                token.token[:8] + "...",
-            )
-            count += 1
+            try:
+                logger.info(
+                    "Push stub: user=%s platform=%s title=%s body=%s token=%s",
+                    user_id,
+                    token.platform,
+                    title,
+                    body,
+                    token.token[:8] + "...",
+                )
+                count += 1
+            except Exception as e:
+                # Handle token expiry/invalid token by marking inactive
+                logger.warning("Push token failed for user=%s, marking inactive: %s", user_id, str(e))
+                token.is_active = False
+                await self.session.flush()
+
+        # Update cache if we sent notifications
+        if count > 0:
+            _notification_cache[cache_key] = now
 
         return count
