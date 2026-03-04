@@ -14,7 +14,7 @@ interface TodayWorkoutCardProps {
   onStartWorkout: () => void;
 }
 
-export function TodayWorkoutCard({ 
+function TodayWorkoutCardComponent({ 
   sessions, 
   isWorkoutActive, 
   activeExerciseCount,
@@ -70,7 +70,7 @@ export function TodayWorkoutCard({
               style={[styles.sessionContainer, index > 0 && styles.sessionBorder]}
             >
               <View style={styles.sessionHeader}>
-                <Text style={styles.sessionName}>
+                <Text style={styles.sessionName} numberOfLines={1} ellipsizeMode="tail">
                   Workout {duration ? `· ${duration} min` : ''}
                 </Text>
               </View>
@@ -79,7 +79,7 @@ export function TodayWorkoutCard({
                 {exercises.slice(0, 4).map((exercise, i) => {
                   const firstSet = exercise.sets?.[0];
                   return (
-                    <Text key={i} style={styles.exerciseText}>
+                    <Text key={i} style={styles.exerciseText} numberOfLines={1} ellipsizeMode="tail">
                       {exercise.exercise_name} · {exercise.sets?.length || 0}×
                       {firstSet ? `${firstSet.weight_kg}kg × ${firstSet.reps}` : ''}
                     </Text>
@@ -227,4 +227,13 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.sm,
   },
+});
+
+export const TodayWorkoutCard = React.memo(TodayWorkoutCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.sessions.length === nextProps.sessions.length &&
+    prevProps.sessions[0]?.id === nextProps.sessions[0]?.id &&
+    prevProps.isWorkoutActive === nextProps.isWorkoutActive &&
+    prevProps.activeExerciseCount === nextProps.activeExerciseCount
+  );
 });
