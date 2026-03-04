@@ -12,10 +12,7 @@ import { MacroRingsRow } from '../../components/dashboard/MacroRingsRow';
 import { TodaySummaryRow } from '../../components/dashboard/TodaySummaryRow';
 import { StreakIndicator } from '../../components/dashboard/StreakIndicator';
 import { QuickActionButton } from '../../components/dashboard/QuickActionButton';
-import { ArticleCardCompact } from '../../components/dashboard/ArticleCardCompact';
 import { DateScroller } from '../../components/dashboard/DateScroller';
-import { DayBadge } from '../../components/dashboard/DayBadge';
-import { DayIndicator } from '../../components/dashboard/DayIndicator';
 import { MealSlotDiary } from '../../components/dashboard/MealSlotDiary';
 import { BudgetBar } from '../../components/nutrition/BudgetBar';
 import { QuickAddModal } from '../../components/modals/QuickAddModal';
@@ -37,9 +34,7 @@ import { computeEMA, computeWeeklyChange, formatWeeklyChange } from '../../utils
 import { formatMuscleGroups } from '../../utils/dayClassificationLogic';
 import { WeeklyCheckinCard } from '../../components/coaching/WeeklyCheckinCard';
 import { FatigueAlertCard } from '../../components/dashboard/FatigueAlertCard';
-import { ReadinessGauge } from '../../components/dashboard/ReadinessGauge';
 import { RecompDashboardCard } from '../../components/dashboard/RecompDashboardCard';
-import { WeeklyTrainingCalendar } from '../../components/dashboard/WeeklyTrainingCalendar';
 import NudgeCard from '../../components/dashboard/NudgeCard';
 import GoalProgressPill from '../../components/dashboard/GoalProgressPill';
 import { RecoveryCheckinModal } from '../../components/modals/RecoveryCheckinModal';
@@ -507,14 +502,6 @@ export function DashboardScreen({ navigation }: any) {
           </View>
         )}
 
-        {/* Weekly Training Calendar */}
-        {!isLoading && (
-          <WeeklyTrainingCalendar
-            selectedDate={selectedDate}
-            trainedDates={weeklyTrainedDates}
-          />
-        )}
-
         {/* Quick Actions — above the fold */}
         <Animated.View style={quickActionsAnim}>
           <SectionHeader title="Quick Log" />
@@ -562,17 +549,6 @@ export function DashboardScreen({ navigation }: any) {
                     }
                   })}
                   accessibilityLabel="Start workout"
-                  accessibilityRole="button"
-                />
-              </View>
-              <View style={styles.quickItem} testID="dashboard-log-bodyweight-button">
-                <QuickActionButton
-                  icon="scale"
-                  label="Bodyweight"
-                  accentColor={colors.macro.carbs}
-                  completed={false}
-                  onPress={() => handleQuickAction(() => setShowBodyweight(true))}
-                  accessibilityLabel="Log bodyweight"
                   accessibilityRole="button"
                 />
               </View>
@@ -671,10 +647,6 @@ export function DashboardScreen({ navigation }: any) {
                 />
                 <StreakIndicator count={streak} />
               </View>
-              <View style={styles.nutritionSummary}>
-                <Text style={styles.nutritionItem}><Icon name="droplet" size={14} color={colors.accent.primary} /> {Math.round(totalWaterMl / 250)} glasses ({totalWaterMl}ml)</Text>
-                <Text style={styles.nutritionItem}><Icon name="wheat" size={14} color={colors.semantic.warning} /> {totalFibreG.toFixed(1)}g fibre</Text>
-              </View>
             </>
           )}
         </Animated.View>
@@ -756,26 +728,30 @@ export function DashboardScreen({ navigation }: any) {
           </TouchableOpacity>
         )}
 
-        {/* Readiness Gauge */}
-        {!isLoading && (
-          <ReadinessGauge
-            score={readinessScore}
-            factors={readinessFactors}
-            onPress={() => setShowCheckin(true)}
-          />
-        )}
-
-        {/* Weekly Report Link */}
-        {!isLoading && (
+        {/* Readiness — compact inline badge */}
+        {!isLoading && readinessScore !== null && !Number.isNaN(readinessScore) && (
           <TouchableOpacity
-            style={styles.milestoneBanner}
-            onPress={() => navigation?.navigate?.('WeeklyReport')}
+            style={styles.readinessBadge}
+            onPress={() => setShowCheckin(true)}
             activeOpacity={0.7}
-            accessibilityLabel="View weekly report"
+            accessibilityLabel={`Readiness score ${readinessScore}`}
             accessibilityRole="button"
           >
-            <Icon name="chart" size={16} color={colors.accent.primary} />
-            <Text style={styles.milestoneText} numberOfLines={1}>Weekly Intelligence Report</Text>
+            <Text style={styles.readinessEmoji}>⚡</Text>
+            <Text style={styles.readinessText}>Readiness: {readinessScore}/100</Text>
+            <Text style={styles.milestoneChevron}>›</Text>
+          </TouchableOpacity>
+        )}
+        {!isLoading && (readinessScore === null || Number.isNaN(readinessScore ?? NaN)) && (
+          <TouchableOpacity
+            style={styles.readinessBadge}
+            onPress={() => setShowCheckin(true)}
+            activeOpacity={0.7}
+            accessibilityLabel="Log recovery check-in"
+            accessibilityRole="button"
+          >
+            <Text style={styles.readinessEmoji}>💤</Text>
+            <Text style={styles.readinessText}>Tap to log recovery</Text>
             <Text style={styles.milestoneChevron}>›</Text>
           </TouchableOpacity>
         )}
@@ -813,51 +789,30 @@ export function DashboardScreen({ navigation }: any) {
           />
         )}
 
-        {/* Fatigue Alert Card */}
-        {!isLoading && (
-          <>
+        {/* Fatigue Alert Card — only when actionable */}
+        {!isLoading && fatigueSuggestions.length > 0 && (
             <FatigueAlertCard
               suggestions={fatigueSuggestions}
               onPress={() => navigation?.navigate?.('Analytics')}
             />
-            {fatigueSuggestions.length === 0 && (
-              <View style={styles.trendSection}>
-                <Text style={styles.emptyStateText}>No fatigue data</Text>
-              </View>
-            )}
-          </>
         )}
 
-        {/* Section 5: Featured Articles (show empty state if no articles) */}
-        <Animated.View style={featuredAnim} testID="dashboard-articles-section">
-          <SectionHeader title="Featured" />
-          {isLoading ? (
-            <View style={styles.articlesRow}>
-              <Skeleton width={200} height={120} borderRadius={12} />
-              <Skeleton width={200} height={120} borderRadius={12} />
-              <Skeleton width={200} height={120} borderRadius={12} />
-            </View>
-          ) : articles.length > 0 ? (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.articlesRow}
+        {/* Featured — single tip card, not a full feed */}
+        {!isLoading && articles.length > 0 && (
+          <Animated.View style={featuredAnim}>
+            <TouchableOpacity
+              style={styles.milestoneBanner}
+              onPress={() => handleArticlePress(articles[0].id)}
+              activeOpacity={0.7}
+              accessibilityLabel={`Read: ${articles[0].title}`}
+              accessibilityRole="button"
             >
-              {articles.map((article) => (
-                <ArticleCardCompact
-                  key={article.id}
-                  article={article}
-                  onPress={() => handleArticlePress(article.id)}
-                />
-              ))}
-            </ScrollView>
-          ) : (
-            <Text style={styles.articlesEmpty}>No articles available right now.</Text>
-          )}
-          <TouchableOpacity onPress={() => navigation.navigate('Learn')} style={{ alignItems: 'flex-end', paddingVertical: spacing[2] }}>
-            <Text style={{ color: colors.accent.primary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.sm }}>See All Articles →</Text>
-          </TouchableOpacity>
-        </Animated.View>
+              <Icon name="book" size={16} color={colors.accent.primary} />
+              <Text style={styles.milestoneText} numberOfLines={1}>{articles[0].title}</Text>
+              <Text style={styles.milestoneChevron}>›</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
         {!premium && <UpgradeBanner onPress={() => setShowUpgrade(true)} />}
       </ScrollView>
@@ -934,9 +889,6 @@ const styles = StyleSheet.create({
   quickItem: {
     flex: 1,
   },
-  articlesRow: {
-    gap: spacing[3],
-  },
   articlesEmpty: {
     color: colors.text.muted,
     fontSize: typography.size.sm,
@@ -960,16 +912,6 @@ const styles = StyleSheet.create({
   skeletonSummaryRow: {
     flexDirection: 'row',
     gap: spacing[6],
-  },
-  nutritionSummary: {
-    flexDirection: 'row',
-    gap: spacing[4],
-    marginTop: spacing[2],
-  },
-  nutritionItem: {
-    color: colors.text.secondary,
-    fontSize: typography.size.sm,
-    lineHeight: typography.lineHeight.sm,
   },
   trendSection: {
     marginTop: spacing[3],
@@ -1029,5 +971,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing[3],
     marginBottom: spacing[2],
+  },
+  readinessBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.bg.surface,
+    borderRadius: radius.sm,
+    padding: spacing[3],
+    marginTop: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+    gap: spacing[2],
+    minHeight: 44,
+  },
+  readinessEmoji: {
+    fontSize: 16,
+  },
+  readinessText: {
+    flex: 1,
+    color: colors.text.primary,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    lineHeight: typography.lineHeight.sm,
   },
 });
