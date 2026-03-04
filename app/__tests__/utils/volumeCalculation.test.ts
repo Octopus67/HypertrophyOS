@@ -20,6 +20,7 @@ function makeSet(overrides: Partial<{
     weight: overrides.weight ?? '0',
     reps: overrides.reps ?? '0',
     rpe: '',
+    rir: '',
     setType: overrides.setType ?? 'normal',
     completed: overrides.completed ?? false,
     completedAt: null,

@@ -98,6 +98,7 @@ const activeSetArb: fc.Arbitrary<ActiveSet> = fc.record({
   weight: fc.constantFrom('', '0', '50', '80', '100', '120.5'),
   reps: fc.constantFrom('', '0', '3', '5', '8', '10', '12'),
   rpe: fc.constantFrom('', '6', '7', '8', '9', '10'),
+  rir: fc.constantFrom('', '0', '1', '2', '3', '4', '5'),
   setType: setTypeArb,
   completed: fc.boolean(),
   completedAt: fc.oneof(
@@ -405,8 +406,11 @@ describe('Training UX Polish — Phase 2 Store Tests', () => {
       fc.assert(
         fc.property(
           fc.constantFrom('weight' as const, 'reps' as const, 'rpe' as const),
-          fc.constantFrom('50', '80', '100', '5', '8', '10', '7', '9'),
-          (field, value) => {
+          (field) => {
+            const value = field === 'weight' ? fc.sample(fc.constantFrom('50', '80', '100'), 1)[0]
+                        : field === 'reps' ? fc.sample(fc.constantFrom('5', '8', '10'), 1)[0]
+                        : fc.sample(fc.constantFrom('7', '8', '9'), 1)[0]; // rpe
+            
             resetStores();
             setupExerciseWithSets('Bench Press', [
               { weight: '100', reps: '8', rpe: '8', completed: true },

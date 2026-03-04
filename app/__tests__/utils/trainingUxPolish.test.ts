@@ -21,6 +21,7 @@ const activeSetArb = fc.record({
   weight: fc.oneof(fc.constant(''), fc.integer({ min: 0, max: 500 }).map(String)),
   reps: fc.oneof(fc.constant(''), fc.integer({ min: 0, max: 100 }).map(String)),
   rpe: fc.oneof(fc.constant(''), fc.integer({ min: 1, max: 10 }).map(String)),
+  rir: fc.oneof(fc.constant(''), fc.integer({ min: 0, max: 10 }).map(String)),
   setType: fc.constantFrom('normal', 'warm-up', 'drop-set', 'amrap') as fc.Arbitrary<SetType>,
   completed: fc.boolean(),
   completedAt: fc.oneof(fc.constant(null), fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }).map(d => {
@@ -137,8 +138,8 @@ describe('calculateSetProgress', () => {
 
   it('returns all complete when every set is completed', () => {
     const sets: ActiveSet[] = [
-      { localId: '1', setNumber: 1, weight: '100', reps: '5', rpe: '', setType: 'normal', completed: true, completedAt: '2024-01-01T00:00:00Z' },
-      { localId: '2', setNumber: 2, weight: '100', reps: '5', rpe: '', setType: 'normal', completed: true, completedAt: '2024-01-01T00:01:00Z' },
+      { localId: '1', setNumber: 1, weight: '100', reps: '5', rpe: '', rir: '', setType: 'normal', completed: true, completedAt: '2024-01-01T00:00:00Z' },
+      { localId: '2', setNumber: 2, weight: '100', reps: '5', rpe: '', rir: '', setType: 'normal', completed: true, completedAt: '2024-01-01T00:01:00Z' },
     ];
     const result = calculateSetProgress(sets);
     expect(result).toEqual({ completed: 2, total: 2, allComplete: true });
@@ -146,8 +147,8 @@ describe('calculateSetProgress', () => {
 
   it('returns none complete when no sets are completed', () => {
     const sets: ActiveSet[] = [
-      { localId: '1', setNumber: 1, weight: '', reps: '', rpe: '', setType: 'normal', completed: false, completedAt: null },
-      { localId: '2', setNumber: 2, weight: '', reps: '', rpe: '', setType: 'normal', completed: false, completedAt: null },
+      { localId: '1', setNumber: 1, weight: '', reps: '', rpe: '', rir: '', setType: 'normal', completed: false, completedAt: null },
+      { localId: '2', setNumber: 2, weight: '', reps: '', rpe: '', rir: '', setType: 'normal', completed: false, completedAt: null },
     ];
     const result = calculateSetProgress(sets);
     expect(result).toEqual({ completed: 0, total: 2, allComplete: false });
@@ -155,9 +156,9 @@ describe('calculateSetProgress', () => {
 
   it('returns mixed progress correctly', () => {
     const sets: ActiveSet[] = [
-      { localId: '1', setNumber: 1, weight: '80', reps: '8', rpe: '7', setType: 'normal', completed: true, completedAt: '2024-01-01T00:00:00Z' },
-      { localId: '2', setNumber: 2, weight: '', reps: '', rpe: '', setType: 'normal', completed: false, completedAt: null },
-      { localId: '3', setNumber: 3, weight: '80', reps: '6', rpe: '9', setType: 'normal', completed: true, completedAt: '2024-01-01T00:02:00Z' },
+      { localId: '1', setNumber: 1, weight: '80', reps: '8', rpe: '7', rir: '', setType: 'normal', completed: true, completedAt: '2024-01-01T00:00:00Z' },
+      { localId: '2', setNumber: 2, weight: '', reps: '', rpe: '', rir: '', setType: 'normal', completed: false, completedAt: null },
+      { localId: '3', setNumber: 3, weight: '80', reps: '6', rpe: '9', rir: '', setType: 'normal', completed: true, completedAt: '2024-01-01T00:02:00Z' },
     ];
     const result = calculateSetProgress(sets);
     expect(result).toEqual({ completed: 2, total: 3, allComplete: false });
@@ -278,7 +279,7 @@ describe('swapExerciseName', () => {
       localId: 'ex1',
       exerciseName: 'Bench Press',
       sets: [
-        { localId: 's1', setNumber: 1, weight: '100', reps: '5', rpe: '8', setType: 'normal', completed: true, completedAt: '2024-01-01T00:00:00Z' },
+        { localId: 's1', setNumber: 1, weight: '100', reps: '5', rpe: '8', rir: '', setType: 'normal', completed: true, completedAt: '2024-01-01T00:00:00Z' },
       ],
     };
     const result = swapExerciseName(exercise, 'Incline Press');
@@ -357,14 +358,14 @@ describe('computeWorkoutSummary & formatMiniSummary', () => {
         localId: 'e1',
         exerciseName: 'Squat',
         sets: [
-          { localId: 's1', setNumber: 1, weight: '100', reps: '5', rpe: '', setType: 'normal' as SetType, completed: true, completedAt: '2024-01-01T00:00:00Z' },
+          { localId: 's1', setNumber: 1, weight: '100', reps: '5', rpe: '', rir: '', setType: 'normal' as SetType, completed: true, completedAt: '2024-01-01T00:00:00Z' },
         ],
       },
       {
         localId: 'e2',
         exerciseName: 'Bench',
         sets: [
-          { localId: 's2', setNumber: 1, weight: '80', reps: '8', rpe: '', setType: 'normal' as SetType, completed: true, completedAt: '2024-01-01T00:01:00Z' },
+          { localId: 's2', setNumber: 1, weight: '80', reps: '8', rpe: '', rir: '', setType: 'normal' as SetType, completed: true, completedAt: '2024-01-01T00:01:00Z' },
         ],
         skipped: true,
       },

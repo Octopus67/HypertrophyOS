@@ -23,6 +23,7 @@ function makeSet(overrides: Partial<ActiveSet> = {}): ActiveSet {
     weight: '',
     reps: '',
     rpe: '',
+    rir: '',
     setType: 'normal',
     completed: false,
     completedAt: null,
