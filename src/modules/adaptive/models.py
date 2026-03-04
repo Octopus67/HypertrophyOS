@@ -33,6 +33,7 @@ class AdaptiveSnapshot(Base):
     target_fat_g: Mapped[float] = mapped_column(Float, nullable=False)
     ema_current: Mapped[float] = mapped_column(Float, nullable=False)
     adjustment_factor: Mapped[float] = mapped_column(Float, nullable=False)
+    version: Mapped[int] = mapped_column(nullable=False, default=1)
     input_parameters: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False,

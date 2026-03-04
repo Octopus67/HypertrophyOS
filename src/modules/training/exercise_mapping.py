@@ -190,9 +190,11 @@ COMPOUND_EXERCISES: set[str] = {
 
 def get_muscle_group(exercise_name: str) -> str:
     """Return the muscle group for *exercise_name*, or ``"Other"`` if unknown."""
-    return EXERCISE_MUSCLE_MAP.get(exercise_name.lower().strip(), "Other")
+    normalized_name = exercise_name.strip().lower()
+    return EXERCISE_MUSCLE_MAP.get(normalized_name, "Other")
 
 
 def is_compound(exercise_name: str) -> bool:
     """Return ``True`` if *exercise_name* is classified as a compound movement."""
-    return exercise_name.lower().strip() in COMPOUND_EXERCISES
+    normalized_name = exercise_name.strip().lower()
+    return normalized_name in COMPOUND_EXERCISES

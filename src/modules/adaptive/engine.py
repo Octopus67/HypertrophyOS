@@ -282,10 +282,10 @@ def compute_snapshot(input: AdaptiveInput) -> AdaptiveOutput:
         target_calories = actual_calories_from_macros
 
     return AdaptiveOutput(
-        target_calories=round(target_calories, 2),
-        target_protein_g=round(protein_g, 2),
-        target_carbs_g=round(carbs_g, 2),
-        target_fat_g=round(fat_g, 2),
+        target_calories=round(target_calories, 0),
+        target_protein_g=round(protein_g, 1),
+        target_carbs_g=round(carbs_g, 1),
+        target_fat_g=round(fat_g, 1),
         ema_current=round(ema_current, 4),
         adjustment_factor=round(adjustment_factor, 2),
     )

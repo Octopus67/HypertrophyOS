@@ -172,7 +172,19 @@ def compute_daily_targets(inp: DailyTargetInput) -> DailyTargetOutput:
     adjusted_carbs_g = max(inp.baseline_carbs_g + carb_extra_g, MIN_CARBS_G)
     adjusted_fat_g = max(inp.baseline_fat_g + fat_extra_g, MIN_FAT_G)
 
-    # Step 7: Explanation
+    # Step 7: TDEE validation - ensure total calories don't exceed TDEE * 1.2
+    total_macro_calories = adjusted_protein_g * 4.0 + adjusted_carbs_g * 4.0 + adjusted_fat_g * 9.0
+    max_allowed_calories = inp.baseline_calories * 1.2
+    
+    if total_macro_calories > max_allowed_calories:
+        # Scale down proportionally
+        scale_factor = max_allowed_calories / total_macro_calories
+        adjusted_calories = max_allowed_calories
+        adjusted_protein_g = adjusted_protein_g * scale_factor
+        adjusted_carbs_g = max(adjusted_carbs_g * scale_factor, MIN_CARBS_G)
+        adjusted_fat_g = max(adjusted_fat_g * scale_factor, MIN_FAT_G)
+
+    # Step 8: Explanation
     parts: list[str] = []
     if inp.is_training_day:
         groups = {ex.muscle_group.lower() for ex in inp.session_exercises}
@@ -198,10 +210,10 @@ def compute_daily_targets(inp: DailyTargetInput) -> DailyTargetOutput:
     explanation = " · ".join(parts)
 
     return DailyTargetOutput(
-        adjusted_calories=round(adjusted_calories, 2),
-        adjusted_protein_g=round(adjusted_protein_g, 2),
-        adjusted_carbs_g=round(adjusted_carbs_g, 2),
-        adjusted_fat_g=round(adjusted_fat_g, 2),
+        adjusted_calories=round(adjusted_calories, 0),
+        adjusted_protein_g=round(adjusted_protein_g, 1),
+        adjusted_carbs_g=round(adjusted_carbs_g, 1),
+        adjusted_fat_g=round(adjusted_fat_g, 1),
         day_classification=classification,
         muscle_group_demand=round(demand, 4),
         volume_multiplier=round(vol_mult, 4),

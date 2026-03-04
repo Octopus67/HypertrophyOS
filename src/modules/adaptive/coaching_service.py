@@ -76,12 +76,18 @@ class CoachingService:
         metrics = await self._get_latest_metrics(user_id)
 
         weight_kg = bw_entries[-1][1]  # latest weight
-        height_cm = metrics.height_cm if metrics and metrics.height_cm else 170.0
-        age_years = metrics.age_years if metrics and hasattr(metrics, "age_years") else 30
+        height_cm = metrics.height_cm if metrics and metrics.height_cm else 170.0  # fallback to 170cm
+        age_years = metrics.age_years if metrics and hasattr(metrics, "age_years") else 30  # fallback to 30yo
         sex = "male"  # default; could be stored on profile
+        
+        if not metrics or not metrics.height_cm:
+            logger.warning("Using fallback height (170cm) and age (30yo) for user %s", user_id)
         activity_level = ActivityLevel(metrics.activity_level) if metrics and metrics.activity_level else ActivityLevel.MODERATE
         goal_type = GoalType(goal.goal_type) if goal else GoalType.MAINTAINING
         goal_rate = goal.goal_rate_per_week if goal and goal.goal_rate_per_week else 0.0
+
+        # Calculate training load from recent data or use fallback
+        training_load = await self._calculate_training_load(user_id)
 
         engine_input = AdaptiveInput(
             weight_kg=weight_kg,
@@ -92,7 +98,7 @@ class CoachingService:
             goal_type=goal_type,
             goal_rate_per_week=goal_rate,
             bodyweight_history=bw_entries,
-            training_load_score=50.0,  # default mid-range
+            training_load_score=training_load,
         )
 
         output = compute_snapshot(engine_input)
@@ -241,12 +247,17 @@ class CoachingService:
     async def get_pending_suggestions(
         self, user_id: uuid.UUID,
     ) -> list[CoachingSuggestionResponse]:
-        """Return all pending suggestions for a user."""
+        """Return all pending suggestions for a user, excluding those older than 14 days."""
+        from datetime import datetime, timezone, timedelta
+        
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=14)
+        
         stmt = (
             select(CoachingSuggestion)
             .where(
                 CoachingSuggestion.user_id == user_id,
                 CoachingSuggestion.status == "pending",
+                CoachingSuggestion.created_at >= cutoff_date,
             )
             .order_by(CoachingSuggestion.created_at.desc())
         )
@@ -401,3 +412,46 @@ class CoachingService:
             suggestion_id=suggestion_id,
             coaching_mode=coaching_mode,
         )
+
+    async def _calculate_training_load(self, user_id: uuid.UUID) -> float:
+        """Calculate training load from recent training data or return fallback."""
+        try:
+            from src.modules.training.models import TrainingSession
+            
+            # Get last 14 days of training sessions
+            cutoff = date.today() - timedelta(days=14)
+            stmt = (
+                select(TrainingSession)
+                .where(
+                    TrainingSession.user_id == user_id,
+                    TrainingSession.session_date >= cutoff,
+                )
+                .order_by(TrainingSession.session_date.desc())
+            )
+            result = await self.db.execute(stmt)
+            sessions = result.scalars().all()
+            
+            if not sessions:
+                return 50.0  # fallback if no recent training data
+            
+            # Calculate average session intensity based on volume and frequency
+            total_volume = 0.0
+            session_count = len(sessions)
+            
+            for session in sessions:
+                exercises = session.exercises if isinstance(session.exercises, list) else []
+                for ex in exercises:
+                    sets = ex.get("sets", [])
+                    if isinstance(sets, list):
+                        for s in sets:
+                            total_volume += s.get("reps", 0) * s.get("weight_kg", 0)
+            
+            # Normalize to 0-100 scale based on frequency and volume
+            frequency_score = min(session_count / 14.0 * 100, 70)  # max 70 for frequency
+            volume_score = min(total_volume / 10000.0 * 30, 30)  # max 30 for volume
+            
+            return min(frequency_score + volume_score, 100.0)
+            
+        except Exception:
+            logger.exception("Failed to calculate training load for user %s", user_id)
+            return 50.0  # fallback on error

@@ -26,12 +26,6 @@ from src.modules.training.exercise_mapping import get_muscle_group, is_compound
 from src.shared.errors import ApiError
 from src.shared.types import TrainingPhase
 
-try:
-    from src.modules.training.models import TrainingSession
-except ImportError:
-    logging.getLogger(__name__).error("Failed to import TrainingSession — circular import")
-    TrainingSession = None  # type: ignore[assignment,misc]
-
 logger = logging.getLogger(__name__)
 
 
@@ -55,11 +49,25 @@ class SyncEngineService:
             .limit(1)
         )
         snap = (await self.session.execute(snap_stmt)).scalar_one_or_none()
+        
         if snap is None:
-            raise ApiError(
-                status=400,
-                code="NO_SNAPSHOT",
-                message="No adaptive snapshot found. Generate a snapshot first.",
+            # Return default targets based on user profile or safe defaults
+            logger.warning("No adaptive snapshot found for user %s, using defaults", user_id)
+            default_targets = await self._get_default_targets(user_id)
+            
+            return DailyTargetResponse(
+                date=target_date,
+                day_classification="rest",
+                classification_reason="No snapshot available",
+                baseline=default_targets,
+                adjusted=default_targets,
+                override=None,
+                effective=default_targets,
+                muscle_group_demand=0.0,
+                volume_multiplier=1.0,
+                training_phase=training_phase.value,
+                calorie_delta=0.0,
+                explanation="Using default targets - generate a snapshot for personalized recommendations",
             )
 
         # Classify day
@@ -135,13 +143,39 @@ class SyncEngineService:
         self, user_id: uuid.UUID, data: OverrideCreate,
     ) -> OverrideResponse:
         """Upsert a daily target override."""
+        from src.middleware.audit_logger import record_audit
+        from src.shared.types import AuditAction
+        
         existing = await self._get_override(user_id, data.date)
         if existing:
+            old_values = {
+                "calories": existing.calories,
+                "protein_g": existing.protein_g,
+                "carbs_g": existing.carbs_g,
+                "fat_g": existing.fat_g,
+            }
+            new_values = {
+                "calories": data.calories,
+                "protein_g": data.protein_g,
+                "carbs_g": data.carbs_g,
+                "fat_g": data.fat_g,
+            }
+            
             existing.calories = data.calories
             existing.protein_g = data.protein_g
             existing.carbs_g = data.carbs_g
             existing.fat_g = data.fat_g
             await self.session.flush()
+            
+            # Audit log the update
+            record_audit(
+                user_id=user_id,
+                action=AuditAction.UPDATE,
+                entity_type="daily_target_override",
+                entity_id=existing.id,
+                changes={"old": old_values, "new": new_values},
+            )
+            
             return OverrideResponse.model_validate(existing)
 
         row = DailyTargetOverride(
@@ -154,6 +188,16 @@ class SyncEngineService:
         )
         self.session.add(row)
         await self.session.flush()
+        
+        # Audit log the creation
+        record_audit(
+            user_id=user_id,
+            action=AuditAction.CREATE,
+            entity_type="daily_target_override",
+            entity_id=row.id,
+            changes={"new": data.model_dump()},
+        )
+        
         return OverrideResponse.model_validate(row)
 
     async def remove_override(self, user_id: uuid.UUID, target_date: date) -> None:
@@ -174,6 +218,8 @@ class SyncEngineService:
     ) -> tuple[bool, list[dict], str]:
         """Check training sessions for the date. Returns (is_training, exercises_json, reason)."""
         try:
+            from src.modules.training.models import TrainingSession
+            
             stmt = (
                 select(TrainingSession)
                 .where(
@@ -198,6 +244,8 @@ class SyncEngineService:
         """Compute average session volume over the last N weeks."""
         start_date = end_date - timedelta(weeks=weeks)
         try:
+            from src.modules.training.models import TrainingSession
+            
             stmt = select(TrainingSession).where(
                 TrainingSession.user_id == user_id,
                 TrainingSession.session_date >= start_date,
@@ -256,3 +304,44 @@ class SyncEngineService:
                 total_volume=total_volume,
             ))
         return result
+
+    async def _get_default_targets(self, user_id: uuid.UUID) -> MacroTargets:
+        """Calculate default targets from user profile or return safe defaults."""
+        try:
+            from src.modules.user.models import UserMetric, UserGoal
+            
+            # Try to get user metrics for TDEE calculation
+            metrics_stmt = (
+                select(UserMetric)
+                .where(UserMetric.user_id == user_id)
+                .order_by(UserMetric.recorded_at.desc())
+                .limit(1)
+            )
+            metrics = (await self.session.execute(metrics_stmt)).scalar_one_or_none()
+            
+            if metrics and hasattr(metrics, 'height_cm') and hasattr(metrics, 'weight_kg'):
+                # Calculate basic TDEE
+                weight_kg = metrics.weight_kg
+                height_cm = metrics.height_cm
+                age_years = getattr(metrics, 'age_years', 30)
+                
+                # Basic BMR calculation (assuming male for safety)
+                bmr = 10.0 * weight_kg + 6.25 * height_cm - 5.0 * age_years + 5.0
+                tdee = bmr * 1.55  # Moderate activity
+                
+                return MacroTargets(
+                    calories=tdee,
+                    protein_g=weight_kg * 1.8,  # 1.8g per kg
+                    carbs_g=(tdee * 0.45) / 4.0,  # 45% of calories
+                    fat_g=(tdee * 0.25) / 9.0,  # 25% of calories
+                )
+        except Exception:
+            logger.exception("Failed to calculate default targets for user %s", user_id)
+        
+        # Safe fallback defaults
+        return MacroTargets(
+            calories=2000.0,
+            protein_g=150.0,
+            carbs_g=200.0,
+            fat_g=65.0,
+        )

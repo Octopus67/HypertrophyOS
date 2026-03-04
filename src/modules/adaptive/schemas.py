@@ -81,9 +81,9 @@ class MacroModifications(BaseModel):
     """User-modified macro targets for collaborative mode."""
 
     calories: float = Field(ge=1200)
-    protein_g: float = Field(ge=0)
-    carbs_g: float = Field(ge=0)
-    fat_g: float = Field(ge=0)
+    protein_g: float = Field(ge=30)
+    carbs_g: float = Field(ge=20)
+    fat_g: float = Field(ge=15)
 
 
 class WeeklyCheckinResponse(BaseModel):
@@ -126,10 +126,10 @@ class OverrideCreate(BaseModel):
     """Payload for setting a daily target override."""
 
     date: date
-    calories: float = Field(ge=800)
-    protein_g: float = Field(ge=0)
-    carbs_g: float = Field(ge=0)
-    fat_g: float = Field(ge=0)
+    calories: float = Field(ge=1200)
+    protein_g: float = Field(ge=30)
+    carbs_g: float = Field(ge=20)
+    fat_g: float = Field(ge=15)
 
 
 class OverrideResponse(BaseModel):
