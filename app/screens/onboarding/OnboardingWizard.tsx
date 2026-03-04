@@ -2,6 +2,8 @@ import { useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Platform } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { colors, spacing, typography, radius, motion } from '../../theme/tokens';
+import { useStepTransition } from '../../hooks/useStepTransition';
+import { useHaptics } from '../../hooks/useHaptics';
 import { useOnboardingStore } from '../../store/onboardingSlice';
 import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 
@@ -32,6 +34,8 @@ export function OnboardingWizard({ onComplete, onSkip }: Props) {
 
   // Progress bar animation
   const progress = useSharedValue(currentStep / TOTAL_STEPS);
+  const stepTransitionStyle = useStepTransition(currentStep);
+  const { impact } = useHaptics();
   useEffect(() => {
     progress.value = withTiming(currentStep / TOTAL_STEPS, { duration: motion.duration.slow, easing: Easing.out(Easing.ease) });
   }, [currentStep, progress]);
@@ -43,14 +47,16 @@ export function OnboardingWizard({ onComplete, onSkip }: Props) {
 
   const goNext = useCallback(() => {
     if (currentStep < TOTAL_STEPS) {
+      impact('light');
       setStep(currentStep + 1);
     }
-  }, [currentStep, setStep]);
+  }, [currentStep, setStep, impact]);
 
   const goBack = useCallback(() => {
-    if (currentStep <= 1) return; // Guard against going back to step 0
+    if (currentStep <= 1) return;
+    impact('light');
     setStep(currentStep - 1);
-  }, [currentStep, setStep]);
+  }, [currentStep, setStep, impact]);
 
   const handleComplete = useCallback(() => {
     reset();
@@ -124,9 +130,9 @@ export function OnboardingWizard({ onComplete, onSkip }: Props) {
         )}
 
         {/* Current step content */}
-        <View style={styles.content}>
+        <Animated.View style={[styles.content, stepTransitionStyle]}>
           {renderStep()}
-        </View>
+        </Animated.View>
       </ErrorBoundary>
     </SafeAreaView>
   );

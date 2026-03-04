@@ -10,6 +10,7 @@ import { colors, spacing, typography, radius } from '../../../theme/tokens';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
 import type { Sex } from '../../../store/onboardingSlice';
 import { Button } from '../../../components/common/Button';
+import { useHaptics } from '../../../hooks/useHaptics';
 
 interface Props {
   onNext?: () => void;
@@ -159,6 +160,7 @@ export function BodyBasicsStep({ onNext }: Props) {
     birthMonth,
     updateField,
   } = useOnboardingStore();
+  const { impact } = useHaptics();
 
   const selectedYear = birthYear ?? DEFAULT_YEAR;
   const selectedMonth = birthMonth ?? (new Date().getMonth() + 1);
@@ -184,9 +186,10 @@ export function BodyBasicsStep({ onNext }: Props) {
 
   const handleSexSelect = useCallback(
     (value: Sex) => {
+      impact('light');
       updateField('sex', value);
     },
-    [updateField],
+    [updateField, impact],
   );
 
   const canProceed = sex !== null && birthYear !== null && birthYear > 1900 && ageValid;

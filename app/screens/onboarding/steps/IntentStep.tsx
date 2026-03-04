@@ -1,8 +1,11 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { colors, spacing, typography, radius } from '../../../theme/tokens';
 import { useOnboardingStore, GoalType } from '../../../store/onboardingSlice';
 import { Icon, IconName } from '../../../components/common/Icon';
 import { Button } from '../../../components/common/Button';
+import { useStaggeredEntrance } from '../../../hooks/useStaggeredEntrance';
+import { useHaptics } from '../../../hooks/useHaptics';
 
 const GOALS: { type: GoalType; icon: IconName; title: string; desc: string }[] = [
   { type: 'lose_fat', icon: 'flame', title: 'Lose Fat', desc: 'Get leaner and feel lighter' },
@@ -14,11 +17,18 @@ const GOALS: { type: GoalType; icon: IconName; title: string; desc: string }[] =
 
 interface Props { onNext: () => void; onSkip: () => void; }
 
+function GoalCard({ index, children }: { index: number; children: React.ReactNode }) {
+  const style = useStaggeredEntrance(index);
+  return <Animated.View style={style}>{children}</Animated.View>;
+}
+
 export function IntentStep({ onNext, onSkip }: Props) {
   const goalType = useOnboardingStore((s) => s.goalType);
   const updateField = useOnboardingStore((s) => s.updateField);
+  const { impact } = useHaptics();
 
   const handleSelect = (type: GoalType) => {
+    impact('light');
     updateField('goalType', type);
   };
 
@@ -27,24 +37,25 @@ export function IntentStep({ onNext, onSkip }: Props) {
       <Text style={styles.heading}>What's your mission?</Text>
       <Text style={styles.subheading}>We'll build a plan tailored to your goal</Text>
 
-      {GOALS.map((g) => (
-        <TouchableOpacity
-          key={g.type}
-          style={[styles.card, goalType === g.type && styles.cardSelected]}
-          onPress={() => handleSelect(g.type)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.iconWrap}>
-            <Icon name={g.icon} size={24} color={colors.accent.primary} />
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>{g.title}</Text>
-            <Text style={styles.cardDesc}>{g.desc}</Text>
-          </View>
-          {goalType === g.type && (
-            <Icon name="check" size={16} color={colors.accent.primary} />
-          )}
-        </TouchableOpacity>
+      {GOALS.map((g, i) => (
+        <GoalCard key={g.type} index={i}>
+          <TouchableOpacity
+            style={[styles.card, goalType === g.type && styles.cardSelected]}
+            onPress={() => handleSelect(g.type)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconWrap}>
+              <Icon name={g.icon} size={24} color={colors.accent.primary} />
+            </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>{g.title}</Text>
+              <Text style={styles.cardDesc}>{g.desc}</Text>
+            </View>
+            {goalType === g.type && (
+              <Icon name="check" size={16} color={colors.accent.primary} />
+            )}
+          </TouchableOpacity>
+        </GoalCard>
       ))}
 
       <Button title="Next" onPress={onNext} disabled={!goalType} style={{ marginTop: spacing[4] }} />

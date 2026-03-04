@@ -3,6 +3,7 @@ import { colors, spacing, typography, radius } from '../../../theme/tokens';
 import { useOnboardingStore } from '../../../store/onboardingSlice';
 import { Button } from '../../../components/common/Button';
 import { Icon } from '../../../components/common/Icon';
+import { useHaptics } from '../../../hooks/useHaptics';
 
 const DIETS = ['Vegetarian', 'Vegan', 'Pescatarian', 'Eggetarian', 'No restrictions'];
 const ALLERGIES = ['Dairy', 'Gluten', 'Nuts', 'Soy', 'Eggs', 'Shellfish', 'None'];
@@ -20,8 +21,10 @@ interface Props { onNext: () => void; onBack: () => void; onSkip: () => void; }
 
 export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
   const store = useOnboardingStore();
+  const { impact } = useHaptics();
 
   const toggleChip = (list: string[], item: string, field: 'dietaryRestrictions' | 'allergies' | 'cuisinePreferences') => {
+    impact('light');
     const updated = list.includes(item) ? list.filter((i) => i !== item) : [...list, item];
     store.updateField(field, updated);
   };
@@ -87,7 +90,7 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
           <TouchableOpacity
             key={n}
             style={[styles.stepperBtn, store.mealFrequency === n && styles.stepperBtnActive]}
-            onPress={() => store.updateField('mealFrequency', n)}
+            onPress={() => { impact('light'); store.updateField('mealFrequency', n); }}
             activeOpacity={0.7}
           >
             <Text style={[styles.stepperText, store.mealFrequency === n && styles.stepperTextActive]}>{n}</Text>

@@ -1,10 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView } from 'react-native';
-import { colors, spacing, typography, radius } from '../../../theme/tokens';
+import Animated, { useSharedValue, useAnimatedStyle, useAnimatedReaction, withTiming, withDelay, Easing, runOnJS, type SharedValue } from 'react-native-reanimated';
+import { colors, spacing, typography, radius, motion } from '../../../theme/tokens';
 import { Button } from '../../../components/common/Button';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
 import { computeTDEEBreakdown } from '../../../utils/onboardingCalculations';
 import { useReduceMotion } from '../../../hooks/useReduceMotion';
+import { useCountingValue } from '../../../hooks/useCountingValue';
+import { useStaggeredEntrance } from '../../../hooks/useStaggeredEntrance';
 
 interface Props { onNext?: () => void; onBack?: () => void; onSkip?: () => void; onComplete?: () => void; onEditStep?: (step: number) => void; }
 
@@ -21,6 +24,36 @@ const BAR_LABELS = {
   eat: { label: 'Exercise', desc: 'Workout sessions' },
   tef: { label: 'TEF', desc: 'Digesting food' },
 };
+
+const BAR_DELAYS = { bmr: 200, neat: 350, eat: 500, tef: 650 };
+
+// ─── Animated TDEE Text ──────────────────────────────────────────────────────
+
+function AnimatedTDEEText({ value }: { value: SharedValue<number> }) {
+  const [display, setDisplay] = useState(0);
+  useAnimatedReaction(
+    () => Math.round(value.value),
+    (cur) => runOnJS(setDisplay)(cur),
+    [value],
+  );
+  return (
+    <Text style={styles.totalValue}>~{display.toLocaleString()} kcal/day</Text>
+  );
+}
+
+// ─── Animated Bar ────────────────────────────────────────────────────────────
+
+function AnimatedBar({ widthPct, color, delay }: { widthPct: number; color: string; delay: number }) {
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    progress.value = withDelay(delay, withTiming(1, { duration: motion.duration.slow, easing: Easing.out(Easing.ease) }));
+  }, []);
+  const animStyle = useAnimatedStyle(() => ({
+    width: `${progress.value * widthPct}%`,
+    backgroundColor: color,
+  }));
+  return <Animated.View style={[styles.barFill, animStyle]} />;
+}
 
 export function TDEERevealStep({ onNext }: Props) {
   const store = useOnboardingStore();
@@ -48,6 +81,7 @@ export function TDEERevealStep({ onNext }: Props) {
   );
 
   const effectiveTDEE = store.tdeeOverride ?? breakdown.total;
+  const animatedTDEE = useCountingValue(effectiveTDEE, 600);
 
   const components: { key: 'bmr' | 'neat' | 'eat' | 'tef'; value: number }[] = [
     { key: 'bmr', value: breakdown.bmr },
@@ -57,6 +91,10 @@ export function TDEERevealStep({ onNext }: Props) {
   ];
 
   const maxVal = Math.max(...components.map((c) => c.value), 1);
+
+  const headingAnim = useStaggeredEntrance(0);
+  const totalCardAnim = useStaggeredEntrance(1);
+  const barsAnim = useStaggeredEntrance(2);
 
   const handleOverrideSubmit = () => {
     const parsed = parseInt(overrideText, 10);
@@ -69,17 +107,23 @@ export function TDEERevealStep({ onNext }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <Text style={styles.heading}>Your Daily Energy</Text>
-      <Text style={styles.subheading}>Here's how your body uses calories each day</Text>
+      <Animated.View style={headingAnim}>
+        <Text style={styles.heading}>Your Daily Energy</Text>
+        <Text style={styles.subheading}>Here's how your body uses calories each day</Text>
+      </Animated.View>
 
       {/* Total TDEE */}
-      <View style={styles.totalCard}>
+      <Animated.View style={[styles.totalCard, totalCardAnim]}>
         <Text style={styles.totalLabel}>Your body burns</Text>
-        <Text style={styles.totalValue}>~{effectiveTDEE.toLocaleString()} kcal/day</Text>
-      </View>
+        {reduceMotion ? (
+          <Text style={styles.totalValue}>~{effectiveTDEE.toLocaleString()} kcal/day</Text>
+        ) : (
+          <AnimatedTDEEText value={animatedTDEE} />
+        )}
+      </Animated.View>
 
       {/* Stacked bars */}
-      <View style={styles.barsContainer}>
+      <Animated.View style={[styles.barsContainer, barsAnim]}>
         {components.map(({ key, value }) => {
           const widthPct = Math.max(8, (value / maxVal) * 100);
           return (
@@ -88,12 +132,11 @@ export function TDEERevealStep({ onNext }: Props) {
                 <Text style={styles.barLabel}>{BAR_LABELS[key].label}</Text>
               </View>
               <View style={styles.barTrack}>
-                <View
-                  style={[
-                    styles.barFill,
-                    { width: `${widthPct}%`, backgroundColor: BAR_COLORS[key] },
-                  ]}
-                />
+                {reduceMotion ? (
+                  <View style={[styles.barFill, { width: `${widthPct}%`, backgroundColor: BAR_COLORS[key] }]} />
+                ) : (
+                  <AnimatedBar widthPct={widthPct} color={BAR_COLORS[key]} delay={BAR_DELAYS[key]} />
+                )}
               </View>
               <View style={styles.barValueCol}>
                 <Text style={styles.barValue}>{value.toLocaleString()}</Text>
@@ -102,7 +145,7 @@ export function TDEERevealStep({ onNext }: Props) {
             </View>
           );
         })}
-      </View>
+      </Animated.View>
 
       {/* Override link */}
       {!showOverride ? (

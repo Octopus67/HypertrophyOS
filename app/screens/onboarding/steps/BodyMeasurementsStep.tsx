@@ -9,10 +9,13 @@ import {
   NativeScrollEvent,
   Dimensions,
 } from 'react-native';
+import Animated, { useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { colors, spacing, typography, radius } from '../../../theme/tokens';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
 import { computeBMR } from '../../../utils/onboardingCalculations';
 import { Button } from '../../../components/common/Button';
+import { useHaptics } from '../../../hooks/useHaptics';
+import { useCountingValue } from '../../../hooks/useCountingValue';
 
 interface Props {
   onNext?: () => void;
@@ -243,6 +246,7 @@ export function BodyMeasurementsStep({ onNext }: Props) {
     bodyFatPct,
     updateField,
   } = useOnboardingStore();
+  const { impact } = useHaptics();
 
   // Live BMR calculation
   const age = computeAge(birthYear, birthMonth);
@@ -250,6 +254,15 @@ export function BodyMeasurementsStep({ onNext }: Props) {
     if (heightCm <= 0 || weightKg <= 0) return 0;
     return computeBMR(weightKg, heightCm, age, sex, bodyFatPct ?? undefined);
   }, [weightKg, heightCm, age, sex, bodyFatPct]);
+
+  // Animated BMR counting
+  const animatedBMR = useCountingValue(liveBMR, 400);
+  const [displayBMR, setDisplayBMR] = useState(liveBMR);
+  useAnimatedReaction(
+    () => Math.round(animatedBMR.value),
+    (cur) => runOnJS(setDisplayBMR)(cur),
+    [animatedBMR],
+  );
 
   // Validation
   const heightValid = heightCm >= 100 && heightCm <= 250;
@@ -311,8 +324,9 @@ export function BodyMeasurementsStep({ onNext }: Props) {
   );
 
   const toggleUnits = useCallback(() => {
+    impact('light');
     updateField('unitSystem', unitSystem === 'metric' ? 'imperial' : 'metric');
-  }, [unitSystem, updateField]);
+  }, [unitSystem, updateField, impact]);
 
   const canProceed = heightCm > 0 && weightKg > 0 && heightValid && weightValid;
 
@@ -369,7 +383,7 @@ export function BodyMeasurementsStep({ onNext }: Props) {
       {liveBMR > 0 && (
         <View style={styles.bmrCard}>
           <Text style={styles.bmrLabel}>Your BMR</Text>
-          <Text style={styles.bmrValue}>~{liveBMR.toLocaleString()} kcal/day</Text>
+          <Text style={styles.bmrValue}>~{displayBMR.toLocaleString()} kcal/day</Text>
           <Text style={styles.bmrHint}>Calories your body burns at rest</Text>
         </View>
       )}

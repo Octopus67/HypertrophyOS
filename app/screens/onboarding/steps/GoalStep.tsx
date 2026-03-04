@@ -4,6 +4,7 @@ import { colors, spacing, typography, radius } from '../../../theme/tokens';
 import { Button } from '../../../components/common/Button';
 import { Icon } from '../../../components/common/Icon';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
+import { useHaptics } from '../../../hooks/useHaptics';
 import {
   computeTDEEBreakdown,
   computeCalorieBudget,
@@ -28,6 +29,7 @@ function formatDate(d: Date): string {
 
 export function GoalStep({ onNext }: Props) {
   const store = useOnboardingStore();
+  const { impact } = useHaptics();
   const age = computeAge(store.birthYear, store.birthMonth);
 
   const tdee = useMemo(() => {
@@ -81,7 +83,7 @@ export function GoalStep({ onNext }: Props) {
                   styles.rateBtn,
                   selected && { borderColor: color, backgroundColor: color + '18' },
                 ]}
-                onPress={() => store.updateField('rateKgPerWeek', r)}
+                onPress={() => { impact('light'); store.updateField('rateKgPerWeek', r); }}
                 activeOpacity={0.7}
                 accessibilityLabel={`Select rate ${r} kg per week`}
                 accessibilityRole="button"

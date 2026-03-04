@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { colors, spacing, typography, radius } from '../../../theme/tokens';
 import { Button } from '../../../components/common/Button';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
@@ -8,6 +9,7 @@ import {
   computeCalorieBudget,
   computeMacroSplit,
 } from '../../../utils/onboardingCalculations';
+import { useStaggeredEntrance } from '../../../hooks/useStaggeredEntrance';
 
 interface Props { onNext?: () => void; onBack?: () => void; onSkip?: () => void; onComplete?: () => void; onEditStep?: (step: number) => void; }
 
@@ -24,6 +26,11 @@ const DIET_LABELS: Record<string, string> = {
   low_carb: 'Low Carb',
   keto: 'Keto',
 };
+
+function SummaryRow({ index, children }: { index: number; children: React.ReactNode }) {
+  const style = useStaggeredEntrance(index);
+  return <Animated.View style={style}>{children}</Animated.View>;
+}
 
 export function SummaryStep({ onComplete, onEditStep }: Props) {
   const store = useOnboardingStore();
@@ -79,21 +86,22 @@ export function SummaryStep({ onComplete, onEditStep }: Props) {
 
       <View style={styles.card}>
         {rows.map((row, i) => (
-          <TouchableOpacity
-            key={row.label}
-            style={[styles.row, i < rows.length - 1 && styles.rowBorder]}
-            onPress={() => onEditStep?.(row.editStep)}
-            activeOpacity={0.6}
-            disabled={submitting}
-            accessibilityLabel={`Edit ${row.label}: ${row.value}`}
-            accessibilityRole="button"
-          >
-            <Text style={styles.rowLabel}>{row.label}</Text>
-            <View style={styles.rowRight}>
-              <Text style={styles.rowValue}>{row.value}</Text>
-              <Text style={styles.editIcon}>›</Text>
-            </View>
-          </TouchableOpacity>
+          <SummaryRow key={row.label} index={i}>
+            <TouchableOpacity
+              style={[styles.row, i < rows.length - 1 && styles.rowBorder]}
+              onPress={() => onEditStep?.(row.editStep)}
+              activeOpacity={0.6}
+              disabled={submitting}
+              accessibilityLabel={`Edit ${row.label}: ${row.value}`}
+              accessibilityRole="button"
+            >
+              <Text style={styles.rowLabel}>{row.label}</Text>
+              <View style={styles.rowRight}>
+                <Text style={styles.rowValue}>{row.value}</Text>
+                <Text style={styles.editIcon}>›</Text>
+              </View>
+            </TouchableOpacity>
+          </SummaryRow>
         ))}
       </View>
 

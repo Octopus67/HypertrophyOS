@@ -6,6 +6,7 @@ import type { ActivityLevel, ExerciseType } from '../../../store/onboardingSlice
 import { computeBMR, computeNEAT, computeEAT } from '../../../utils/onboardingCalculations';
 import { Button } from '../../../components/common/Button';
 import { Icon, IconName } from '../../../components/common/Icon';
+import { useHaptics } from '../../../hooks/useHaptics';
 
 interface Props {
   onNext?: () => void;
@@ -57,6 +58,7 @@ export function LifestyleStep({ onNext }: Props) {
     bodyFatPct,
     updateField,
   } = useOnboardingStore();
+  const { impact } = useHaptics();
 
   // Live TDEE activity component
   const age = computeAge(birthYear, birthMonth);
@@ -69,6 +71,7 @@ export function LifestyleStep({ onNext }: Props) {
   }, [weightKg, heightCm, age, sex, bodyFatPct, activityLevel, exerciseSessionsPerWeek, exerciseTypes]);
 
   const toggleExerciseType = (type: ExerciseType) => {
+    impact('light');
     const current = [...exerciseTypes];
     const idx = current.indexOf(type);
     if (idx >= 0) {
@@ -93,7 +96,7 @@ export function LifestyleStep({ onNext }: Props) {
             <TouchableOpacity
               key={opt.value}
               style={[styles.activityCard, isSelected && styles.activityCardSelected]}
-              onPress={() => updateField('activityLevel', opt.value)}
+              onPress={() => { impact('light'); updateField('activityLevel', opt.value); }}
               activeOpacity={0.7}
             >
               <Icon name={opt.icon} size={24} />
@@ -118,7 +121,7 @@ export function LifestyleStep({ onNext }: Props) {
             <TouchableOpacity
               key={n}
               style={[styles.sessionBtn, isSelected && styles.sessionBtnSelected]}
-              onPress={() => updateField('exerciseSessionsPerWeek', n)}
+              onPress={() => { impact('light'); updateField('exerciseSessionsPerWeek', n); }}
               activeOpacity={0.7}
             >
               <Text style={[styles.sessionText, isSelected && styles.sessionTextSelected]}>
