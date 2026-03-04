@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { colors, radius, spacing, typography } from '../../theme/tokens';
 import { Card } from '../../components/common/Card';
@@ -116,7 +116,12 @@ export function LogsScreen() {
   const loadTrainingPage = useCallback(async (page: number, replace: boolean) => {
     try {
       const res = await api.get('training/sessions', {
-        params: { page, limit: TRAINING_PAGE_SIZE },
+        params: { 
+          start_date: selectedDate, 
+          end_date: selectedDate, 
+          page, 
+          limit: TRAINING_PAGE_SIZE 
+        },
       });
       const items: TrainingSessionResponse[] = res.data.items ?? [];
       const totalCount: number = res.data.total_count ?? 0;
@@ -135,7 +140,7 @@ export function LogsScreen() {
     } catch {
       // best-effort
     }
-  }, []);
+  }, [selectedDate]);
 
   const loadData = useCallback(async () => {
     // Compute 14-day window for Quick Re-log
@@ -168,6 +173,12 @@ export function LogsScreen() {
   }, [loadNutritionData, loadTrainingPage]);
 
   useEffect(() => { loadData(); }, [loadData, selectedDate]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   // ── Compute Quick Re-log items when data changes ──────────────────────────
   useEffect(() => {

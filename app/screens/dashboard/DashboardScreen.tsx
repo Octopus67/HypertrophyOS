@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
-let Haptics: any = null;
-try { Haptics = require('expo-haptics'); } catch {}
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated from 'react-native-reanimated';
 import { colors, spacing, typography, radius, letterSpacing } from '../../theme/tokens';
@@ -31,7 +30,9 @@ import { AddTrainingModal } from '../../components/modals/AddTrainingModal';
 import { AddBodyweightModal } from '../../components/modals/AddBodyweightModal';
 import { MealBuilder } from '../../components/nutrition/MealBuilder';
 import { CelebrationModal } from '../../components/achievements/CelebrationModal';
+import { TodayWorkoutCard } from '../../components/dashboard/TodayWorkoutCard';
 import { useStore, isPremium } from '../../store';
+import { useActiveWorkoutStore } from '../../store/activeWorkoutSlice';
 import { computeEMA, computeWeeklyChange, formatWeeklyChange } from '../../utils/emaTrend';
 import { formatMuscleGroups } from '../../utils/dayClassificationLogic';
 import { WeeklyCheckinCard } from '../../components/coaching/WeeklyCheckinCard';
@@ -40,6 +41,7 @@ import { ReadinessGauge } from '../../components/dashboard/ReadinessGauge';
 import { RecompDashboardCard } from '../../components/dashboard/RecompDashboardCard';
 import { RecoveryCheckinModal } from '../../components/modals/RecoveryCheckinModal';
 import { Icon } from '../../components/common/Icon';
+import { useHaptics } from '../../hooks/useHaptics';
 import { useDailyTargets } from '../../hooks/useDailyTargets';
 import { useHealthData } from '../../hooks/useHealthData';
 import api from '../../services/api';
@@ -68,6 +70,7 @@ interface NutritionEntryRaw {
 
 export function DashboardScreen({ navigation }: any) {
   const store = useStore();
+  const { impact } = useHaptics();
   const premium = isPremium(store);
   const onboardingSkipped = useStore((s) => s.onboardingSkipped);
   const setNeedsOnboarding = useStore((s) => s.setNeedsOnboarding);
@@ -79,6 +82,10 @@ export function DashboardScreen({ navigation }: any) {
   const pendingCelebrations = useStore((s) => s.pendingCelebrations);
   const setPendingCelebrations = useStore((s) => s.setPendingCelebrations);
   const clearCelebrations = useStore((s) => s.clearCelebrations);
+
+  // Active workout state
+  const isWorkoutActive = useActiveWorkoutStore(s => s.exercises.length > 0);
+  const activeExerciseCount = useActiveWorkoutStore(s => s.exercises.length);
 
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showNutrition, setShowNutrition] = useState(false);
@@ -110,6 +117,8 @@ export function DashboardScreen({ navigation }: any) {
 
   // Raw nutrition entries for MealSlotDiary
   const [nutritionEntries, setNutritionEntries] = useState<NutritionEntryRaw[]>([]);
+  // Training sessions for Today's Workout card
+  const [trainingSessions, setTrainingSessions] = useState<any[]>([]);
   // Day classification state
   const [dayClassification, setDayClassification] = useState<{
     isTrainingDay: boolean;
@@ -226,6 +235,7 @@ export function DashboardScreen({ navigation }: any) {
         const sessions = trainingRes.value.data.items ?? [];
         setWorkoutsCompleted(sessions.length);
         setTrainingLogged(sessions.length > 0);
+        setTrainingSessions(sessions);
       }
 
       // Process day classification
@@ -340,13 +350,14 @@ export function DashboardScreen({ navigation }: any) {
   const handleDateSelect = useCallback((date: string) => {
     setSelectedDate(date);
     setDateLoading(true);
+    impact('light');
     if (dateDebounceRef.current) {
       clearTimeout(dateDebounceRef.current);
     }
     dateDebounceRef.current = setTimeout(() => {
       loadDashboardData(date);
     }, DATE_DEBOUNCE_MS);
-  }, [loadDashboardData]);
+  }, [loadDashboardData, impact]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -360,11 +371,18 @@ export function DashboardScreen({ navigation }: any) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleRefresh = useCallback(() => {
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboardData(selectedDate);
+    }, [selectedDate, loadDashboardData])
+  );
+
+  const handleRefresh = useCallback(async () => {
     isInitialLoad.current = false;
     setRefreshing(true);
-    loadDashboardData(selectedDate);
-  }, [loadDashboardData, selectedDate]);
+    await loadDashboardData(selectedDate);
+    impact('light');
+  }, [loadDashboardData, selectedDate, impact]);
 
   const handleArticlePress = (articleId: string) => {
     navigation?.navigate?.('ArticleDetail', { articleId });
@@ -376,7 +394,7 @@ export function DashboardScreen({ navigation }: any) {
   };
 
   const handleQuickAction = (action: () => void) => {
-    try { Haptics?.impactAsync?.(Haptics.ImpactFeedbackStyle.Light)?.catch?.(() => {}); } catch {}
+    impact('light');
     action();
   };
 
@@ -555,6 +573,24 @@ export function DashboardScreen({ navigation }: any) {
             />
           )}
         </Animated.View>
+
+        {/* Today's Workout Card */}
+        {!isLoading && (
+          <TodayWorkoutCard
+            sessions={trainingSessions}
+            isWorkoutActive={isWorkoutActive}
+            activeExerciseCount={activeExerciseCount}
+            onPress={(sessionId) => navigation?.navigate?.('SessionDetail', { sessionId })}
+            onResume={() => navigation?.navigate?.('ActiveWorkout')}
+            onStartWorkout={() => {
+              if (isPremiumWorkoutLoggerEnabled()) {
+                navigation.push('ActiveWorkout', { mode: 'new' });
+              } else {
+                setShowTraining(true);
+              }
+            }}
+          />
+        )}
 
         {/* Section 3: Today Summary (workouts + streak only, meals count now in MealSlotDiary) */}
         <Animated.View style={[summaryAnim, styles.summarySection]}>
