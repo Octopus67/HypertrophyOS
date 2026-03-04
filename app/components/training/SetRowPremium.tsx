@@ -1,9 +1,9 @@
 /**
  * SetRowPremium — Enhanced set row for the premium workout logger.
  *
- * Layout: [#] [Previous: 80kg×8 ⬅] [Reps] [Weight ±] [RPE/RIR] [✓]
+ * Layout: [#] [Prev ⬅] [Reps] [Weight ±] [RPE] [RIR] [✓]
  *
- * Requirements: 1.1, 1.2, 2.1, 2.2, 2.5, 3.1, 3.2, 3.3, 3.4, 7.2, 7.3, 7.4, 18.2
+ * RPE and RIR are both shown when showRpeRir is true — neither is mandatory.
  */
 
 import React, { useRef } from 'react';
@@ -36,7 +36,6 @@ export interface SetRowPremiumProps {
   isCompleted: boolean;
   unitSystem: UnitSystem;
   showRpeRir: boolean;
-  rpeMode: 'rpe' | 'rir';
   onToggleComplete: () => void;
   onCopyPrevious: () => void;
   onUpdateField: (field: 'weight' | 'reps' | 'rpe' | 'rir', value: string) => void;
@@ -52,14 +51,14 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
   isCompleted,
   unitSystem,
   showRpeRir,
-  rpeMode,
   onToggleComplete,
   onCopyPrevious,
   onUpdateField,
   onWeightStep,
 }) => {
   const weightRef = useRef<TextInput>(null);
-  const rpeRirRef = useRef<TextInput>(null);
+  const rpeRef = useRef<TextInput>(null);
+  const rirRef = useRef<TextInput>(null);
 
   const { impact, notification } = useHaptics();
   const reduceMotion = useReduceMotion();
@@ -69,21 +68,23 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
     transform: [{ scale: checkScale.value }],
   }));
 
-  // ── Callbacks declared before use (project rule: no temporal dead zone) ──
-
   const handleRepsSubmit = React.useCallback(() => {
     weightRef.current?.focus();
   }, []);
 
   const handleWeightSubmit = React.useCallback(() => {
     if (showRpeRir) {
-      rpeRirRef.current?.focus();
+      rpeRef.current?.focus();
     } else {
       onToggleComplete();
     }
   }, [showRpeRir, onToggleComplete]);
 
-  const handleRpeRirSubmit = React.useCallback(() => {
+  const handleRpeSubmit = React.useCallback(() => {
+    rirRef.current?.focus();
+  }, []);
+
+  const handleRirSubmit = React.useCallback(() => {
     onToggleComplete();
     notification('success');
     if (!reduceMotion) {
@@ -103,17 +104,9 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
     onWeightStep('down');
   }, [onWeightStep, impact]);
 
-  // ── Previous performance display text ──
-
   const previousText = previousSet
-    ? `${convertWeight(previousSet.weightKg, unitSystem)}${unitSystem === 'metric' ? 'kg' : 'lbs'}×${previousSet.reps}`
+    ? `${convertWeight(previousSet.weightKg, unitSystem)}${unitSystem === 'metric' ? 'kg' : 'lb'}×${previousSet.reps}`
     : null;
-
-  const intensityField = rpeMode === 'rpe' ? 'rpe' : 'rir';
-  const intensityValue = rpeMode === 'rpe' ? set.rpe : set.rir;
-  const intensityLabel = rpeMode === 'rpe' ? 'RPE' : 'RIR';
-
-  // ── Render ──
 
   return (
     <View
@@ -126,7 +119,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
       {/* Set number */}
       <Text style={styles.setNumber}>{setIndex + 1}</Text>
 
-      {/* Previous performance — tappable to copy */}
+      {/* Previous performance */}
       <View style={styles.previousContainer}>
         {previousText ? (
           <TouchableOpacity
@@ -195,21 +188,39 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* RPE / RIR input — conditionally rendered */}
+      {/* RPE input */}
       {showRpeRir && (
         <TextInput
-          ref={rpeRirRef}
-          style={[styles.input, styles.rpeInput]}
-          value={intensityValue}
-          onChangeText={(v) => onUpdateField(intensityField, v)}
-          onSubmitEditing={handleRpeRirSubmit}
+          ref={rpeRef}
+          style={[styles.input, styles.intensityInput]}
+          value={set.rpe}
+          onChangeText={(v) => onUpdateField('rpe', v)}
+          onSubmitEditing={handleRpeSubmit}
           keyboardType="decimal-pad"
-          returnKeyType="done"
-          placeholder={intensityLabel}
+          returnKeyType="next"
+          placeholder="RPE"
           placeholderTextColor={colors.text.muted}
-          accessibilityLabel={`${intensityLabel} for set ${setIndex + 1}`}
+          accessibilityLabel={`RPE for set ${setIndex + 1}`}
           blurOnSubmit={false}
           maxLength={4}
+        />
+      )}
+
+      {/* RIR input */}
+      {showRpeRir && (
+        <TextInput
+          ref={rirRef}
+          style={[styles.input, styles.intensityInput]}
+          value={set.rir}
+          onChangeText={(v) => onUpdateField('rir', v)}
+          onSubmitEditing={handleRirSubmit}
+          keyboardType="number-pad"
+          returnKeyType="done"
+          placeholder="RIR"
+          placeholderTextColor={colors.text.muted}
+          accessibilityLabel={`RIR for set ${setIndex + 1}`}
+          blurOnSubmit={false}
+          maxLength={2}
         />
       )}
 
@@ -225,16 +236,11 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
               });
             }
           }}
-          style={[
-            styles.checkBtn,
-            isCompleted && styles.checkBtnCompleted,
-          ]}
+          style={[styles.checkBtn, isCompleted && styles.checkBtnCompleted]}
           accessibilityLabel={`Complete set ${setIndex + 1}`}
           accessibilityRole="button"
         >
-          <Text style={[styles.checkText, isCompleted && styles.checkTextCompleted]}>
-            ✓
-          </Text>
+          <Text style={[styles.checkText, isCompleted && styles.checkTextCompleted]}>✓</Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -251,7 +257,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
     borderRadius: radius.sm,
     marginBottom: spacing[1],
-    gap: spacing[2],
+    gap: spacing[1],
   },
   rowCompleted: {
     backgroundColor: 'rgba(0, 255, 100, 0.08)',
@@ -263,7 +269,7 @@ const styles = StyleSheet.create({
   },
 
   setNumber: {
-    width: 20,
+    width: 18,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     color: colors.text.muted,
@@ -271,8 +277,7 @@ const styles = StyleSheet.create({
   },
 
   previousContainer: {
-    minWidth: 72,
-    maxWidth: 90,
+    width: 68,
   },
   previousText: {
     fontSize: typography.size.xs,
@@ -285,9 +290,7 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    flex: 1,
-    minWidth: 44,
-    maxWidth: 60,
+    width: 48,
     height: 36,
     backgroundColor: colors.bg.surfaceRaised,
     borderRadius: radius.sm,
@@ -304,13 +307,14 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   weightInput: {
+    width: 56,
     fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
     color: colors.accent.primary,
   },
   stepperBtn: {
-    width: 28,
-    height: 28,
+    width: 26,
+    height: 26,
     borderRadius: radius.full,
     backgroundColor: colors.bg.surfaceRaised,
     alignItems: 'center',
@@ -322,8 +326,8 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
 
-  rpeInput: {
-    maxWidth: 48,
+  intensityInput: {
+    width: 44,
   },
 
   checkBtn: {

@@ -35,7 +35,7 @@ export interface ExerciseCardPremiumProps {
   overloadSuggestion: OverloadSuggestion | null;
   unitSystem: UnitSystem;
   showRpeRir: boolean;
-  rpeMode: 'rpe' | 'rir';
+  rpeMode?: 'rpe' | 'rir'; // kept for backward compat, no longer used
   onSwap: () => void;
   onSkip: () => void;
   onGenerateWarmUp: () => void;
@@ -211,7 +211,8 @@ export const ExerciseCardPremium: React.FC<ExerciseCardPremiumProps> = ({
         <Text style={styles.columnHeader}>Weight</Text>
         {showRpeRir && (
           <View style={styles.rpeHeaderContainer}>
-            <Text style={styles.columnHeader}>{rpeMode === 'rpe' ? 'RPE' : 'RIR'}</Text>
+            <Text style={styles.columnHeader}>RPE</Text>
+            <Text style={styles.columnHeader}>RIR</Text>
             {onShowRpeEducation && (
               <TouchableOpacity
                 onPress={onShowRpeEducation}
@@ -241,7 +242,6 @@ export const ExerciseCardPremium: React.FC<ExerciseCardPremiumProps> = ({
             isCompleted={set.completed}
             unitSystem={unitSystem}
             showRpeRir={showRpeRir}
-            rpeMode={rpeMode}
             onToggleComplete={() => onToggleSetCompleted(set.localId)}
             onCopyPrevious={() => onCopyPreviousToSet(set.localId)}
             onUpdateField={(field, value) => onUpdateSetField(set.localId, field, value)}
