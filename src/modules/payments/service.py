@@ -96,6 +96,11 @@ class PaymentService:
         # Get or create subscription record
         subscription = await self._get_or_create_subscription(user_id)
 
+        # Prevent double-subscribe
+        if subscription.status == SubscriptionStatus.ACTIVE:
+            from src.shared.errors import ConflictError
+            raise ConflictError("User already has an active subscription")
+
         validate_transition(subscription.status, SubscriptionStatus.PENDING_PAYMENT)
 
         subscription.status = SubscriptionStatus.PENDING_PAYMENT
@@ -164,6 +169,24 @@ class PaymentService:
 
         # verify_webhook raises UnprocessableError on invalid signature
         event = await provider.verify_webhook(payload, signature)
+
+        # Idempotency check
+        if event.event_id:
+            from src.modules.payments.models import WebhookEventLog
+            existing_stmt = select(WebhookEventLog).where(
+                WebhookEventLog.event_id == event.event_id
+            )
+            existing_result = await self.session.execute(existing_stmt)
+            if existing_result.scalar_one_or_none():
+                return event  # Already processed, return without processing
+
+            # Record this event
+            log_entry = WebhookEventLog(
+                provider_name=provider_name,
+                event_id=event.event_id,
+                event_type=event.event_type,
+            )
+            self.session.add(log_entry)
 
         # Update subscription if we can find it
         if event.provider_subscription_id:
@@ -305,5 +328,10 @@ class PaymentService:
             validate_transition(subscription.status, new_status)
             subscription.status = new_status
             await self.session.flush()
-        except UnprocessableError:
-            pass  # Invalid transition — ignore silently for webhooks
+        except UnprocessableError as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                "Invalid webhook transition ignored: %s -> %s for subscription %s, event: %s",
+                subscription.status, new_status, subscription.id, event.event_type
+            )

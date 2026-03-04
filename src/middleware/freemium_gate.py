@@ -27,7 +27,8 @@ async def require_premium(
     """FastAPI dependency that enforces premium subscription access.
 
     Checks the user's most recent subscription record. Access is granted
-    if the subscription status is ``active`` or ``past_due`` (grace period).
+    if the subscription status is ``active`` or ``past_due`` (grace period)
+    and the subscription has not expired.
 
     Raises PremiumRequiredError (403) if the user does not have an active
     premium subscription.
@@ -51,5 +52,11 @@ async def require_premium(
         SubscriptionStatus.PAST_DUE,
     ):
         raise PremiumRequiredError("Active subscription required")
+
+    # Check expiry date
+    if subscription.current_period_end:
+        from datetime import datetime, timezone
+        if datetime.now(timezone.utc) > subscription.current_period_end:
+            raise PremiumRequiredError("Subscription has expired")
 
     return user

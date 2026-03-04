@@ -50,8 +50,8 @@ class WeeklyReportService:
             dashboard = await micro_svc.get_dashboard(user_id, week_start, week_end)
             if dashboard.days_with_data > 0:
                 nutrient_score = dashboard.nutrient_score
-        except Exception:
-            logger.debug("Micronutrient data unavailable for report")
+        except Exception as e:
+            logger.debug("Micronutrient data unavailable for report: %s", type(e).__name__)
 
         # --- Recommendations ---
         ctx = ReportContext(
@@ -91,8 +91,8 @@ class WeeklyReportService:
         analytics = TrainingAnalyticsService(self.session)
         try:
             sessions = await analytics._fetch_sessions(user_id, week_start, week_end)
-        except Exception:
-            logger.exception("Failed to fetch training sessions for user=%s", user_id)
+        except Exception as e:
+            logger.exception("Failed to fetch training sessions for user=%s: %s", user_id, type(e).__name__)
             return TrainingMetrics()
 
         total_volume = 0.0
@@ -129,8 +129,8 @@ class WeeklyReportService:
                 for r in wns_results:
                     if r.hypertrophy_units > 0:
                         wns_data[r.muscle_group] = r.hypertrophy_units
-        except Exception:
-            logger.debug("WNS data unavailable for report, using legacy volume")
+        except Exception as e:
+            logger.debug("WNS data unavailable for report, using legacy volume: %s", type(e).__name__)
 
         return TrainingMetrics(
             total_volume=round(total_volume, 2),
@@ -157,8 +157,8 @@ class WeeklyReportService:
             stmt = NutritionEntry.not_deleted(stmt)
             result = await self.session.execute(stmt)
             entries = list(result.scalars().all())
-        except Exception:
-            logger.exception("Failed to fetch nutrition entries for user=%s", user_id)
+        except Exception as e:
+            logger.exception("Failed to fetch nutrition entries for user=%s: %s", user_id, type(e).__name__)
             return NutritionMetrics(), 0.0, 0
 
         daily_cals: dict[date, float] = defaultdict(float)
@@ -195,8 +195,8 @@ class WeeklyReportService:
                 target_cal = snapshots[0].target_calories
             if len(snapshots) >= 2 and snapshots[1].target_calories is not None:
                 tdee_delta = round(target_cal - snapshots[1].target_calories, 2)
-        except Exception:
-            logger.exception("Failed to fetch adaptive snapshots for user=%s", user_id)
+        except Exception as e:
+            logger.exception("Failed to fetch adaptive snapshots for user=%s: %s", user_id, type(e).__name__)
 
         # Compliance
         compliant_days = 0
@@ -234,8 +234,8 @@ class WeeklyReportService:
             )
             bw_result = await self.session.execute(bw_stmt)
             bw_logs = list(bw_result.scalars().all())
-        except Exception:
-            logger.exception("Failed to fetch bodyweight logs for user=%s", user_id)
+        except Exception as e:
+            logger.exception("Failed to fetch bodyweight logs for user=%s: %s", user_id, type(e).__name__)
             return BodyMetrics()
 
         if len(bw_logs) >= 2:
@@ -259,8 +259,8 @@ class WeeklyReportService:
             goal_result = await self.session.execute(goal_stmt)
             goal = goal_result.scalar_one_or_none()
             return (goal.goal_type if goal else "maintaining", goal.goal_rate_per_week if goal else None)
-        except Exception:
-            logger.exception("Failed to fetch user goal for user=%s", user_id)
+        except Exception as e:
+            logger.exception("Failed to fetch user goal for user=%s: %s", user_id, type(e).__name__)
             return "maintaining", None
 
 

@@ -71,3 +71,16 @@ class PaymentTransaction(Base):
         "metadata",
         JSONB, nullable=True, server_default=text("'{}'::jsonb"),
     )
+
+
+class WebhookEventLog(Base):
+    """Tracks processed webhook events for idempotency."""
+
+    __tablename__ = "webhook_event_logs"
+
+    provider_name: Mapped[str] = mapped_column(String(50))
+    event_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    event_type: Mapped[str] = mapped_column(String(100))
+    processed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=text("now()")
+    )

@@ -114,6 +114,7 @@ class RazorpayProvider(PaymentProvider):
 
         return WebhookEvent(
             event_type=event_data.get("event", "unknown"),
+            event_id=event_data.get("id"),
             provider_subscription_id=event_data.get("subscription_id"),
             provider_transaction_id=event_data.get("transaction_id"),
             amount=event_data.get("amount"),

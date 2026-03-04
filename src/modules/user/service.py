@@ -7,6 +7,7 @@ and goal management with paginated history queries.
 from __future__ import annotations
 from typing import Optional
 
+import time
 import uuid
 from datetime import date, datetime, timedelta
 
@@ -29,9 +30,13 @@ from src.modules.user.schemas import (
     UserProfileResponse,
     UserProfileUpdate,
 )
-from src.shared.errors import NotFoundError, ValidationError
+from src.shared.errors import NotFoundError, ValidationError, RateLimitedError
 from src.shared.pagination import PaginatedResult, PaginationParams
 from src.shared.types import ActivityLevel, GoalType
+
+# Rate limiting for recalculate: 1 per minute per user
+_recalculate_attempts: dict[str, float] = {}
+RECALCULATE_COOLDOWN_SECONDS = 60
 
 
 class UserService:
@@ -70,6 +75,22 @@ class UserService:
             self.db.add(profile)
 
         update_data = data.model_dump(exclude_unset=True)
+        
+        # Validate preferences field
+        if "preferences" in update_data and update_data["preferences"] is not None:
+            prefs = update_data["preferences"]
+            if not isinstance(prefs, dict):
+                raise ValidationError("Preferences must be a dictionary")
+            
+            # Allow only known preference keys
+            allowed_keys = {
+                "age_years", "sex", "theme", "units", "notifications",
+                "unit_system", "rest_timer", "cuisine_preferences"
+            }
+            unknown_keys = set(prefs.keys()) - allowed_keys
+            if unknown_keys:
+                raise ValidationError(f"Unknown preference keys: {', '.join(unknown_keys)}")
+
         for field, value in update_data.items():
             setattr(profile, field, value)
 
@@ -130,6 +151,10 @@ class UserService:
         self, user_id: uuid.UUID, data: BodyweightLogCreate
     ) -> BodyweightLogResponse:
         """Log or update a bodyweight entry (upsert by date)."""
+        # Validate bodyweight bounds
+        if data.weight_kg < 20 or data.weight_kg > 500:
+            raise ValidationError("Bodyweight must be between 20kg and 500kg")
+            
         # Check for existing entry on the same date
         stmt = select(BodyweightLog).where(
             BodyweightLog.user_id == user_id,
@@ -219,6 +244,18 @@ class UserService:
         self, user_id: uuid.UUID, data: RecalculateRequest
     ) -> RecalculateResponse:
         """Recalculate adaptive targets after updating metrics and/or goals."""
+
+        # Rate limiting: max 1 recalculate per minute per user
+        user_key = str(user_id)
+        now = time.time()
+        last_attempt = _recalculate_attempts.get(user_key, 0)
+        if now - last_attempt < RECALCULATE_COOLDOWN_SECONDS:
+            remaining = int(RECALCULATE_COOLDOWN_SECONDS - (now - last_attempt))
+            raise RateLimitedError(
+                message="Recalculate rate limit exceeded. Please wait before trying again.",
+                retry_after=remaining
+            )
+        _recalculate_attempts[user_key] = now
 
         # Step 1: Log metrics if provided
         new_metrics: Optional[UserMetricResponse] = None

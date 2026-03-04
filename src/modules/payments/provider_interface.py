@@ -37,6 +37,7 @@ class WebhookEvent:
     """Parsed webhook event from a payment provider."""
 
     event_type: str
+    event_id: Optional[str] = None
     provider_subscription_id: Optional[str] = None
     provider_transaction_id: Optional[str] = None
     amount: Optional[float] = None
