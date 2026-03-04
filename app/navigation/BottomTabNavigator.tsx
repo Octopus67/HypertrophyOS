@@ -28,6 +28,7 @@ import { PrepSundayFlow } from '../screens/meal-prep/PrepSundayFlow';
 import { WeeklyReportScreen } from '../screens/reports/WeeklyReportScreen';
 import { SessionDetailView } from '../screens/training/SessionDetailView';
 import { ActiveWorkoutScreen } from '../screens/training/ActiveWorkoutScreen';
+import { WorkoutSummaryScreen } from '../screens/training/WorkoutSummaryScreen';
 import type { ActiveWorkoutScreenParams } from '../types/training';
 
 // ─── Param lists ─────────────────────────────────────────────────────────────
@@ -36,6 +37,16 @@ export type DashboardStackParamList = {
   DashboardHome: undefined;
   ExercisePicker: { target?: 'modal' | 'activeWorkout' };
   ActiveWorkout: ActiveWorkoutScreenParams;
+  WorkoutSummary: {
+    summary: import('../utils/workoutSummary').WorkoutSummaryResult;
+    duration: number;
+    personalRecords: import('../types/training').PersonalRecordResponse[];
+    exerciseBreakdown: Array<{
+      exerciseName: string;
+      setsCompleted: number;
+      bestSet: { weight: string; reps: string } | null;
+    }>;
+  };
   WeeklyReport: undefined;
   ArticleDetail: { articleId: string };
   Learn: undefined;
@@ -45,6 +56,16 @@ export type LogsStackParamList = {
   LogsHome: undefined;
   ExercisePicker: { target?: 'modal' | 'activeWorkout' };
   ActiveWorkout: ActiveWorkoutScreenParams;
+  WorkoutSummary: {
+    summary: import('../utils/workoutSummary').WorkoutSummaryResult;
+    duration: number;
+    personalRecords: import('../types/training').PersonalRecordResponse[];
+    exerciseBreakdown: Array<{
+      exerciseName: string;
+      setsCompleted: number;
+      bestSet: { weight: string; reps: string } | null;
+    }>;
+  };
   SessionDetail: { sessionId: string };
 };
 
@@ -161,6 +182,7 @@ function DashboardStackScreen() {
       <DashboardStack.Screen name="DashboardHome" component={DashboardScreen} />
       <DashboardStack.Screen name="ExercisePicker" component={ExercisePickerScreen} />
       <DashboardStack.Screen name="ActiveWorkout" component={ActiveWorkoutScreen} options={{ headerShown: false }} />
+      <DashboardStack.Screen name="WorkoutSummary" component={WorkoutSummaryScreen} options={{ headerShown: false }} />
       <DashboardStack.Screen name="WeeklyReport" component={WeeklyReportScreen} />
       <DashboardStack.Screen name="ArticleDetail">
         {({ route, navigation }: any) => (
@@ -198,6 +220,7 @@ function LogsStackScreen() {
       <LogsStack.Screen name="LogsHome" component={LogsScreen} />
       <LogsStack.Screen name="ExercisePicker" component={ExercisePickerScreen} />
       <LogsStack.Screen name="ActiveWorkout" component={ActiveWorkoutScreen} options={{ headerShown: false }} />
+      <LogsStack.Screen name="WorkoutSummary" component={WorkoutSummaryScreen} options={{ headerShown: false }} />
       <LogsStack.Screen name="SessionDetail" component={SessionDetailView} options={{ headerShown: false }} />
     </LogsStack.Navigator>
     </ErrorBoundary>

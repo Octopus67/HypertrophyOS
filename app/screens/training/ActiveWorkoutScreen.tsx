@@ -16,7 +16,7 @@
  * Requirements: 1.1, 1.3, 2.1, 3.3, 3.4, 4.1, 5.1, 8.1, 9.1, 9.2, 9.3, 10.1, 17.3, 18.3
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -55,6 +55,16 @@ import { templateToActiveExercises } from '../../utils/templateConversion';
 // Types
 import type { PreviousPerformanceData, PersonalRecordResponse } from '../../types/training';
 import type { WorkoutSummaryResult } from '../../utils/workoutSummary';
+
+import Animated from 'react-native-reanimated';
+import { useStaggeredEntrance } from '../../hooks/useStaggeredEntrance';
+
+// ─── Staggered entrance wrapper ──────────────────────────────────────────────
+
+function ExerciseCardWrapper({ children, index }: { children: React.ReactNode; index: number }) {
+  const entranceStyle = useStaggeredEntrance(index, 60);
+  return <Animated.View style={entranceStyle}>{children}</Animated.View>;
+}
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
@@ -348,22 +358,40 @@ export function ActiveWorkoutScreen({ route, navigation }: any) {
 
       setFinishSheetVisible(false);
 
-      // PR celebration
+      // Prepare exercise breakdown data
+      const exerciseBreakdown = store.exercises
+        .filter(ex => !ex.skipped)
+        .map(ex => {
+          const completedSets = ex.sets.filter(s => s.completed && s.setType !== 'warm-up');
+          let bestSet = null;
+          
+          if (completedSets.length > 0) {
+            // Find best set by volume (weight × reps)
+            bestSet = completedSets.reduce((best, current) => {
+              const currentVolume = (parseFloat(current.weight) || 0) * (parseInt(current.reps, 10) || 0);
+              const bestVolume = (parseFloat(best.weight) || 0) * (parseInt(best.reps, 10) || 0);
+              return currentVolume > bestVolume ? current : best;
+            });
+          }
+
+          return {
+            exerciseName: ex.exerciseName,
+            setsCompleted: completedSets.length,
+            bestSet: bestSet ? { weight: bestSet.weight, reps: bestSet.reps } : null,
+          };
+        });
+
+      // Navigate to WorkoutSummary
       const prs: PersonalRecordResponse[] = response.data?.personal_records ?? [];
-      if (prs.length > 0) {
-        setPrData(prs);
-        setPrCelebrationVisible(true);
-        // Wait for celebration to auto-dismiss, then navigate
-        setTimeout(() => {
-          store.discardWorkout();
-          isNavigatingAway.current = true;
-          navigation.navigate('DashboardHome');
-        }, 3500);
-      } else {
-        store.discardWorkout();
-        isNavigatingAway.current = true;
-        navigation.navigate('DashboardHome');
-      }
+      store.discardWorkout();
+      isNavigatingAway.current = true;
+      
+      navigation.navigate('WorkoutSummary', {
+        summary,
+        duration: elapsedSeconds,
+        personalRecords: prs,
+        exerciseBreakdown,
+      });
     } catch (error: any) {
       const errorMessage = error?.response?.data?.detail || error?.message || 'Could not save workout. Please try again.';
       showAlert('Save Failed', errorMessage);
@@ -453,14 +481,14 @@ export function ActiveWorkoutScreen({ route, navigation }: any) {
         <VolumePills muscleVolumes={volumeData} />
 
         {/* Exercise cards */}
-        {store.exercises.map((exercise) => {
+        {store.exercises.map((exercise, idx) => {
           const prevKey = exercise.exerciseName.toLowerCase();
           const prevPerf = store.previousPerformance[prevKey] ?? null;
           const overload = store.overloadSuggestions[exercise.exerciseName] ?? null;
 
           return (
-            <ExerciseCardPremium
-              key={exercise.localId}
+            <ExerciseCardWrapper key={exercise.localId} index={idx}>
+              <ExerciseCardPremium
               exercise={exercise}
               previousPerformance={prevPerf}
               overloadSuggestion={overload}
@@ -490,7 +518,8 @@ export function ActiveWorkoutScreen({ route, navigation }: any) {
                 handleWeightStep(exercise.localId, setLocalId, direction)
               }
               onApplyOverload={() => handleApplyOverload(exercise.localId)}
-            />
+              />
+            </ExerciseCardWrapper>
           );
         })}
 

@@ -12,9 +12,13 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withSpring,
+  runOnJS,
   Easing,
 } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { colors, typography, radius, spacing, motion } from '../../theme/tokens';
+import { springs } from '../../theme/tokens';
 import { Icon } from './Icon';
 
 interface ModalContainerProps {
@@ -39,6 +43,22 @@ export function ModalContainer({
   const scale = useSharedValue(0.95);
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(300);
+
+  const panGesture = Gesture.Pan()
+    .onUpdate((e) => {
+      if (e.translationY > 0) {
+        translateY.value = e.translationY;
+      }
+    })
+    .onEnd((e) => {
+      if (e.translationY > 150) {
+        translateY.value = withTiming(600, { duration: motion.duration.default }, () => {
+          runOnJS(onClose)();
+        });
+      } else {
+        translateY.value = withSpring(0, springs.snappy);
+      }
+    });
 
   useEffect(() => {
     if (visible) {
@@ -102,18 +122,20 @@ export function ModalContainer({
         <Animated.View style={[styles.backdrop, backdropStyle]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         </Animated.View>
-        <Animated.View style={[styles.mobileSheet, mobileContentStyle]} testID={testID}>
-          <View style={styles.dragHandleContainer}>
-            <View style={styles.dragHandle} />
-          </View>
-          <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
-            <TouchableOpacity onPress={onClose} hitSlop={8} style={{ padding: 8, zIndex: 30 }} testID={closeButtonTestID}>
-              <Icon name="close" size={18} color={colors.text.secondary} />
-            </TouchableOpacity>
-          </View>
-          {children}
-        </Animated.View>
+        <GestureDetector gesture={panGesture}>
+          <Animated.View style={[styles.mobileSheet, mobileContentStyle]} testID={testID}>
+            <View style={styles.dragHandleContainer}>
+              <View style={styles.dragHandle} />
+            </View>
+            <View style={styles.header}>
+              <Text style={styles.title}>{title}</Text>
+              <TouchableOpacity onPress={onClose} hitSlop={8} style={{ padding: 8, zIndex: 30 }} testID={closeButtonTestID}>
+                <Icon name="close" size={18} color={colors.text.secondary} />
+              </TouchableOpacity>
+            </View>
+            {children}
+          </Animated.View>
+        </GestureDetector>
       </View>
     </Modal>
   );
