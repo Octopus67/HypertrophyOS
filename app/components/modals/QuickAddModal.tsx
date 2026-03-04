@@ -87,7 +87,7 @@ export function QuickAddModal({ visible, onClose, onSuccess, targetDate }: Quick
   };
 
   return (
-    <ModalContainer visible={visible} onClose={handleClose} title={<><Icon name="lightning" /> Quick Add</>} testID="quick-add-modal" closeButtonTestID="quickadd-cancel-button">
+    <ModalContainer visible={visible} onClose={handleClose} title={<><Icon name="lightning" size={18} color={colors.accent.primary} /><Text style={{ fontSize: typography.size.lg, fontWeight: typography.weight.semibold, color: colors.text.primary }}>Quick Add</Text></>} testID="quick-add-modal" closeButtonTestID="quickadd-cancel-button">
       <View style={styles.field}>
         <Text style={styles.label}>Calories *</Text>
         <TextInput

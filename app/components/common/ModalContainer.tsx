@@ -103,7 +103,11 @@ export function ModalContainer({
           <Animated.View style={[styles.webDialog, webContentStyle]} testID={testID}>
             <Pressable onPress={(e) => e.stopPropagation()} style={{ flex: 1 }}>
               <View style={styles.header}>
-                <Text style={styles.title}>{title}</Text>
+                {typeof title === 'string' ? (
+                  <Text style={styles.title}>{title}</Text>
+                ) : (
+                  <View style={styles.titleRow}>{title}</View>
+                )}
                 <TouchableOpacity onPress={onClose} hitSlop={8} style={{ padding: 8 }} testID={closeButtonTestID}>
                   <Icon name="close" size={18} color={colors.text.secondary} />
                 </TouchableOpacity>
@@ -128,7 +132,11 @@ export function ModalContainer({
               <View style={styles.dragHandle} />
             </View>
             <View style={styles.header}>
-              <Text style={styles.title}>{title}</Text>
+              {typeof title === 'string' ? (
+                <Text style={styles.title}>{title}</Text>
+              ) : (
+                <View style={styles.titleRow}>{title}</View>
+              )}
               <TouchableOpacity onPress={onClose} hitSlop={8} style={{ padding: 8, zIndex: 30 }} testID={closeButtonTestID}>
                 <Icon name="close" size={18} color={colors.text.secondary} />
               </TouchableOpacity>
@@ -196,6 +204,12 @@ const styles = StyleSheet.create({
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     color: colors.text.primary,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
+    flex: 1,
   },
   closeButton: {},
 });

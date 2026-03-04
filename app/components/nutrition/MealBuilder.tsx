@@ -161,7 +161,7 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
             onPress={() => handleRemoveItem(item.tempId)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={styles.removeBtn}><Icon name="close" size={16} /></Text>
+            <Text style={styles.removeBtn}>✕</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -185,9 +185,10 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
 
         {/* Running Totals Bar */}
         <View style={styles.totalsBar}>
-          <Text style={styles.totalItem}>
-            <Icon name="flame" size={14} /> {Math.round(runningTotals.calories)}
-          </Text>
+          <View style={styles.totalItemRow}>
+            <Icon name="flame" size={14} color={colors.text.secondary} />
+            <Text style={styles.totalItem}> {Math.round(runningTotals.calories)}</Text>
+          </View>
           <Text style={[styles.totalItem, { color: colors.macro.protein }]}>
             P {Math.round(runningTotals.protein_g)}g
           </Text>
@@ -288,6 +289,10 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
+  },
+  totalItemRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
   },
   list: {
     maxHeight: 250,
