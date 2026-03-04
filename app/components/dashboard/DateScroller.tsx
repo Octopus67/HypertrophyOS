@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { colors, spacing, typography, radius } from '../../theme/tokens';
 import { getWeekDates, formatDayCell } from '../../utils/dateScrollerLogic';
+import { useHaptics } from '../../hooks/useHaptics';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -19,6 +20,7 @@ interface DateScrollerProps {
 }
 
 export function DateScroller({ selectedDate, onDateSelect, loggedDates }: DateScrollerProps) {
+  const { impact } = useHaptics();
   const [weekOffset, setWeekOffset] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
 
@@ -60,7 +62,7 @@ export function DateScroller({ selectedDate, onDateSelect, loggedDates }: DateSc
     <View style={styles.container}>
       {!isToday && (
         <TouchableOpacity
-          onPress={() => { setWeekOffset(0); onDateSelect(today); }}
+          onPress={() => { impact('light'); setWeekOffset(0); onDateSelect(today); }}
           style={styles.todayPill}
           activeOpacity={0.7}
         >
@@ -91,7 +93,7 @@ export function DateScroller({ selectedDate, onDateSelect, loggedDates }: DateSc
                     isToday && styles.dayCellToday,
                     isSelected && styles.dayCellSelected,
                   ]}
-                  onPress={() => onDateSelect(dateStr)}
+                  onPress={() => { impact('light'); onDateSelect(dateStr); }}
                   activeOpacity={0.7}
                 >
                   <Text style={[styles.dayName, isToday && styles.dayNameToday, isSelected && styles.dayNameSelected]}>

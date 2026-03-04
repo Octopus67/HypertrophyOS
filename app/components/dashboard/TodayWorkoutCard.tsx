@@ -26,7 +26,7 @@ export function TodayWorkoutCard({
   if (isWorkoutActive) {
     return (
       <Card variant="flat" style={styles.card}>
-        <TouchableOpacity onPress={onResume} activeOpacity={0.7} style={styles.resumeBanner}>
+        <TouchableOpacity onPress={onResume} activeOpacity={0.7} style={styles.resumeBanner} accessibilityLabel={`Resume workout with ${activeExerciseCount} exercises`} accessibilityRole="button">
           <View style={styles.resumeContent}>
             <Icon name="dumbbell" size={20} color={colors.accent.primary} />
             <View style={styles.resumeText}>
@@ -65,6 +65,8 @@ export function TodayWorkoutCard({
               key={session.id} 
               onPress={() => onPress(session.id)}
               activeOpacity={0.7}
+              accessibilityLabel={`View workout details${duration ? `, ${duration} minutes` : ''}`}
+              accessibilityRole="button"
               style={[styles.sessionContainer, index > 0 && styles.sessionBorder]}
             >
               <View style={styles.sessionHeader}>
@@ -107,7 +109,7 @@ export function TodayWorkoutCard({
         <Text style={styles.title}>Today's Training</Text>
       </View>
       <Text style={styles.emptyText}>No workout yet today</Text>
-      <TouchableOpacity onPress={onStartWorkout} style={styles.startButton} activeOpacity={0.7}>
+      <TouchableOpacity onPress={onStartWorkout} style={styles.startButton} activeOpacity={0.7} accessibilityLabel="Start a new workout" accessibilityRole="button">
         <Text style={styles.startButtonText}>Start Workout</Text>
       </TouchableOpacity>
     </Card>
