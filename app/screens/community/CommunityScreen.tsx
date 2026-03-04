@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { colors, radius, spacing, typography } from '../../theme/tokens';
@@ -7,6 +7,14 @@ import { Card } from '../../components/common/Card';
 import { Icon } from '../../components/common/Icon';
 
 const TELEGRAM_URL = 'https://t.me/repwiseCommunity';
+
+const openTelegramLink = () => {
+  if (Platform.OS === 'web') {
+    window.open(TELEGRAM_URL, '_blank');
+  } else {
+    Linking.openURL(TELEGRAM_URL);
+  }
+};
 
 export function CommunityScreen() {
   const navigation = useNavigation();
@@ -30,7 +38,7 @@ export function CommunityScreen() {
         </View>
 
         <Text style={styles.sectionTitle}>Join Us Now</Text>
-        <TouchableOpacity onPress={() => Linking.openURL(TELEGRAM_URL)} activeOpacity={0.8}>
+        <TouchableOpacity onPress={openTelegramLink} activeOpacity={0.8}>
           <Card style={styles.linkCard}>
             <Icon name="chat" size={22} color={colors.accent.primary} />
             <View style={styles.linkContent}>

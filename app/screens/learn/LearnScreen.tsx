@@ -249,11 +249,14 @@ export function LearnScreen() {
   const toggleFavorite = async (articleId: string) => {
     const isFav = favorites.has(articleId);
     // Optimistic update
+    const newFavorites = new Set(favorites);
     if (isFav) {
-      setFavorites((prev) => { const next = new Set(prev); next.delete(articleId); return next; });
+      newFavorites.delete(articleId);
     } else {
-      setFavorites((prev) => new Set(prev).add(articleId));
+      newFavorites.add(articleId);
     }
+    setFavorites(newFavorites);
+    
     try {
       if (isFav) {
         await api.delete(`content/articles/${articleId}/favorite`);
@@ -262,12 +265,8 @@ export function LearnScreen() {
       }
     } catch (err: any) {
       console.warn('Favorite toggle failed:', err?.response?.status, err?.response?.data?.message);
-      // Revert on error
-      if (isFav) {
-        setFavorites((prev) => new Set(prev).add(articleId));
-      } else {
-        setFavorites((prev) => { const next = new Set(prev); next.delete(articleId); return next; });
-      }
+      // Revert on error - restore original state
+      setFavorites(favorites);
     }
   };
 
@@ -329,8 +328,8 @@ export function LearnScreen() {
           <View testID="learn-empty-state">
           <EmptyState
             icon={<Icon name="book" />}
-            title="No articles yet"
-            description="Try a different category or check back later"
+            title={searchQuery.trim() ? "No articles found" : "No articles yet"}
+            description={searchQuery.trim() ? "Try different search terms or check back later" : "Try a different category or check back later"}
           >
             <View style={styles.emptyPills}>
               {CATEGORIES.filter((c) => c !== category).map((c) => (

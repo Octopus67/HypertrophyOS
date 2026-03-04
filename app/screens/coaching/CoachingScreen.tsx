@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TextInput, Alert, TouchableOpacity, Linking,
+  View, Text, StyleSheet, ScrollView, TextInput, Alert, TouchableOpacity, Linking, Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,6 +27,15 @@ interface CoachingSession {
   scheduled_at: string | null;
   completed_at: string | null;
 }
+
+const openTelegramLink = () => {
+  const url = 'https://t.me/repwiseCommunity';
+  if (Platform.OS === 'web') {
+    window.open(url, '_blank');
+  } else {
+    Linking.openURL(url);
+  }
+};
 
 export function CoachingScreen() {
   const navigation = useNavigation();
@@ -115,7 +124,7 @@ export function CoachingScreen() {
             Get personalized training and nutrition guidance from an experienced coach. Available for premium members.
           </Text>
           <TouchableOpacity
-            onPress={() => Linking.openURL('https://t.me/repwiseCommunity')}
+            onPress={openTelegramLink}
             style={styles.dmButton}
             activeOpacity={0.8}
           >
