@@ -3,9 +3,11 @@ import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axio
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 
+const API_TIMEOUT_MS = 15_000;
+
 const api: AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api/v1/`,
-  timeout: 15_000,
+  timeout: API_TIMEOUT_MS,
   headers: { 'Content-Type': 'application/json' },
 });
 

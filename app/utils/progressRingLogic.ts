@@ -23,6 +23,7 @@ export function computeRingFill(
   target: number,
   color: string,
 ): RingFill {
+  if (value < 0) value = 0;
   if (target === 0) {
     return { percentage: 0, fillColor: color, isOvershoot: false, isMissing: true };
   }

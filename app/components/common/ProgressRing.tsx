@@ -5,7 +5,10 @@ import Animated, {
   useSharedValue,
   useAnimatedProps,
   withSpring,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
+import { Platform } from 'react-native';
 import { colors, typography, springs, spacing } from '../../theme/tokens';
 import { computeRingFill, formatRingLabel } from '../../utils/progressRingLogic';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
@@ -48,7 +51,10 @@ export const ProgressRing = memo(function ProgressRing({
   useEffect(() => {
     if (animated && !fill.isMissing && !reduceMotion) {
       progress.value = 0;
-      progress.value = withSpring(fill.percentage / 100, springs.gentle);
+      const target = fill.percentage / 100;
+      progress.value = Platform.OS === 'web'
+        ? withTiming(target, { duration: 600, easing: Easing.out(Easing.cubic) })
+        : withSpring(target, springs.gentle);
 
       // DEV-only: warn if spring takes >1s to settle
       if (__DEV__) {

@@ -12,6 +12,8 @@ interface QuickActionButtonProps {
   accentColor: string;
   completed: boolean;
   onPress: () => void;
+  accessibilityLabel?: string;
+  accessibilityRole?: string;
 }
 
 export function QuickActionButton({

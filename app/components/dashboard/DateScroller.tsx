@@ -44,10 +44,10 @@ export function DateScroller({ selectedDate, onDateSelect, loggedDates }: DateSc
       const x = e.nativeEvent.contentOffset.x;
       const page = Math.round(x / SCREEN_WIDTH);
       if (page === 0) {
-        setWeekOffset((prev) => prev - 1);
+        setWeekOffset((prev) => Math.max(prev - 1, -52));
         scrollRef.current?.scrollTo({ x: SCREEN_WIDTH, animated: false });
       } else if (page === 2) {
-        setWeekOffset((prev) => prev + 1);
+        setWeekOffset((prev) => Math.min(prev + 1, 0));
         scrollRef.current?.scrollTo({ x: SCREEN_WIDTH, animated: false });
       }
     },

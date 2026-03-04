@@ -65,6 +65,13 @@ export function TrendLineChart({
     min = min - range * 0.05;
     max = max + range * 0.05;
 
+    // Guard against division by zero when all values are identical
+    if (max === min) {
+      const epsilon = Math.abs(max) * 0.1 || 1;
+      min = max - epsilon;
+      max = max + epsilon;
+    }
+
     const pw = CHART_WIDTH - PADDING.left - PADDING.right;
     const ph = CHART_HEIGHT - PADDING.top - PADDING.bottom;
 

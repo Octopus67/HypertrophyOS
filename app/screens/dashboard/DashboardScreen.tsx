@@ -45,6 +45,8 @@ import { useHealthData } from '../../hooks/useHealthData';
 import api from '../../services/api';
 import { isPremiumWorkoutLoggerEnabled } from '../../utils/featureFlags';
 
+const DATE_DEBOUNCE_MS = 300;
+
 interface Article {
   id: string;
   title: string;
@@ -153,20 +155,20 @@ export function DashboardScreen({ navigation }: any) {
   const summaryAnim = useStaggeredEntrance(7, 60);
   const featuredAnim = useStaggeredEntrance(8, 60);
 
-  const loadDashboardData = useCallback(async (dateToLoad?: string) => {
+  const loadDashboardData = useCallback(async (dateToLoad?: string, signal?: AbortSignal) => {
     try {
       const targetDate = dateToLoad ?? selectedDate;
       setDayClassLoading(true);
       setError(null);
 
       const [nutritionRes, adaptiveRes, trainingRes, articlesRes, bwRes, dayClassRes, streakRes] = await Promise.allSettled([
-        api.get('nutrition/entries', { params: { start_date: targetDate, end_date: targetDate } }),
-        api.get('adaptive/snapshots', { params: { limit: 1 } }),
-        api.get('training/sessions', { params: { start_date: targetDate, end_date: targetDate, limit: 10 } }),
-        api.get('content/articles', { params: { limit: 5, status: 'published' } }),
-        api.get('users/bodyweight/history', { params: { limit: 90 } }),
-        api.get('training/day-classification', { params: { date: targetDate } }),
-        api.get('achievements/streak'),
+        api.get('nutrition/entries', { params: { start_date: targetDate, end_date: targetDate }, signal }),
+        api.get('adaptive/snapshots', { params: { limit: 1 }, signal }),
+        api.get('training/sessions', { params: { start_date: targetDate, end_date: targetDate, limit: 10 }, signal }),
+        api.get('content/articles', { params: { limit: 5, status: 'published' }, signal }),
+        api.get('users/bodyweight/history', { params: { limit: 90 }, signal }),
+        api.get('training/day-classification', { params: { date: targetDate }, signal }),
+        api.get('achievements/streak', { signal }),
       ]);
 
       // Process nutrition entries — store raw entries for MealSlotDiary
@@ -207,14 +209,14 @@ export function DashboardScreen({ navigation }: any) {
         if (snap) {
           setCalories((prev) => ({ ...prev, target: Math.round(snap.target_calories) }));
           setProtein((prev) => ({ ...prev, target: Math.round(snap.target_protein_g) }));
-          if (snap.target_carbs_g) {
+          if (snap?.target_carbs_g) {
             setCarbs((prev) => ({ ...prev, target: Math.round(snap.target_carbs_g) }));
           }
           setAdaptiveTargets({
             calories: Math.round(snap.target_calories),
             protein_g: Math.round(snap.target_protein_g),
-            carbs_g: Math.round(snap.target_carbs_g ?? 250),
-            fat_g: Math.round(snap.target_fat_g ?? 65),
+            carbs_g: Math.round(snap?.target_carbs_g ?? 250),
+            fat_g: Math.round(snap?.target_fat_g ?? 65),
           });
         }
       }
@@ -250,7 +252,7 @@ export function DashboardScreen({ navigation }: any) {
 
       // Fetch milestone for banner (fire-and-forget)
       try {
-        const { data } = await api.get('training/analytics/strength-standards');
+        const { data } = await api.get('training/analytics/strength-standards', { signal });
         if (data.milestones?.length > 0) {
           setMilestoneMessage(data.milestones[0].message);
         } else {
@@ -262,7 +264,7 @@ export function DashboardScreen({ navigation }: any) {
 
       // Fetch weekly check-in (fire-and-forget, don't block dashboard)
       try {
-        const checkinRes = await api.post('adaptive/weekly-checkin');
+        const checkinRes = await api.post('adaptive/weekly-checkin', {}, { signal });
         store.setWeeklyCheckin(checkinRes.data);
       } catch {
         // Non-critical — dashboard works without check-in
@@ -270,7 +272,7 @@ export function DashboardScreen({ navigation }: any) {
 
       // Fetch fatigue data (fire-and-forget)
       try {
-        const fatigueRes = await api.get('training/fatigue');
+        const fatigueRes = await api.get('training/fatigue', { signal });
         setFatigueSuggestions(fatigueRes.data.suggestions ?? []);
       } catch {
         setFatigueSuggestions([]);
@@ -282,7 +284,7 @@ export function DashboardScreen({ navigation }: any) {
           hrv_ms: healthData.hrv_ms,
           resting_hr_bpm: healthData.resting_hr_bpm,
           sleep_duration_hours: healthData.sleep_duration_hours,
-        });
+        }, { signal });
         setReadinessScore(readinessRes.data.score);
         setReadinessFactors(readinessRes.data.factors ?? []);
       } catch {
@@ -294,7 +296,7 @@ export function DashboardScreen({ navigation }: any) {
       try {
         const goalType = store.goals?.goalType;
         if (goalType === 'recomposition') {
-          const recompRes = await api.get('recomp/metrics');
+          const recompRes = await api.get('recomp/metrics', { signal });
           setRecompMetrics(recompRes.data);
         } else {
           setRecompMetrics(null);
@@ -343,11 +345,18 @@ export function DashboardScreen({ navigation }: any) {
     }
     dateDebounceRef.current = setTimeout(() => {
       loadDashboardData(date);
-    }, 300);
+    }, DATE_DEBOUNCE_MS);
   }, [loadDashboardData]);
 
   useEffect(() => {
-    loadDashboardData(selectedDate);
+    const controller = new AbortController();
+    loadDashboardData(selectedDate, controller.signal);
+    return () => {
+      controller.abort();
+      if (dateDebounceRef.current) {
+        clearTimeout(dateDebounceRef.current);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -458,6 +467,8 @@ export function DashboardScreen({ navigation }: any) {
                   accentColor={colors.macro.calories}
                   completed={nutritionLogged}
                   onPress={() => handleQuickAction(() => setShowNutrition(true))}
+                  accessibilityLabel="Log food"
+                  accessibilityRole="button"
                 />
               </View>
               <View style={styles.quickItem}>
@@ -467,6 +478,8 @@ export function DashboardScreen({ navigation }: any) {
                   accentColor={colors.accent.primary}
                   completed={false}
                   onPress={() => handleQuickAction(() => setShowMealBuilder(true))}
+                  accessibilityLabel="Build meal"
+                  accessibilityRole="button"
                 />
               </View>
               <View style={styles.quickItem} testID="dashboard-log-training-button">
@@ -482,6 +495,8 @@ export function DashboardScreen({ navigation }: any) {
                       setShowTraining(true);
                     }
                   })}
+                  accessibilityLabel="Start workout"
+                  accessibilityRole="button"
                 />
               </View>
               <View style={styles.quickItem} testID="dashboard-log-bodyweight-button">
@@ -491,6 +506,8 @@ export function DashboardScreen({ navigation }: any) {
                   accentColor={colors.macro.carbs}
                   completed={false}
                   onPress={() => handleQuickAction(() => setShowBodyweight(true))}
+                  accessibilityLabel="Log bodyweight"
+                  accessibilityRole="button"
                 />
               </View>
             </View>
@@ -564,12 +581,22 @@ export function DashboardScreen({ navigation }: any) {
         </Animated.View>
 
         {/* Weight Trend Section — show trend weight + weekly change if ≥3 data points */}
-        {!isLoading && (() => {
+        {isLoading ? (
+          <View style={styles.trendSection}>
+            <Skeleton width="60%" height={20} />
+          </View>
+        ) : (() => {
           const emaSeries = computeEMA(weightHistory);
           const unitSystem = store.unitSystem;
           const unit = unitSystem === 'metric' ? 'kg' : 'lbs';
 
-          if (weightHistory.length === 0) return null;
+          if (weightHistory.length === 0) {
+            return (
+              <View style={styles.trendSection}>
+                <Text style={styles.emptyStateText}>No weight data yet</Text>
+              </View>
+            );
+          }
 
           // <3 data points: no trend section
           if (emaSeries.length === 0) return null;
@@ -610,11 +637,19 @@ export function DashboardScreen({ navigation }: any) {
         })()}
 
         {/* Milestone Banner */}
-        {!isLoading && milestoneMessage && (
+        {isLoading ? (
+          <View style={styles.milestoneBanner}>
+            <Skeleton width={16} height={16} variant="circle" />
+            <Skeleton width="70%" height={16} />
+            <Skeleton width={16} height={16} />
+          </View>
+        ) : milestoneMessage && (
           <TouchableOpacity
             style={styles.milestoneBanner}
             onPress={() => navigation?.navigate?.('Analytics')}
             activeOpacity={0.7}
+            accessibilityLabel="View milestone progress"
+            accessibilityRole="button"
           >
             <Icon name="dumbbell" size={16} color={colors.accent.primary} />
             <Text style={styles.milestoneText} numberOfLines={1}>{milestoneMessage}</Text>
@@ -637,6 +672,8 @@ export function DashboardScreen({ navigation }: any) {
             style={styles.milestoneBanner}
             onPress={() => navigation?.navigate?.('WeeklyReport')}
             activeOpacity={0.7}
+            accessibilityLabel="View weekly report"
+            accessibilityRole="button"
           >
             <Icon name="chart" size={16} color={colors.accent.primary} />
             <Text style={styles.milestoneText} numberOfLines={1}>Weekly Intelligence Report</Text>
@@ -679,38 +716,49 @@ export function DashboardScreen({ navigation }: any) {
 
         {/* Fatigue Alert Card */}
         {!isLoading && (
-          <FatigueAlertCard
-            suggestions={fatigueSuggestions}
-            onPress={() => navigation?.navigate?.('Analytics')}
-          />
+          <>
+            <FatigueAlertCard
+              suggestions={fatigueSuggestions}
+              onPress={() => navigation?.navigate?.('Analytics')}
+            />
+            {fatigueSuggestions.length === 0 && (
+              <View style={styles.trendSection}>
+                <Text style={styles.emptyStateText}>No fatigue data</Text>
+              </View>
+            )}
+          </>
         )}
 
         {/* Section 5: Featured Articles (show empty state if no articles) */}
-        {!isLoading && (
-          <Animated.View style={featuredAnim} testID="dashboard-articles-section">
-            <SectionHeader title="Featured" />
-            {articles.length > 0 ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.articlesRow}
-              >
-                {articles.map((article) => (
-                  <ArticleCardCompact
-                    key={article.id}
-                    article={article}
-                    onPress={() => handleArticlePress(article.id)}
-                  />
-                ))}
-              </ScrollView>
-            ) : (
-              <Text style={styles.articlesEmpty}>No articles available right now.</Text>
-            )}
-            <TouchableOpacity onPress={() => navigation.navigate('Learn')} style={{ alignItems: 'flex-end', paddingVertical: spacing[2] }}>
-              <Text style={{ color: colors.accent.primary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.sm }}>See All Articles →</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
+        <Animated.View style={featuredAnim} testID="dashboard-articles-section">
+          <SectionHeader title="Featured" />
+          {isLoading ? (
+            <View style={styles.articlesRow}>
+              <Skeleton width={200} height={120} borderRadius={12} />
+              <Skeleton width={200} height={120} borderRadius={12} />
+              <Skeleton width={200} height={120} borderRadius={12} />
+            </View>
+          ) : articles.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.articlesRow}
+            >
+              {articles.map((article) => (
+                <ArticleCardCompact
+                  key={article.id}
+                  article={article}
+                  onPress={() => handleArticlePress(article.id)}
+                />
+              ))}
+            </ScrollView>
+          ) : (
+            <Text style={styles.articlesEmpty}>No articles available right now.</Text>
+          )}
+          <TouchableOpacity onPress={() => navigation.navigate('Learn')} style={{ alignItems: 'flex-end', paddingVertical: spacing[2] }}>
+            <Text style={{ color: colors.accent.primary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.sm }}>See All Articles →</Text>
+          </TouchableOpacity>
+        </Animated.View>
 
         {!premium && <UpgradeBanner onPress={() => setShowUpgrade(true)} />}
       </ScrollView>
@@ -870,5 +918,12 @@ const styles = StyleSheet.create({
   milestoneChevron: {
     color: colors.accent.primary,
     fontSize: typography.size.lg,
+  },
+  emptyStateText: {
+    color: colors.text.muted,
+    fontSize: typography.size.sm,
+    textAlign: 'center',
+    paddingVertical: spacing[2],
+    lineHeight: typography.lineHeight.sm,
   },
 });
