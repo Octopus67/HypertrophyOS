@@ -47,7 +47,7 @@ async def lifespan(application: FastAPI):
         import src.modules.coaching.models  # noqa: F401
         import src.modules.food_database.models  # noqa: F401
         import src.modules.feature_flags.models  # noqa: F401
-        import src.modules.health_reports.models  # noqa: F401
+
         import src.modules.founder.models  # noqa: F401
         import src.modules.progress_photos.models  # noqa: F401
         import src.modules.achievements.models  # noqa: F401
@@ -223,8 +223,7 @@ app.include_router(coaching_router, prefix="/api/v1/coaching", tags=["coaching"]
 from src.modules.food_database.router import router as food_router
 app.include_router(food_router, prefix="/api/v1/food", tags=["food"])
 
-from src.modules.health_reports.router import router as health_router
-app.include_router(health_router, prefix="/api/v1/health", tags=["health"])
+
 
 from src.modules.dietary_analysis.router import router as dietary_router
 app.include_router(dietary_router, prefix="/api/v1/dietary", tags=["dietary"])

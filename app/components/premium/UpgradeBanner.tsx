@@ -42,7 +42,7 @@ export function UpgradeBanner({ onPress }: UpgradeBannerProps) {
         <View style={styles.textContainer}>
           <Text style={styles.title}>Unlock Premium</Text>
           <Text style={styles.subtitle}>
-            Coaching, advanced analytics, health reports & more
+            Coaching, advanced analytics & more
           </Text>
         </View>
         <Text style={styles.arrow}>→</Text>

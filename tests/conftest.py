@@ -25,7 +25,7 @@ import src.modules.content.models  # noqa: F401
 import src.modules.coaching.models  # noqa: F401
 import src.modules.food_database.models  # noqa: F401
 import src.modules.feature_flags.models  # noqa: F401
-import src.modules.health_reports.models  # noqa: F401
+
 import src.modules.founder.models  # noqa: F401
 import src.modules.progress_photos.models  # noqa: F401
 import src.modules.achievements.models  # noqa: F401

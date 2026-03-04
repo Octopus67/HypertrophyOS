@@ -114,7 +114,6 @@ describe('Property 14 — Skeleton Loading Coverage', () => {
     { name: 'CoachingScreen', path: 'screens/coaching/CoachingScreen.tsx' },
     { name: 'CommunityScreen', path: 'screens/community/CommunityScreen.tsx' },
     { name: 'LearnScreen', path: 'screens/learn/LearnScreen.tsx' },
-    { name: 'HealthReportsScreen', path: 'screens/health/HealthReportsScreen.tsx' },
   ];
 
   test.each(asyncScreensMissingSkeleton)(
@@ -148,7 +147,6 @@ describe('Property 15 — Empty State Coverage', () => {
     { name: 'AnalyticsScreen', path: 'screens/analytics/AnalyticsScreen.tsx' },
     { name: 'LearnScreen', path: 'screens/learn/LearnScreen.tsx' },
     { name: 'CoachingScreen', path: 'screens/coaching/CoachingScreen.tsx' },
-    { name: 'HealthReportsScreen', path: 'screens/health/HealthReportsScreen.tsx' },
   ];
 
   test.each(screensWithEmptyState)(

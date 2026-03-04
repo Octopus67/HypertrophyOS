@@ -80,22 +80,7 @@ test.describe('Profile Feature Navigation', () => {
     }
   });
 
-  test('can navigate to Health Reports screen', async ({ page }) => {
-    const profileScreen = page.locator('[data-testid="profile-screen"]');
-    await profileScreen.evaluate((el) => el.scrollTo(0, el.scrollHeight / 3));
-    await page.waitForTimeout(500);
 
-    const healthText = page.getByText('Health Reports').first();
-    if (await healthText.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await healthText.click();
-      await page.waitForTimeout(1500);
-
-      const healthScreen = page.locator('[data-testid="health-reports-screen"]');
-      await expect(healthScreen).toBeVisible({ timeout: 10000 });
-    } else {
-      expect(true).toBeTruthy();
-    }
-  });
 
   test('can navigate to Founder Story screen', async ({ page }) => {
     const profileScreen = page.locator('[data-testid="profile-screen"]');

@@ -37,7 +37,6 @@ describe('BottomTabNavigator structure', () => {
       'Coaching',
       'Community',
       'FounderStory',
-      'HealthReports',
     ];
 
     test('ProfileStack contains all expected routes', () => {
@@ -47,26 +46,25 @@ describe('BottomTabNavigator structure', () => {
       expect(PROFILE_STACK_ROUTES).toContain('Coaching');
       expect(PROFILE_STACK_ROUTES).toContain('Community');
       expect(PROFILE_STACK_ROUTES).toContain('FounderStory');
-      expect(PROFILE_STACK_ROUTES).toContain('HealthReports');
     });
 
-    test('ProfileStack has 7 routes total', () => {
-      expect(PROFILE_STACK_ROUTES).toHaveLength(7);
+    test('ProfileStack has 6 routes total', () => {
+      expect(PROFILE_STACK_ROUTES).toHaveLength(6);
     });
   });
 
   describe('Feature routes accessible from navigation', () => {
     // All feature routes now live in ProfileStack
-    const FEATURE_ROUTES = ['Coaching', 'Community', 'FounderStory', 'HealthReports', 'Learn'];
+    const FEATURE_ROUTES = ['Coaching', 'Community', 'FounderStory', 'Learn'];
 
     test('all feature routes are defined', () => {
-      expect(FEATURE_ROUTES).toHaveLength(5);
+      expect(FEATURE_ROUTES).toHaveLength(4);
     });
 
     test('Learn and ArticleDetail routes exist in ProfileStack', () => {
       const PROFILE_STACK_ROUTES = [
         'ProfileHome', 'Learn', 'ArticleDetail', 'Coaching',
-        'Community', 'FounderStory', 'HealthReports',
+        'Community', 'FounderStory',
       ];
       expect(PROFILE_STACK_ROUTES).toContain('Learn');
       expect(PROFILE_STACK_ROUTES).toContain('ArticleDetail');

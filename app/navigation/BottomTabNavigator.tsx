@@ -17,7 +17,7 @@ import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { CoachingScreen } from '../screens/coaching/CoachingScreen';
 import { CommunityScreen } from '../screens/community/CommunityScreen';
 import { FounderStoryScreen } from '../screens/founder/FounderStoryScreen';
-import { HealthReportsScreen } from '../screens/health/HealthReportsScreen';
+
 import { ExercisePickerScreen } from '../screens/exercise-picker/ExercisePickerScreen';
 import { ProgressPhotosScreen } from '../screens/profile/ProgressPhotosScreen';
 import { NutritionReportScreen } from '../screens/nutrition/NutritionReportScreen';
@@ -83,7 +83,6 @@ export type ProfileStackParamList = {
   Coaching: undefined;
   Community: undefined;
   FounderStory: undefined;
-  HealthReports: undefined;
   ProgressPhotos: undefined;
   MealPlan: undefined;
   ShoppingList: { planId: string };
@@ -101,7 +100,7 @@ export type BottomTabParamList = {
 
 export const TAB_NAMES: (keyof BottomTabParamList)[] = ['Home', 'Log', 'Analytics', 'Profile'];
 export const PROFILE_STACK_ROUTES: (keyof ProfileStackParamList)[] = [
-  'ProfileHome', 'Learn', 'ArticleDetail', 'Coaching', 'Community', 'FounderStory', 'HealthReports', 'ProgressPhotos', 'MealPlan', 'ShoppingList', 'PrepSunday',
+  'ProfileHome', 'Learn', 'ArticleDetail', 'Coaching', 'Community', 'FounderStory', 'ProgressPhotos', 'MealPlan', 'ShoppingList', 'PrepSunday',
 ];
 
 // ─── Custom card style interpolator ──────────────────────────────────────────
@@ -287,7 +286,7 @@ function ProfileStackScreen() {
       <ProfileStack.Screen name="Coaching" component={CoachingScreen} />
       <ProfileStack.Screen name="Community" component={CommunityScreen} />
       <ProfileStack.Screen name="FounderStory" component={FounderStoryScreen} />
-      <ProfileStack.Screen name="HealthReports" component={HealthReportsScreen} />
+
       <ProfileStack.Screen name="ProgressPhotos" component={ProgressPhotosScreen} />
       <ProfileStack.Screen name="MealPlan" component={MealPlanScreen} />
       <ProfileStack.Screen name="ShoppingList" component={ShoppingListView} />

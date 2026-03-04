@@ -188,7 +188,7 @@ export function ProfileScreen() {
             <FeatureNavItem icon={<Icon name="target" size={22} color={colors.text.secondary} />} label="Coaching" description="AI-powered training guidance" onPress={() => navigation.navigate('Coaching')} />
             <FeatureNavItem icon={<Icon name="chat" size={22} color={colors.text.secondary} />} label="Community" description="Connect with other lifters" onPress={() => navigation.navigate('Community')} />
             <FeatureNavItem icon={<Icon name="dumbbell" size={22} color={colors.text.secondary} />} label="Founder's Story" description="The story behind Repwise" onPress={() => navigation.navigate('FounderStory')} />
-            <FeatureNavItem icon={<Icon name="chart" size={22} color={colors.text.secondary} />} label="Health Reports" description="Detailed health analysis" onPress={() => navigation.navigate('HealthReports')} />
+
             <FeatureNavItem icon={<Icon name="book" size={22} color={colors.text.secondary} />} label="Learn" description="Articles and educational content" onPress={() => navigation.navigate('Learn')} testID="profile-learn-link" />
             <FeatureNavItem icon={<Icon name="camera" size={22} color={colors.text.secondary} />} label="Progress Photos" description="Track your transformation visually" onPress={() => navigation.navigate('ProgressPhotos')} testID="profile-photos-link" />
           </Card>
