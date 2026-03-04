@@ -50,7 +50,7 @@ export function HealthReportsScreen() {
   const loadReports = async () => {
     setError(null);
     try {
-      const { data } = await api.get('health-reports');
+      const { data } = await api.get('health/reports');
       setReports(data.items ?? []);
     } catch {
       setError('Unable to load health reports. Check your connection.');
@@ -61,7 +61,7 @@ export function HealthReportsScreen() {
     setSelectedReport(reportId);
     setCorrelationsLoading(true);
     try {
-      const { data } = await api.get(`health-reports/${reportId}/correlations`);
+      const { data } = await api.get(`health/reports/${reportId}/correlations`);
       setCorrelations(data.correlations ?? []);
     } catch {
       setCorrelations([]);
