@@ -1,8 +1,9 @@
 """Auth module SQLAlchemy models."""
 
 import uuid
+from datetime import datetime, timezone
 
-from sqlalchemy import Index, String
+from sqlalchemy import Boolean, DateTime, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.shared.base_model import Base
@@ -39,3 +40,29 @@ class User(SoftDeleteMixin, Base):
     __table_args__ = (
         Index("ix_users_auth_provider_id", "auth_provider", "auth_provider_id"),
     )
+
+
+class PasswordResetToken(Base):
+    """Password reset tokens table.
+    
+    Stores hashed tokens for password reset with expiry and usage tracking.
+    """
+
+    __tablename__ = "password_reset_tokens"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(nullable=False, index=True)
+    token_hash: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class TokenBlacklist(Base):
+    """JWT token blacklist table.
+    
+    Stores JTI (JWT ID) of tokens that have been logged out.
+    """
+
+    __tablename__ = "token_blacklist"
+
+    jti: Mapped[str] = mapped_column(String(36), nullable=False, unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

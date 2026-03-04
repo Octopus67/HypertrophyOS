@@ -26,7 +26,7 @@ async def test_register_email_happy_path(client, override_get_db):
     """POST /register with valid email/password → 201, returns tokens."""
     resp = await client.post(
         "/api/v1/auth/register",
-        json={"email": "new@example.com", "password": "securepass123"},
+        json={"email": "new@example.com", "password": "SecurePass123"},
     )
     assert resp.status_code == 201
     body = resp.json()
@@ -42,13 +42,18 @@ async def test_register_email_happy_path(client, override_get_db):
 
 @pytest.mark.asyncio
 async def test_register_duplicate_email(client, override_get_db):
-    """Register same email twice → second returns 409 Conflict."""
-    payload = {"email": "dup@example.com", "password": "securepass123"}
+    """Register same email twice → second returns 201 with empty tokens to prevent enumeration."""
+    payload = {"email": "dup@example.com", "password": "SecurePass123"}
     first = await client.post("/api/v1/auth/register", json=payload)
     assert first.status_code == 201
 
     second = await client.post("/api/v1/auth/register", json=payload)
-    assert second.status_code == 409
+    assert second.status_code == 201
+    # Should return empty tokens to prevent email enumeration
+    body = second.json()
+    assert body["access_token"] == ""
+    assert body["refresh_token"] == ""
+    assert body["expires_in"] == 0
 
 
 # ------------------------------------------------------------------
@@ -58,7 +63,7 @@ async def test_register_duplicate_email(client, override_get_db):
 @pytest.mark.asyncio
 async def test_login_correct_credentials(client, override_get_db):
     """Register, then POST /login → 200, returns tokens."""
-    creds = {"email": "login@example.com", "password": "securepass123"}
+    creds = {"email": "login@example.com", "password": "SecurePass123"}
     await client.post("/api/v1/auth/register", json=creds)
 
     resp = await client.post("/api/v1/auth/login", json=creds)
@@ -76,7 +81,7 @@ async def test_login_correct_credentials(client, override_get_db):
 @pytest.mark.asyncio
 async def test_login_incorrect_password(client, override_get_db):
     """POST /login with wrong password → 401."""
-    creds = {"email": "wrongpw@example.com", "password": "securepass123"}
+    creds = {"email": "wrongpw@example.com", "password": "SecurePass123"}
     await client.post("/api/v1/auth/register", json=creds)
 
     resp = await client.post(
@@ -109,7 +114,7 @@ async def test_refresh_valid_token(client, override_get_db):
     """Register, extract refresh_token, POST /refresh → 200, new tokens."""
     reg = await client.post(
         "/api/v1/auth/register",
-        json={"email": "refresh@example.com", "password": "securepass123"},
+        json={"email": "refresh@example.com", "password": "SecurePass123"},
     )
     refresh_tok = reg.json()["refresh_token"]
 

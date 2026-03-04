@@ -43,6 +43,21 @@ async def get_current_user(
     except JWTError:
         raise UnauthorizedError("Invalid or expired token")
 
+    # Check token type
+    token_type = payload.get("type")
+    if token_type != "access":
+        raise UnauthorizedError("Invalid token type")
+
+    # Check if token is blacklisted
+    jti = payload.get("jti")
+    if jti:
+        from src.modules.auth.models import TokenBlacklist
+        blacklist_result = await db.execute(
+            select(TokenBlacklist).where(TokenBlacklist.jti == jti)
+        )
+        if blacklist_result.scalar_one_or_none() is not None:
+            raise UnauthorizedError("Token has been revoked")
+
     user_id_str: Optional[str] = payload.get("sub")
     if user_id_str is None:
         raise UnauthorizedError("Invalid token payload")

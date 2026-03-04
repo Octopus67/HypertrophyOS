@@ -88,6 +88,8 @@ def _make_token(user_id: uuid.UUID, role: str = UserRole.USER) -> str:
 
     payload = {
         "sub": str(user_id),
+        "type": "access",
+        "jti": str(uuid.uuid4()),
         "role": role,
         "exp": datetime.now(timezone.utc) + timedelta(hours=1),
     }

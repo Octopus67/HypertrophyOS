@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     # App
     APP_NAME: str = "Repwise"
     DEBUG: bool = False
-    CORS_ORIGINS: list[str] = ["*"]
+    CORS_ORIGINS: list[str] = ["http://localhost:8081", "http://localhost:19006"]
 
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://localhost:5432/hypertrophy_os"
@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # Rate limiting
     LOGIN_RATE_LIMIT_THRESHOLD: int = 5
     LOGIN_RATE_LIMIT_WINDOW_SECONDS: int = 900
+
+    # OAuth
+    GOOGLE_CLIENT_ID: str = ""
 
     # Payment providers
     STRIPE_WEBHOOK_SECRET: str = "whsec_test_secret"

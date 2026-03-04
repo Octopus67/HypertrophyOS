@@ -30,20 +30,16 @@ async def delete_account(
     return AccountDeletionResponse(**result)
 
 
-@router.post("/reactivate/{user_id}", response_model=AccountReactivationResponse)
-async def reactivate_account_by_id(
-    user_id: str,
+@router.post("/reactivate", response_model=AccountReactivationResponse)
+async def reactivate_account(
+    current_user: User = Depends(get_current_user),
     service: AccountService = Depends(_get_service),
 ) -> AccountReactivationResponse:
-    """Reactivate a deactivated account by user ID within the grace period.
+    """Reactivate a deactivated account within the grace period.
 
-    This is a simplified endpoint for the MVP. In production, this would
-    require email verification or a special reactivation token.
+    Uses the authenticated user's ID for reactivation.
 
     Requirement 22.3.
     """
-    import uuid as _uuid
-
-    uid = _uuid.UUID(user_id)
-    result = await service.reactivate(uid)
+    result = await service.reactivate(current_user.id)
     return AccountReactivationResponse(**result)

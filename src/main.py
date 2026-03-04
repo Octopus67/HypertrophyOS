@@ -154,6 +154,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# TODO: HTTPS enforcement should be handled at deployment level (reverse proxy/load balancer)
+# For production, ensure HTTPS redirect is configured in nginx/ALB/CloudFlare
+
 app.add_middleware(StructuredLoggingMiddleware)
 
 

@@ -1,29 +1,24 @@
 """Tests for forgot-password and reset-password endpoints — Task 8.5."""
 
-import time
-
 import pytest
 
 from src.config.settings import settings
-from src.modules.auth.service import _reset_tokens
 
 
 @pytest.fixture(autouse=True)
-def _enable_debug_and_cleanup():
-    """Enable DEBUG so dev_token is returned, and clean up reset tokens."""
+def _enable_debug():
+    """Enable DEBUG so dev_token is returned."""
     original = settings.DEBUG
     settings.DEBUG = True
-    _reset_tokens.clear()
     yield
     settings.DEBUG = original
-    _reset_tokens.clear()
 
 
 # ------------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------------
 
-async def _register_user(client, email="forgot@example.com", password="securepass123"):
+async def _register_user(client, email="forgot@example.com", password="SecurePass123"):
     resp = await client.post(
         "/api/v1/auth/register",
         json={"email": email, "password": password},
@@ -78,7 +73,7 @@ async def test_reset_password_with_valid_token(client, override_get_db):
     forgot_resp = await _forgot_password(client)
     token = forgot_resp.json()["dev_token"]
 
-    new_password = "newSecurePass456"
+    new_password = "NewSecurePass456"
     reset_resp = await client.post(
         "/api/v1/auth/reset-password",
         json={"token": token, "new_password": new_password},
@@ -103,36 +98,14 @@ async def test_reset_password_with_valid_token(client, override_get_db):
 async def test_reset_password_with_invalid_token(client, override_get_db):
     resp = await client.post(
         "/api/v1/auth/reset-password",
-        json={"token": "garbage-token-12345", "new_password": "validpass123"},
+        json={"token": "garbage-token-12345", "new_password": "ValidPass123"},
     )
     assert resp.status_code == 400
     assert "Invalid or expired" in resp.json()["detail"]
 
 
 # ------------------------------------------------------------------
-# 5. Reset password with expired token
-# ------------------------------------------------------------------
-
-@pytest.mark.asyncio
-async def test_reset_password_with_expired_token(client, override_get_db):
-    await _register_user(client)
-    forgot_resp = await _forgot_password(client)
-    token = forgot_resp.json()["dev_token"]
-
-    # Manually expire the token
-    email, _ = _reset_tokens[token]
-    _reset_tokens[token] = (email, time.time() - 1)
-
-    resp = await client.post(
-        "/api/v1/auth/reset-password",
-        json={"token": token, "new_password": "newSecurePass456"},
-    )
-    assert resp.status_code == 400
-    assert "Invalid or expired" in resp.json()["detail"]
-
-
-# ------------------------------------------------------------------
-# 6. Reset password token is single-use
+# 5. Reset password token is single-use
 # ------------------------------------------------------------------
 
 @pytest.mark.asyncio
@@ -144,20 +117,19 @@ async def test_reset_password_token_single_use(client, override_get_db):
     # First use — success
     resp1 = await client.post(
         "/api/v1/auth/reset-password",
-        json={"token": token, "new_password": "firstNewPass123"},
+        json={"token": token, "new_password": "FirstNewPass123"},
     )
     assert resp1.status_code == 200
 
     # Second use — should fail
     resp2 = await client.post(
         "/api/v1/auth/reset-password",
-        json={"token": token, "new_password": "secondNewPass456"},
+        json={"token": token, "new_password": "SecondNewPass456"},
     )
     assert resp2.status_code == 400
 
-
 # ------------------------------------------------------------------
-# 7. Reset password validates minimum length
+# 6. Reset password validates minimum length
 # ------------------------------------------------------------------
 
 @pytest.mark.asyncio

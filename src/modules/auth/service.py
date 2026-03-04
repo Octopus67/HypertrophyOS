@@ -3,25 +3,25 @@
 from __future__ import annotations
 from typing import Optional
 
+import hashlib
 import time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.settings import settings
-from src.modules.auth.models import User
+from src.modules.auth.models import User, PasswordResetToken, TokenBlacklist
 from src.shared.errors import ConflictError, UnauthorizedError
 from src.shared.types import AuthProvider, UserRole
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# TODO: Replace with Redis/DB storage for production
-_reset_tokens: dict[str, tuple[str, float]] = {}  # token → (email, expiry_timestamp)
 
 
 @dataclass
@@ -79,10 +79,28 @@ class AuthService:
         """Authenticate or register via OAuth provider.
 
         Creates a new user if no account is linked to the provider id.
-        For MVP the *token* value is treated as the provider user id
-        (real verification would call the provider's API).
+        For Google: verifies the ID token with Google's servers.
+        For Apple: placeholder implementation (TODO).
         """
-        provider_user_id = token  # placeholder — real impl verifies with provider
+        if provider == "google":
+            if not settings.GOOGLE_CLIENT_ID:
+                raise UnauthorizedError("Google OAuth not configured")
+            
+            try:
+                # Verify Google ID token
+                idinfo = id_token.verify_oauth2_token(
+                    token, google_requests.Request(), settings.GOOGLE_CLIENT_ID
+                )
+                provider_user_id = idinfo["sub"]
+                email = idinfo["email"]
+            except ValueError:
+                raise UnauthorizedError("Invalid Google token")
+        elif provider == "apple":
+            # TODO: Implement Apple OAuth verification
+            provider_user_id = token  # placeholder
+            email = f"{hashlib.sha256(f'{provider}:{token}'.encode()).hexdigest()[:12]}@oauth.internal"
+        else:
+            raise UnauthorizedError("Unsupported OAuth provider")
 
         stmt = select(User).where(
             User.auth_provider == provider,
@@ -93,11 +111,9 @@ class AuthService:
         user = result.scalar_one_or_none()
 
         if user is None:
-            # Create a new user linked to this OAuth provider.
-            # Email is derived from the token payload in a real implementation;
-            # here we use a placeholder.
+            # Create a new user linked to this OAuth provider
             user = User(
-                email=f"{provider_user_id}@{provider}.oauth",
+                email=email,
                 auth_provider=provider,
                 auth_provider_id=provider_user_id,
                 role=UserRole.USER,
@@ -128,12 +144,25 @@ class AuthService:
 
         return _generate_tokens(user.id)
 
-    async def logout(self, user_id: uuid.UUID) -> None:  # noqa: ARG002
-        """Placeholder for token blacklisting.
+    async def logout(self, token: str) -> None:
+        """Add the current token to blacklist to invalidate it.
 
-        In a production system this would add the current token jti to a
-        blacklist (e.g. Redis set with TTL matching token expiry).
+        In production, expired blacklist entries should be cleaned up periodically.
         """
+        try:
+            payload = _decode_token(token)
+            jti = payload.get("jti")
+            if not jti:
+                return  # Token doesn't have JTI, can't blacklist
+            
+            exp = payload.get("exp")
+            if exp:
+                expires_at = datetime.fromtimestamp(exp, timezone.utc)
+                blacklist_entry = TokenBlacklist(jti=jti, expires_at=expires_at)
+                self.session.add(blacklist_entry)
+                await self.session.commit()
+        except (JWTError, ValueError):
+            pass  # Invalid token, nothing to blacklist
 
     # ------------------------------------------------------------------
     # Password reset
@@ -150,7 +179,18 @@ class AuthService:
             return None
 
         token = str(uuid.uuid4())
-        _reset_tokens[token] = (email, time.time() + 3600)
+        token_hash = pwd_context.hash(token)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+        
+        reset_token = PasswordResetToken(
+            user_id=user.id,
+            token_hash=token_hash,
+            expires_at=expires_at,
+            used=False
+        )
+        self.session.add(reset_token)
+        await self.session.flush()
+        
         return token
 
     async def reset_password(self, token: str, new_password: str) -> bool:
@@ -158,23 +198,34 @@ class AuthService:
 
         Returns False if the token is invalid or expired.
         """
-        entry = _reset_tokens.get(token)
-        if entry is None:
+        # Hash the provided token to match what's stored in the database
+        token_hash = pwd_context.hash(token)
+        now = datetime.now(timezone.utc)
+        
+        # Find a matching token by trying to verify against all stored hashes
+        stmt = select(PasswordResetToken).where(
+            PasswordResetToken.expires_at > now,
+            PasswordResetToken.used == False
+        )
+        result = await self.session.execute(stmt)
+        reset_tokens = result.scalars().all()
+        
+        matching_token = None
+        for reset_token in reset_tokens:
+            if pwd_context.verify(token, reset_token.token_hash):
+                matching_token = reset_token
+                break
+        
+        if matching_token is None:
             return False
 
-        email, expiry = entry
-        if time.time() > expiry:
-            del _reset_tokens[token]
-            return False
-
-        user = await self._get_user_by_email(email)
-        if user is None:
-            del _reset_tokens[token]
+        user = await self.session.get(User, matching_token.user_id)
+        if user is None or user.deleted_at is not None:
             return False
 
         user.hashed_password = _hash_password(new_password)
+        matching_token.used = True
         await self.session.commit()
-        del _reset_tokens[token]
         return True
 
     # ------------------------------------------------------------------
@@ -208,15 +259,20 @@ def _generate_tokens(user_id: uuid.UUID) -> AuthTokens:
     access_exp = now + timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_exp = now + timedelta(days=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS)
 
+    access_jti = str(uuid.uuid4())
+    refresh_jti = str(uuid.uuid4())
+
     access_payload = {
         "sub": str(user_id),
         "type": "access",
+        "jti": access_jti,
         "exp": access_exp,
         "iat": now,
     }
     refresh_payload = {
         "sub": str(user_id),
         "type": "refresh",
+        "jti": refresh_jti,
         "exp": refresh_exp,
         "iat": now,
     }

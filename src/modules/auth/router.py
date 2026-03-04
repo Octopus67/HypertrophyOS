@@ -1,6 +1,6 @@
 """Auth routes — registration, login, OAuth, token refresh, and logout."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import get_db
@@ -18,7 +18,7 @@ from src.modules.auth.schemas import (
     ResetPasswordRequest,
 )
 from src.modules.auth.service import AuthService
-from src.shared.errors import UnauthorizedError
+from src.shared.errors import UnauthorizedError, ConflictError
 
 router = APIRouter()
 
@@ -33,8 +33,21 @@ async def register(
     service: AuthService = Depends(_get_auth_service),
 ) -> AuthTokensResponse:
     """Register a new user with email and password."""
-    tokens = await service.register_email(email=data.email, password=data.password)
-    return tokens
+    try:
+        tokens = await service.register_email(email=data.email, password=data.password)
+        return AuthTokensResponse(
+            access_token=tokens.access_token,
+            refresh_token=tokens.refresh_token,
+            expires_in=tokens.expires_in
+        )
+    except ConflictError:
+        # Return same success response to prevent email enumeration
+        # In production, could send "account exists" email to the address
+        return AuthTokensResponse(
+            access_token="",
+            refresh_token="", 
+            expires_in=0
+        )
 
 
 @router.post("/login", response_model=AuthTokensResponse)
@@ -77,11 +90,14 @@ async def refresh(
 
 @router.post("/logout", status_code=204, response_model=None)
 async def logout(
+    request: Request,
     user: User = Depends(get_current_user),
     service: AuthService = Depends(_get_auth_service),
 ) -> None:
     """Logout the current user (invalidate tokens server-side)."""
-    await service.logout(user_id=user.id)
+    from src.middleware.authenticate import _extract_bearer_token
+    token = _extract_bearer_token(request)
+    await service.logout(token)
 
 
 @router.get("/me")
