@@ -6,9 +6,17 @@ import {
   StyleSheet,
   AppState,
 } from 'react-native';
-import { colors, radius, spacing, typography, shadows } from '../../theme/tokens';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
+import { colors, radius, spacing, typography, shadows, springs, motion } from '../../theme/tokens';
 import { adjustTime, getTimerColor } from '../../utils/restTimerLogic';
 import { useHaptics } from '../../hooks/useHaptics';
+import { useReduceMotion } from '../../hooks/useReduceMotion';
 
 interface FloatingRestTimerBarProps {
   durationSeconds: number;
@@ -40,6 +48,12 @@ export function FloatingRestTimerBar({
   const pausedRemainingRef = useRef<number>(durationSeconds);
 
   const { notification: hapticNotification } = useHaptics();
+  const reduceMotion = useReduceMotion();
+  const translateY = useSharedValue(reduceMotion ? 0 : 80);
+
+  const slideStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
   // Reset when a new timer starts
   useEffect(() => {
@@ -48,6 +62,10 @@ export function FloatingRestTimerBar({
       setPaused(false);
       startedAtRef.current = Date.now();
       pausedRemainingRef.current = durationSeconds;
+      if (!reduceMotion) {
+        translateY.value = 80;
+        translateY.value = withSpring(0, springs.snappy);
+      }
     }
   }, [isActive, durationSeconds]);
 
@@ -122,6 +140,16 @@ export function FloatingRestTimerBar({
     setPaused((prev) => !prev);
   }, []);
 
+  const handleAnimatedDismiss = useCallback(() => {
+    if (reduceMotion) {
+      onDismiss();
+      return;
+    }
+    translateY.value = withTiming(80, { duration: motion.duration.default }, () => {
+      runOnJS(onDismiss)();
+    });
+  }, [onDismiss, reduceMotion, translateY]);
+
   if (!isActive) return null;
 
   const timerColorKey = getTimerColor(remaining, durationSeconds);
@@ -132,7 +160,7 @@ export function FloatingRestTimerBar({
   const timeText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
   return (
-    <View style={styles.container} accessibilityRole="timer" accessibilityLabel={`Rest timer: ${remaining} seconds`}>
+    <Animated.View style={[styles.container, slideStyle]} accessibilityRole="timer" accessibilityLabel={`Rest timer: ${remaining} seconds`}>
       <View style={styles.row}>
         {/* Exercise name */}
         <View style={styles.infoSection}>
@@ -171,7 +199,7 @@ export function FloatingRestTimerBar({
 
           <TouchableOpacity
             style={styles.dismissBtn}
-            onPress={onDismiss}
+            onPress={handleAnimatedDismiss}
             accessibilityLabel="Dismiss rest timer"
             accessibilityRole="button"
           >
@@ -179,7 +207,7 @@ export function FloatingRestTimerBar({
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

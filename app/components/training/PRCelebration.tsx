@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors, radius, spacing, typography, motion } from '../../theme/tokens';
 import type { PersonalRecordResponse } from '../../types/training';
+import { useHaptics } from '../../hooks/useHaptics';
 
 interface PRCelebrationProps {
   prs: PersonalRecordResponse[];
@@ -34,6 +35,7 @@ export function PRCelebration({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onDismissRef = useRef(onDismiss);
   onDismissRef.current = onDismiss;
+  const { notification: hapticNotification } = useHaptics();
 
   const dismiss = useCallback(() => {
     onDismissRef.current();
@@ -41,6 +43,7 @@ export function PRCelebration({
 
   useEffect(() => {
     if (visible && prs.length > 0) {
+      hapticNotification('success');
       // Animate in
       opacity.value = withTiming(1, { duration: motion.duration.slow });
       scale.value = withSequence(

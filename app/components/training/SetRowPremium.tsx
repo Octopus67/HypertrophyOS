@@ -14,10 +14,17 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import type { ActiveSet } from '../../types/training';
 import type { UnitSystem } from '../../utils/unitConversion';
 import { convertWeight } from '../../utils/unitConversion';
-import { colors, typography, spacing, radius } from '../../theme/tokens';
+import { colors, typography, spacing, radius, springs } from '../../theme/tokens';
+import { useHaptics } from '../../hooks/useHaptics';
+import { useReduceMotion } from '../../hooks/useReduceMotion';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -54,6 +61,14 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
   const weightRef = useRef<TextInput>(null);
   const rpeRirRef = useRef<TextInput>(null);
 
+  const { impact, notification } = useHaptics();
+  const reduceMotion = useReduceMotion();
+  const checkScale = useSharedValue(1);
+
+  const checkAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkScale.value }],
+  }));
+
   // ── Callbacks declared before use (project rule: no temporal dead zone) ──
 
   const handleRepsSubmit = React.useCallback(() => {
@@ -70,15 +85,23 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
 
   const handleRpeRirSubmit = React.useCallback(() => {
     onToggleComplete();
-  }, [onToggleComplete]);
+    notification('success');
+    if (!reduceMotion) {
+      checkScale.value = withSpring(1.3, springs.snappy, () => {
+        checkScale.value = withSpring(1, springs.gentle);
+      });
+    }
+  }, [onToggleComplete, notification, reduceMotion, checkScale]);
 
   const handleStepUp = React.useCallback(() => {
+    impact('light');
     onWeightStep('up');
-  }, [onWeightStep]);
+  }, [onWeightStep, impact]);
 
   const handleStepDown = React.useCallback(() => {
+    impact('light');
     onWeightStep('down');
-  }, [onWeightStep]);
+  }, [onWeightStep, impact]);
 
   // ── Previous performance display text ──
 
@@ -191,19 +214,29 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
       )}
 
       {/* Completion checkmark */}
-      <TouchableOpacity
-        onPress={onToggleComplete}
-        style={[
-          styles.checkBtn,
-          isCompleted && styles.checkBtnCompleted,
-        ]}
-        accessibilityLabel={`Complete set ${setIndex + 1}`}
-        accessibilityRole="button"
-      >
-        <Text style={[styles.checkText, isCompleted && styles.checkTextCompleted]}>
-          ✓
-        </Text>
-      </TouchableOpacity>
+      <Animated.View style={checkAnimatedStyle}>
+        <TouchableOpacity
+          onPress={() => {
+            onToggleComplete();
+            notification('success');
+            if (!reduceMotion) {
+              checkScale.value = withSpring(1.3, springs.snappy, () => {
+                checkScale.value = withSpring(1, springs.gentle);
+              });
+            }
+          }}
+          style={[
+            styles.checkBtn,
+            isCompleted && styles.checkBtnCompleted,
+          ]}
+          accessibilityLabel={`Complete set ${setIndex + 1}`}
+          accessibilityRole="button"
+        >
+          <Text style={[styles.checkText, isCompleted && styles.checkTextCompleted]}>
+            ✓
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 };
