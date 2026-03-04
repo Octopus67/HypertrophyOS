@@ -174,6 +174,17 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler) 
 app.add_exception_handler(PydanticValidationError, pydantic_validation_exception_handler)  # type: ignore[arg-type]
 
 
+# Catch-all for unhandled exceptions — ensures CORS headers are attached to 500 responses
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
+    import logging
+    logging.getLogger(__name__).exception("Unhandled exception: %s", exc)
+    return JSONResponse(
+        status_code=500,
+        content={"status": 500, "code": "INTERNAL_ERROR", "message": "An unexpected error occurred", "details": None},
+    )
+
+
 # Health check
 @app.get("/api/v1/health")
 async def health_check() -> dict[str, str]:

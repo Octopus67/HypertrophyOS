@@ -56,8 +56,8 @@ export const ProgressRing = memo(function ProgressRing({
         ? withTiming(target, { duration: 600, easing: Easing.out(Easing.cubic) })
         : withSpring(target, springs.gentle);
 
-      // DEV-only: warn if spring takes >1s to settle
-      if (__DEV__) {
+      // DEV-only: warn if spring takes >1s to settle (native only, web uses deterministic withTiming)
+      if (__DEV__ && Platform.OS !== 'web') {
         const springStart = Date.now();
         const checkSettled = setTimeout(() => {
           const elapsed = Date.now() - springStart;
