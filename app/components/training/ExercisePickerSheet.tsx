@@ -74,8 +74,12 @@ export function ExercisePickerSheet({
 
   const query = search.trim().toLowerCase();
 
-  const filteredExercises = query
-    ? exercises.filter((e) => e.toLowerCase().includes(query))
+  const queryWords = query ? query.split(/\s+/).filter(Boolean) : [];
+  const filteredExercises = queryWords.length
+    ? exercises.filter((e) => {
+        const name = e.toLowerCase();
+        return queryWords.every((w) => name.includes(w));
+      })
     : exercises;
 
   const showRecent = !query && recentExercises.length > 0;

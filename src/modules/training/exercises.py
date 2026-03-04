@@ -20949,8 +20949,8 @@ def search_exercises(
     category: Optional[str] = None,
 ) -> list[dict]:
     """Case-insensitive name search with optional muscle group, equipment, and category filters."""
-    q = query.lower()
-    results = [ex for ex in EXERCISES if q in ex["name"].lower()]
+    words = query.lower().split()
+    results = [ex for ex in EXERCISES if all(w in ex["name"].lower() for w in words)]
     if muscle_group:
         mg = muscle_group.lower()
         results = [ex for ex in results if ex["muscle_group"] == mg]
