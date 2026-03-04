@@ -111,7 +111,6 @@ describe('Property 14 — Skeleton Loading Coverage', () => {
   );
 
   const asyncScreensMissingSkeleton = [
-    { name: 'ProfileScreen', path: 'screens/profile/ProfileScreen.tsx' },
     { name: 'CoachingScreen', path: 'screens/coaching/CoachingScreen.tsx' },
     { name: 'CommunityScreen', path: 'screens/community/CommunityScreen.tsx' },
     { name: 'LearnScreen', path: 'screens/learn/LearnScreen.tsx' },

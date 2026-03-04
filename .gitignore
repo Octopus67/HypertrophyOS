@@ -39,3 +39,4 @@ dev.db
 
 # Downloaded exercise images (run scripts/download_exercise_images.py to fetch)
 static/exercises/
+api_test_results.txt
