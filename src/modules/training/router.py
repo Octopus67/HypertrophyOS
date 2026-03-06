@@ -524,8 +524,18 @@ async def get_muscle_volume(
 
     if use_wns:
         from src.modules.training.wns_volume_service import WNSVolumeService
+        from src.modules.user.models import UserGoals
+        from sqlalchemy import select
+        
+        # Fetch user's goal to adjust volume landmarks
+        goal_result = await db.execute(select(UserGoals).where(UserGoals.user_id == user.id))
+        user_goal = goal_result.scalar_one_or_none()
+        
+        goal_type = user_goal.goal_type if user_goal else None
+        goal_rate = user_goal.goal_rate_per_week if user_goal else None
+        
         wns_svc = WNSVolumeService(db)
-        muscle_groups = await wns_svc.get_weekly_muscle_volume(user.id, week_start)
+        muscle_groups = await wns_svc.get_weekly_muscle_volume(user.id, week_start, goal_type, goal_rate)
         return WNSWeeklyResponse(
             week_start=week_start,
             week_end=week_end,

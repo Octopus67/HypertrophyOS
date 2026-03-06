@@ -55,6 +55,49 @@ def _build_exercise_lookup() -> dict[str, dict]:
     return {ex["name"].lower().strip(): ex for ex in get_all_exercises()}
 
 
+def get_volume_multiplier_for_goal(goal_type: str, rate_kg_per_week: float) -> float:
+    """Calculate volume multiplier based on calorie balance.
+    
+    During a deficit, recovery capacity is reduced → lower MRV.
+    During a surplus, recovery capacity is enhanced → higher MRV.
+    
+    Args:
+        goal_type: 'lose_fat', 'build_muscle', 'maintain', 'recomposition', 'eat_healthier'
+        rate_kg_per_week: Target rate of weight change
+        
+    Returns:
+        Multiplier to apply to all volume landmarks (0.60-1.20 range)
+        
+    Research basis:
+    - Menno Henselmans: 20-33% volume reduction when cutting
+    - Murphy & Koehler 2021: 500 kcal deficit fully blunts lean mass gains
+    - Helms et al. 2014: 0.5-1% BW/week loss rate for contest prep
+    - Slater et al. 2019: Conservative surplus ~360-480 kcal for optimal gains
+    """
+    if goal_type == 'lose_fat':
+        # 1 kg/week ≈ 1000 kcal/day deficit
+        deficit_kcal = rate_kg_per_week * -1000
+        # Formula: 1.0 + (deficit * 0.0004)
+        # -250 kcal → 0.90x, -500 kcal → 0.80x, -1000 kcal → 0.60x
+        multiplier = 1.0 + (deficit_kcal * 0.0004)
+        return max(0.60, multiplier)  # Floor at 60% for aggressive cuts
+        
+    elif goal_type == 'build_muscle':
+        # 1 kg/week ≈ 1000 kcal/day surplus (though this is excessive)
+        surplus_kcal = rate_kg_per_week * 1000
+        # Formula: 1.0 + (surplus * 0.00025)
+        # +250 kcal → 1.06x, +500 kcal → 1.13x
+        multiplier = 1.0 + (surplus_kcal * 0.00025)
+        return min(1.20, multiplier)  # Cap at 120% (diminishing returns)
+        
+    elif goal_type == 'recomposition':
+        # Calorie cycling: slight reduction to be conservative
+        return 0.95
+        
+    else:  # 'maintain', 'eat_healthier'
+        return 1.0
+
+
 def _classify_wns_status(net_stimulus: float, landmarks: dict[str, float], frequency: int) -> VolumeStatus:
     """Classify WNS status relative to HU landmarks.
     
@@ -86,7 +129,7 @@ class WNSVolumeService:
         self.session = session
 
     async def get_weekly_muscle_volume(
-        self, user_id: uuid.UUID, week_start: date
+        self, user_id: uuid.UUID, week_start: date, goal_type: Optional[str] = None, goal_rate: Optional[float] = None
     ) -> list[WNSMuscleVolume]:
         from src.modules.training.analytics_service import TrainingAnalyticsService
 
@@ -157,6 +200,11 @@ class WNSVolumeService:
 
         # Compute WNS for each muscle group
         results: list[WNSMuscleVolume] = []
+        
+        # Calculate volume multiplier based on goal
+        volume_multiplier = 1.0
+        if goal_type and goal_rate is not None:
+            volume_multiplier = get_volume_multiplier_for_goal(goal_type, goal_rate)
 
         for mg, lm_dict in DEFAULT_WNS_LANDMARKS.items():
             sessions = muscle_sessions.get(mg, [])
@@ -204,7 +252,10 @@ class WNSVolumeService:
                 total_atrophy += atrophy_between_sessions(float(days_since_last))
 
             net = max(0.0, gross - total_atrophy)
-            status = _classify_wns_status(net, lm_dict, len(session_dates))
+            
+            # Apply goal-adjusted landmarks
+            adjusted_landmarks = {k: v * volume_multiplier for k, v in lm_dict.items()}
+            status = _classify_wns_status(net, adjusted_landmarks, len(session_dates))
 
             # Build exercise contribution list
             ex_contributions = [
@@ -232,7 +283,7 @@ class WNSVolumeService:
                     status=status,
                     session_count=len(sessions),
                     frequency=len(session_dates),
-                    landmarks=WNSLandmarks(**lm_dict),
+                    landmarks=WNSLandmarks(**{k: round(v, 1) for k, v in adjusted_landmarks.items()}),
                     exercises=ex_contributions,
                 )
             )
