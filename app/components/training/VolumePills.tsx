@@ -14,6 +14,8 @@ import { colors, typography, spacing, radius } from '../../theme/tokens';
 
 export interface VolumePillsProps {
   muscleVolumes: MuscleVolumeEntry[];
+  goalType?: string;
+  goalMultiplier?: number;
 }
 
 function getPillColor(current: number, mavLow: number, mavHigh: number) {
@@ -24,7 +26,7 @@ function getPillColor(current: number, mavLow: number, mavHigh: number) {
   return { bg: colors.bg.surfaceRaised, text: colors.text.secondary };
 }
 
-export const VolumePills: React.FC<VolumePillsProps> = ({ muscleVolumes }) => {
+export const VolumePills: React.FC<VolumePillsProps> = ({ muscleVolumes, goalMultiplier }) => {
   if (!muscleVolumes.length) return null;
 
   return (
@@ -47,6 +49,13 @@ export const VolumePills: React.FC<VolumePillsProps> = ({ muscleVolumes }) => {
               {entry.muscleGroup}: {entry.currentSets}
               {entry.mavHigh > 0 ? ` (MAV: ${entry.mavLow}-${entry.mavHigh})` : ''}
             </Text>
+            {goalMultiplier && goalMultiplier !== 1.0 && (
+              <Text style={styles.adjustmentText}>
+                {goalMultiplier < 1.0
+                  ? `Adjusted for cutting (-${Math.round((1 - goalMultiplier) * 100)}%)`
+                  : `Adjusted for bulking (+${Math.round((goalMultiplier - 1) * 100)}%)`}
+              </Text>
+            )}
           </View>
         );
       })}
@@ -71,6 +80,11 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
+  },
+  adjustmentText: {
+    fontSize: typography.size.xs,
+    color: colors.text.muted,
+    marginTop: spacing[0.5],
   },
 });
 

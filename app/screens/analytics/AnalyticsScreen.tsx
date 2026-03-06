@@ -98,6 +98,7 @@ export function AnalyticsScreen() {
   } | null>(null);
   const [fatigueScores, setFatigueScores] = useState<any[]>([]);
   const [selectedFatigueGroup, setSelectedFatigueGroup] = useState<any | null>(null);
+  const [wnsExplainerExpanded, setWnsExplainerExpanded] = useState(false);
 
   const loadAnalytics = useCallback(async (signal?: AbortSignal) => {
     setError(null);
@@ -434,6 +435,40 @@ export function AnalyticsScreen() {
         {/* ===== TRAINING TAB ===== */}
         {selectedTab === 'training' && (
           <>
+            {/* WNS Explainer Card */}
+            <TouchableOpacity
+              onPress={() => setWnsExplainerExpanded(!wnsExplainerExpanded)}
+              style={styles.explainerCard}
+              testID="wns-explainer-card"
+              activeOpacity={0.7}
+            >
+              <View style={styles.explainerHeader}>
+                <Text style={styles.explainerTitle}>🧠 Why Repwise Tracks Hypertrophy Units (HU)</Text>
+                <Text style={styles.chevron}>{wnsExplainerExpanded ? '▼' : '▶'}</Text>
+              </View>
+              {wnsExplainerExpanded && (
+                <View style={styles.explainerContent}>
+                  <Text style={styles.explainerSubhead}>Traditional Apps</Text>
+                  <Text style={styles.explainerText}>Count total sets — treats every set equally regardless of effort or fatigue.</Text>
+
+                  <Text style={styles.explainerSubhead}>Repwise (HU)</Text>
+                  <Text style={styles.explainerText}>Counts effective stimulus by weighing each set based on:</Text>
+
+                  <Text style={styles.explainerBullet}>• <Text style={styles.explainerBold}>Intensity</Text> — harder sets score higher</Text>
+                  <Text style={styles.explainerBullet}>• <Text style={styles.explainerBold}>Diminishing returns</Text> — junk volume is discounted</Text>
+                  <Text style={styles.explainerBullet}>• <Text style={styles.explainerBold}>Frequency</Text> — spreading work across days is rewarded</Text>
+                  <Text style={styles.explainerBullet}>• <Text style={styles.explainerBold}>Goal adjustment</Text> — targets adapt to your training phase</Text>
+
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('HUExplainer')}
+                    style={styles.learnMoreBtn}
+                  >
+                    <Text style={styles.learnMoreText}>Learn More →</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </TouchableOpacity>
+
             {/* Training Volume */}
             <Text style={styles.sectionTitle}>Training Volume</Text>
             <Card>
@@ -768,4 +803,66 @@ const styles = StyleSheet.create({
   analyticsTabActive: { backgroundColor: colors.accent.primaryMuted },
   analyticsTabText: { color: colors.text.muted, fontSize: typography.size.base, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.base },
   analyticsTabTextActive: { color: colors.accent.primary },
+  explainerCard: {
+    backgroundColor: colors.bg.surface,
+    borderRadius: radius.sm,
+    padding: spacing[3],
+    marginTop: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.border.subtle,
+  },
+  explainerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  explainerTitle: {
+    color: colors.text.primary,
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
+    flex: 1,
+    lineHeight: typography.lineHeight.base,
+  },
+  chevron: {
+    color: colors.text.muted,
+    fontSize: typography.size.sm,
+    marginLeft: spacing[2],
+  },
+  explainerContent: {
+    marginTop: spacing[3],
+  },
+  explainerSubhead: {
+    color: colors.accent.primary,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    marginTop: spacing[2],
+    marginBottom: spacing[1],
+    lineHeight: typography.lineHeight.sm,
+  },
+  explainerText: {
+    color: colors.text.secondary,
+    fontSize: typography.size.sm,
+    lineHeight: typography.lineHeight.sm,
+  },
+  explainerBullet: {
+    color: colors.text.secondary,
+    fontSize: typography.size.sm,
+    lineHeight: typography.lineHeight.sm,
+    marginLeft: spacing[2],
+    marginTop: spacing[1],
+  },
+  explainerBold: {
+    fontWeight: typography.weight.semibold,
+    color: colors.text.primary,
+  },
+  learnMoreBtn: {
+    marginTop: spacing[3],
+    alignSelf: 'flex-start',
+  },
+  learnMoreText: {
+    color: colors.accent.primary,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    lineHeight: typography.lineHeight.sm,
+  },
 });
