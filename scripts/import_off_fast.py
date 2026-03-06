@@ -165,10 +165,15 @@ async def bulk_insert(foods, db_url):
     return len(new_foods)
 
 async def main():
-    db_url = "postgresql+asyncpg://neondb_owner:npg_yVzuCrjh7TL4@ep-steep-bonus-ai7arlzn-pooler.c-4.us-east-1.aws.neon.tech/neondb?ssl=require"
+    import os
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        print("ERROR: DATABASE_URL environment variable not set")
+        print("Usage: DATABASE_URL='postgresql+asyncpg://...' python scripts/import_off_fast.py")
+        sys.exit(1)
     
     print("=== Open Food Facts Import ===")
-    print(f"Target DB: Neon production")
+    print(f"Target DB: {db_url.split('@')[1].split('/')[0] if '@' in db_url else 'unknown'}")  # Hide credentials
     print()
     
     if not OFF_CSV_PATH.exists():

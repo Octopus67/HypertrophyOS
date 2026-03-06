@@ -14,7 +14,11 @@ from sqlalchemy import text
 from src.modules.food_database.seed_data import INDIAN_FOOD_ITEMS
 from src.modules.food_database.global_seed_data import GLOBAL_FOOD_ITEMS
 
-DATABASE_URL = "postgresql+asyncpg://neondb_owner:npg_yVzuCrjh7TL4@ep-steep-bonus-ai7arlzn-pooler.c-4.us-east-1.aws.neon.tech/neondb?ssl=require"
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    print("ERROR: DATABASE_URL environment variable not set")
+    print("Usage: DATABASE_URL='postgresql+asyncpg://...' python scripts/seed_production.py")
+    sys.exit(1)
 
 async def seed():
     engine = create_async_engine(DATABASE_URL)
