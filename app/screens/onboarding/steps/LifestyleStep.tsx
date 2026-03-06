@@ -28,6 +28,7 @@ const ACTIVITY_OPTIONS: ActivityOption[] = [
   { value: 'lightly_active', icon: 'walk', label: 'On my feet some', desc: 'Light walking, errands' },
   { value: 'moderately_active', icon: 'run', label: 'Physically active', desc: 'Active job or daily movement' },
   { value: 'highly_active', icon: 'lightning', label: 'Very physical', desc: 'Manual labor or constant movement' },
+  { value: 'very_highly_active', icon: 'lightning', label: 'Extremely active', desc: 'Exercise 6-7x/week + physical job' },
 ];
 
 const SESSION_COUNTS = [0, 1, 2, 3, 4, 5, 6, 7];

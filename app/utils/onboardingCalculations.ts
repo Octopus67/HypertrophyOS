@@ -1,7 +1,7 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Sex = 'male' | 'female' | 'other';
-export type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'highly_active';
+export type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'highly_active' | 'very_highly_active';
 export type GoalType = 'lose_fat' | 'build_muscle' | 'maintain' | 'eat_healthier' | 'recomposition';
 export type DietStyle = 'balanced' | 'high_protein' | 'low_carb' | 'keto';
 export type ExerciseType = 'strength' | 'cardio' | 'sports' | 'yoga' | 'walking';
@@ -120,6 +120,7 @@ export function computeNEAT(bmr: number, activityLevel: ActivityLevel, weightKg:
     lightly_active: 5.0,     // ~350 for 70kg, ~400 for 80kg
     moderately_active: 7.5,  // ~525 for 70kg, ~600 for 80kg
     highly_active: 11.0,     // ~770 for 70kg, ~880 for 80kg
+    very_highly_active: 15.0, // ~1050 for 70kg, ~1200 for 80kg
   };
   return Math.round(kcalPerKg[activityLevel] * weightKg);
 }

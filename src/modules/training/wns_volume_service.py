@@ -62,7 +62,7 @@ def get_volume_multiplier_for_goal(goal_type: str, rate_kg_per_week: float) -> f
     During a surplus, recovery capacity is enhanced → higher MRV.
     
     Args:
-        goal_type: 'lose_fat', 'build_muscle', 'maintain', 'recomposition', 'eat_healthier'
+        goal_type: 'cutting', 'bulking', 'maintaining', 'recomposition'
         rate_kg_per_week: Target rate of weight change
         
     Returns:
@@ -74,27 +74,20 @@ def get_volume_multiplier_for_goal(goal_type: str, rate_kg_per_week: float) -> f
     - Helms et al. 2014: 0.5-1% BW/week loss rate for contest prep
     - Slater et al. 2019: Conservative surplus ~360-480 kcal for optimal gains
     """
-    if goal_type == 'lose_fat':
-        # 1 kg/week ≈ 1000 kcal/day deficit
+    if goal_type == 'cutting':
         deficit_kcal = rate_kg_per_week * -1000
-        # Formula: 1.0 + (deficit * 0.0003)
-        # -250 kcal → 0.93x, -500 kcal → 0.85x, -1000 kcal → 0.70x
         multiplier = 1.0 + (deficit_kcal * 0.0003)
-        return max(0.70, multiplier)  # Floor at 70% for aggressive cuts
-        
-    elif goal_type == 'build_muscle':
-        # 1 kg/week ≈ 1000 kcal/day surplus (though this is excessive)
+        return max(0.70, multiplier)
+
+    elif goal_type == 'bulking':
         surplus_kcal = rate_kg_per_week * 1000
-        # Formula: 1.0 + (surplus * 0.00025)
-        # +250 kcal → 1.06x, +500 kcal → 1.13x
         multiplier = 1.0 + (surplus_kcal * 0.00025)
-        return min(1.20, multiplier)  # Cap at 120% (diminishing returns)
-        
+        return min(1.20, multiplier)
+
     elif goal_type == 'recomposition':
-        # Calorie cycling: slight reduction to be conservative
         return 0.95
-        
-    else:  # 'maintain', 'eat_healthier'
+
+    else:  # 'maintaining'
         return 1.0
 
 
@@ -253,6 +246,9 @@ class WNSVolumeService:
 
             net = max(0.0, gross - total_atrophy)
             
+            # Calculate frequency (unique session dates)
+            session_dates = {sd for sd, _ in sessions}
+            
             # Apply goal-adjusted landmarks
             adjusted_landmarks = {k: v * volume_multiplier for k, v in lm_dict.items()}
             status = _classify_wns_status(net, adjusted_landmarks, len(session_dates))
@@ -270,8 +266,6 @@ class WNSVolumeService:
                 if data["sets_count"] > 0
             ]
             ex_contributions.sort(key=lambda x: x.contribution_hu, reverse=True)
-
-            session_dates = {sd for sd, _ in sessions}
 
             results.append(
                 WNSMuscleVolume(

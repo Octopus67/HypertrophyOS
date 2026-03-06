@@ -58,23 +58,41 @@ def _default_input(**overrides) -> AdaptiveInput:
 # ---------------------------------------------------------------------------
 
 class TestBMR:
+    def _make_input(self, weight_kg=80.0, height_cm=178.0, age_years=30, sex="male", body_fat_pct=None):
+        return AdaptiveInput(
+            weight_kg=weight_kg, height_cm=height_cm, age_years=age_years, sex=sex,
+            activity_level=ActivityLevel.MODERATE, goal_type=GoalType.MAINTAINING,
+            goal_rate_per_week=0.0, bodyweight_history=[(date.today(), weight_kg)],
+            training_load_score=0.0, body_fat_pct=body_fat_pct,
+        )
+
     def test_male_bmr(self):
         # 10*80 + 6.25*178 - 5*30 + 5 = 800 + 1112.5 - 150 + 5 = 1767.5
-        assert _compute_bmr(80.0, 178.0, 30, "male") == pytest.approx(1767.5)
+        assert _compute_bmr(self._make_input(80.0, 178.0, 30, "male")) == pytest.approx(1767.5)
 
     def test_female_bmr(self):
         # 10*60 + 6.25*165 - 5*25 - 161 = 600 + 1031.25 - 125 - 161 = 1345.25
-        assert _compute_bmr(60.0, 165.0, 25, "female") == pytest.approx(1345.25)
+        assert _compute_bmr(self._make_input(60.0, 165.0, 25, "female")) == pytest.approx(1345.25)
 
     def test_bmr_increases_with_weight(self):
-        lighter = _compute_bmr(70.0, 178.0, 30, "male")
-        heavier = _compute_bmr(90.0, 178.0, 30, "male")
+        lighter = _compute_bmr(self._make_input(70.0, 178.0, 30, "male"))
+        heavier = _compute_bmr(self._make_input(90.0, 178.0, 30, "male"))
         assert heavier > lighter
 
     def test_bmr_decreases_with_age(self):
-        younger = _compute_bmr(80.0, 178.0, 20, "male")
-        older = _compute_bmr(80.0, 178.0, 40, "male")
+        younger = _compute_bmr(self._make_input(80.0, 178.0, 20, "male"))
+        older = _compute_bmr(self._make_input(80.0, 178.0, 40, "male"))
         assert younger > older
+
+    def test_katch_mcardle_with_body_fat(self):
+        # With body_fat_pct=20%, lean_mass = 80 * 0.8 = 64, BMR = 370 + 21.6*64 = 1752.4
+        inp = self._make_input(80.0, 178.0, 30, "male", body_fat_pct=20.0)
+        assert _compute_bmr(inp) == pytest.approx(370 + 21.6 * 64.0)
+
+    def test_invalid_body_fat_falls_back_to_mifflin(self):
+        # body_fat_pct=3% is out of valid range (5-50), should use Mifflin-St Jeor
+        inp = self._make_input(80.0, 178.0, 30, "male", body_fat_pct=3.0)
+        assert _compute_bmr(inp) == pytest.approx(1767.5)
 
 
 # ---------------------------------------------------------------------------
@@ -168,10 +186,10 @@ class TestMacros:
     def test_cutting_macros(self):
         protein_g, fat_g, carbs_g = _compute_macros(80.0, 2000.0, GoalType.CUTTING)
         assert protein_g == pytest.approx(80.0 * 2.2)  # 176g
-        assert fat_g == pytest.approx(2000.0 * 0.25 / 9.0)  # ~55.56g
-        # carbs = (2000 - 176*4 - 55.56*9) / 4
-        expected_carbs = (2000.0 - 176.0 * 4.0 - fat_g * 9.0) / 4.0
-        assert carbs_g == pytest.approx(expected_carbs)
+        # Default 'balanced': remaining_kcal * 0.25 / 9 for fat
+        remaining_kcal = 2000.0 - 176.0 * 4.0
+        assert fat_g == pytest.approx(remaining_kcal * 0.25 / 9.0)
+        assert carbs_g == pytest.approx(remaining_kcal * 0.75 / 4.0)
 
     def test_negative_carbs_floored(self):
         # Very low calories with heavy person → carbs would go negative

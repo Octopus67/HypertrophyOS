@@ -78,6 +78,9 @@ class AdaptiveInput:
     goal_rate_per_week: float  # kg/week, e.g. -0.5 for cutting
     bodyweight_history: list[tuple[date, float]]  # (date, weight_kg)
     training_load_score: float  # 0-100
+    diet_style: Optional[Literal['balanced', 'high_protein', 'low_carb', 'keto']] = None
+    protein_per_kg_override: Optional[float] = None
+    body_fat_pct: Optional[float] = None
 
 
 @dataclass(frozen=True)
@@ -92,14 +95,28 @@ class AdaptiveOutput:
     adjustment_factor: float
 
 
+# Diet style macro splits (fat_pct + carb_pct of remaining kcal after protein)
+DIET_STYLE_MACROS = {
+    'balanced': {'fat_pct': 0.25, 'carb_pct': 0.75},
+    'high_protein': {'fat_pct': 0.25, 'carb_pct': 0.75},
+    'low_carb': {'fat_pct': 0.40, 'carb_pct': 0.60},
+    'keto': {'fat_pct': 0.70, 'carb_pct': 0.30},
+}
+
+
 # ---------------------------------------------------------------------------
-# Step 1: BMR (Mifflin-St Jeor)
+# Step 1: BMR (Mifflin-St Jeor or Katch-McArdle if body fat available)
 # ---------------------------------------------------------------------------
 
-def _compute_bmr(weight_kg: float, height_cm: float, age_years: int, sex: Literal["male", "female"]) -> float:
-    """Basal Metabolic Rate via Mifflin-St Jeor equation."""
-    base = 10.0 * weight_kg + 6.25 * height_cm - 5.0 * age_years
-    if sex == "male":
+def _compute_bmr(input: AdaptiveInput) -> float:
+    """Basal Metabolic Rate. Uses Katch-McArdle if body_fat_pct is available,
+    otherwise falls back to Mifflin-St Jeor."""
+    if input.body_fat_pct and 5 <= input.body_fat_pct <= 50:
+        lean_mass_kg = input.weight_kg * (1 - input.body_fat_pct / 100)
+        return 370 + (21.6 * lean_mass_kg)
+
+    base = 10.0 * input.weight_kg + 6.25 * input.height_cm - 5.0 * input.age_years
+    if input.sex == "male":
         return base + 5.0
     return base - 161.0
 
@@ -211,6 +228,8 @@ def _compute_macros(
     weight_kg: float,
     target_calories: float,
     goal_type: GoalType,
+    diet_style: Optional[str] = None,
+    protein_per_kg_override: Optional[float] = None,
 ) -> tuple[float, float, float]:
     """Return (protein_g, fat_g, carbs_g).
 
@@ -218,9 +237,28 @@ def _compute_macros(
     target_calories upward (returned via the carbs_g value — caller
     must reconcile).
     """
-    protein_g = weight_kg * PROTEIN_MULTIPLIERS[goal_type]
-    fat_g = target_calories * FAT_PERCENTAGE / 9.0
-    carbs_g = (target_calories - protein_g * 4.0 - fat_g * 9.0) / 4.0
+    if protein_per_kg_override and 1.2 <= protein_per_kg_override <= 3.5:
+        protein_g_per_kg = protein_per_kg_override
+    else:
+        protein_g_per_kg = PROTEIN_MULTIPLIERS[goal_type]
+
+    protein_g = weight_kg * protein_g_per_kg
+    protein_kcal = protein_g * 4.0
+    remaining_kcal = target_calories - protein_kcal
+
+    style = diet_style if diet_style in DIET_STYLE_MACROS else 'balanced'
+    fat_pct = DIET_STYLE_MACROS[style]['fat_pct']
+    carb_pct = DIET_STYLE_MACROS[style]['carb_pct']
+
+    fat_g = remaining_kcal * fat_pct / 9.0
+    carbs_g = remaining_kcal * carb_pct / 4.0
+
+    # Keto: cap carbs at 50g, give remaining to fat
+    if diet_style == 'keto' and carbs_g > 50:
+        carbs_g = 50.0
+        carb_kcal = 50 * 4
+        fat_kcal = remaining_kcal - carb_kcal
+        fat_g = fat_kcal / 9.0
 
     if carbs_g < MIN_CARBS_G:
         carbs_g = MIN_CARBS_G
@@ -241,7 +279,7 @@ def compute_snapshot(input: AdaptiveInput) -> AdaptiveOutput:
     """
 
     # Step 1 — BMR
-    bmr = _compute_bmr(input.weight_kg, input.height_cm, input.age_years, input.sex)
+    bmr = _compute_bmr(input)
 
     # Step 2 — TDEE
     tdee = _compute_tdee(bmr, input.activity_level)
@@ -274,6 +312,7 @@ def compute_snapshot(input: AdaptiveInput) -> AdaptiveOutput:
     # Step 5 — Macro distribution
     protein_g, fat_g, carbs_g = _compute_macros(
         input.weight_kg, target_calories, input.goal_type,
+        input.diet_style, input.protein_per_kg_override,
     )
 
     # If carbs were floored, reconcile target_calories upward

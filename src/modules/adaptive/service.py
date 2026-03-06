@@ -42,6 +42,9 @@ class AdaptiveService:
                 (entry.date, entry.weight_kg) for entry in data.bodyweight_history
             ],
             training_load_score=data.training_load_score,
+            diet_style=getattr(data, 'diet_style', None),
+            protein_per_kg_override=getattr(data, 'protein_per_kg_override', None),
+            body_fat_pct=getattr(data, 'body_fat_pct', None),
         )
 
         # Pure computation — no side effects
