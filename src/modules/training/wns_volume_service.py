@@ -77,10 +77,10 @@ def get_volume_multiplier_for_goal(goal_type: str, rate_kg_per_week: float) -> f
     if goal_type == 'lose_fat':
         # 1 kg/week ≈ 1000 kcal/day deficit
         deficit_kcal = rate_kg_per_week * -1000
-        # Formula: 1.0 + (deficit * 0.0004)
-        # -250 kcal → 0.90x, -500 kcal → 0.80x, -1000 kcal → 0.60x
-        multiplier = 1.0 + (deficit_kcal * 0.0004)
-        return max(0.60, multiplier)  # Floor at 60% for aggressive cuts
+        # Formula: 1.0 + (deficit * 0.0003)
+        # -250 kcal → 0.93x, -500 kcal → 0.85x, -1000 kcal → 0.70x
+        multiplier = 1.0 + (deficit_kcal * 0.0003)
+        return max(0.70, multiplier)  # Floor at 70% for aggressive cuts
         
     elif goal_type == 'build_muscle':
         # 1 kg/week ≈ 1000 kcal/day surplus (though this is excessive)
