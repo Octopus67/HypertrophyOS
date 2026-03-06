@@ -6,11 +6,14 @@ Requirements: 7.4, 7.5
 from __future__ import annotations
 
 import uuid
+from datetime import time
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy import select
 
 from src.modules.auth.models import User
+from src.modules.feature_flags.service import FeatureFlagService, invalidate_cache
 from src.modules.notifications.models import DeviceToken, NotificationPreference
 from src.modules.notifications.schemas import DeviceTokenCreate, NotificationPreferenceUpdate
 from src.modules.notifications.service import NotificationService
@@ -136,8 +139,14 @@ async def test_update_preferences_partial_update(db_session):
 
 @pytest.mark.asyncio
 async def test_send_push_disabled_returns_zero(db_session):
+    invalidate_cache()
     user = await _create_user(db_session)
     svc = NotificationService(db_session)
+
+    # Enable the feature flag so we test the push_enabled preference
+    ff_svc = FeatureFlagService(db_session)
+    await ff_svc.set_flag("push_notifications", is_enabled=True)
+    invalidate_cache()
 
     # Disable push
     await svc.get_preferences(user.id)
@@ -154,8 +163,14 @@ async def test_send_push_disabled_returns_zero(db_session):
 
 @pytest.mark.asyncio
 async def test_send_push_enabled_with_tokens_returns_count(db_session):
+    invalidate_cache()
     user = await _create_user(db_session)
     svc = NotificationService(db_session)
+
+    # Enable the feature flag
+    ff_svc = FeatureFlagService(db_session)
+    await ff_svc.set_flag("push_notifications", is_enabled=True)
+    invalidate_cache()
 
     # Ensure push is enabled (default)
     await svc.get_preferences(user.id)
@@ -164,7 +179,19 @@ async def test_send_push_enabled_with_tokens_returns_count(db_session):
     await svc.register_device(user.id, DeviceTokenCreate(platform="ios", token="token_one"))
     await svc.register_device(user.id, DeviceTokenCreate(platform="android", token="token_two"))
 
-    count = await svc.send_push(user.id, "Workout Reminder", "Time to train!")
+    # Mock the Expo push API so the real HTTP call isn't made
+    import httpx
+
+    mock_response = AsyncMock(
+        status_code=200,
+        json=lambda: {"data": [{"status": "ok"}, {"status": "ok"}]},
+        raise_for_status=lambda: None,
+    )
+    with patch("src.services.push_notifications.PushNotificationService._get_client") as mock_get:
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.post = AsyncMock(return_value=mock_response)
+        mock_get.return_value = mock_client
+        count = await svc.send_push(user.id, "Workout Reminder", "Time to train!")
     assert count == 2
 
 
@@ -185,3 +212,76 @@ async def test_deactivate_token_sets_inactive(db_session):
     result = await db_session.execute(stmt)
     updated = result.scalar_one()
     assert updated.is_active is False
+
+
+# --- H1: Feature flag disabled → no notification sent ---
+
+@pytest.mark.asyncio
+async def test_send_push_feature_flag_disabled_returns_zero(db_session):
+    """When push_notifications feature flag is disabled, send_push returns 0."""
+    invalidate_cache()
+    user = await _create_user(db_session, email="ff_test@example.com")
+    svc = NotificationService(db_session)
+
+    # Ensure push prefs are enabled
+    await svc.get_preferences(user.id)
+    await svc.register_device(user.id, DeviceTokenCreate(platform="ios", token="ff_test_tok"))
+
+    # Feature flag does not exist (defaults to disabled)
+    count = await svc.send_push(user.id, "Test", "Body")
+    assert count == 0
+
+
+# --- H2: Quiet hours active → no notification sent ---
+
+@pytest.mark.asyncio
+async def test_send_push_quiet_hours_blocks_delivery(db_session):
+    """When current UTC time falls within quiet hours, send_push returns 0."""
+    invalidate_cache()
+    user = await _create_user(db_session, email="qh_test@example.com")
+    svc = NotificationService(db_session)
+
+    # Enable the feature flag
+    ff_svc = FeatureFlagService(db_session)
+    await ff_svc.set_flag("push_notifications", is_enabled=True)
+    invalidate_cache()
+
+    await svc.get_preferences(user.id)
+    # Set quiet hours to cover the entire day (00:00 → 23:59)
+    await svc.update_preferences(
+        user.id,
+        NotificationPreferenceUpdate(
+            quiet_hours_start=time(0, 0),
+            quiet_hours_end=time(23, 59),
+        ),
+    )
+    await svc.register_device(user.id, DeviceTokenCreate(platform="ios", token="qh_test_tok"))
+
+    count = await svc.send_push(user.id, "Test", "Body")
+    assert count == 0
+
+
+# --- H3: Per-type preference disabled → no notification sent ---
+
+@pytest.mark.asyncio
+async def test_send_push_type_preference_disabled_returns_zero(db_session):
+    """When the per-type preference (e.g. workout_reminders) is disabled, send_push returns 0."""
+    invalidate_cache()
+    user = await _create_user(db_session, email="type_test@example.com")
+    svc = NotificationService(db_session)
+
+    # Enable the feature flag
+    ff_svc = FeatureFlagService(db_session)
+    await ff_svc.set_flag("push_notifications", is_enabled=True)
+    invalidate_cache()
+
+    await svc.get_preferences(user.id)
+    # Disable workout_reminders specifically
+    await svc.update_preferences(
+        user.id,
+        NotificationPreferenceUpdate(workout_reminders=False),
+    )
+    await svc.register_device(user.id, DeviceTokenCreate(platform="ios", token="type_test_tok"))
+
+    count = await svc.send_push(user.id, "Workout!", "Time to train", notification_type="workout_reminder")
+    assert count == 0

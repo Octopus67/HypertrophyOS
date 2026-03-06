@@ -19,7 +19,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Repwise needs camera access to take progress photos and scan food barcodes.",
         "NSPhotoLibraryUsageDescription": "Repwise needs photo library access to select progress photos.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserNotificationsUsageDescription": "Repwise sends notifications for workout reminders, personal records, and weekly check-ins."
       }
     },
     "android": {
@@ -44,7 +45,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-notifications"
     ],
     "scheme": "repwise",
     "extra": {

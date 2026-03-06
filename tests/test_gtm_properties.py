@@ -459,10 +459,17 @@ async def test_notification_optout(push_enabled: bool, num_tokens: int, db_sessi
     """When push_enabled=False, send_push always returns 0.
     When push_enabled=True and at least one active token exists, send_push >= 1."""
     import uuid as _uuid
+    from src.modules.feature_flags.service import FeatureFlagService, invalidate_cache
 
+    invalidate_cache()
     unique = _uuid.uuid4().hex[:12]
     user = await _make_user(db_session, email=f"prop5_{unique}@test.com")
     svc = _NotificationService(db_session)
+
+    # Enable the feature flag so we actually test push_enabled preference
+    ff_svc = FeatureFlagService(db_session)
+    await ff_svc.set_flag("push_notifications", is_enabled=True)
+    invalidate_cache()
 
     # Set preference
     await svc.get_preferences(user.id)
@@ -475,7 +482,19 @@ async def test_notification_optout(push_enabled: bool, num_tokens: int, db_sessi
         tok = _DeviceTokenCreate(platform="android", token=f"{unique}_tok_{i}")
         await svc.register_device(user.id, tok)
 
-    count = await svc.send_push(user.id, "Test Title", "Test Body")
+    from unittest.mock import AsyncMock, patch
+    import httpx
+
+    mock_response = AsyncMock(
+        status_code=200,
+        json=lambda: {"data": [{"status": "ok"}] * max(num_tokens, 1)},
+        raise_for_status=lambda: None,
+    )
+    with patch("src.services.push_notifications.PushNotificationService._get_client") as mock_get:
+        mock_client = AsyncMock(spec=httpx.AsyncClient)
+        mock_client.post = AsyncMock(return_value=mock_response)
+        mock_get.return_value = mock_client
+        count = await svc.send_push(user.id, "Test Title", "Test Body")
 
     if not push_enabled:
         assert count == 0, f"Expected 0 when push disabled, got {count}"

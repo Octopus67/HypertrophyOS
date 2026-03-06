@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import Optional
 
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -17,6 +18,8 @@ from src.modules.adaptive.schemas import (
     SnapshotResponse,
 )
 from src.shared.pagination import PaginatedResult, PaginationParams
+
+logger = logging.getLogger(__name__)
 
 
 class AdaptiveService:
@@ -66,6 +69,21 @@ class AdaptiveService:
         )
         self.session.add(snapshot)
         await self.session.flush()
+
+        # --- Weekly check-in notification (Phase 4) ---
+        try:
+            from src.modules.notifications.service import NotificationService
+
+            notif_svc = NotificationService(self.session)
+            await notif_svc.send_push(
+                user_id=user_id,
+                title="Weekly Check-In Ready",
+                body="Review your progress",
+                notification_type="weekly_checkin",
+                data={"screen": "WeeklyCheckin"},
+            )
+        except Exception:
+            logger.exception("Weekly check-in notification failed")
 
         return SnapshotResponse.model_validate(snapshot)
 

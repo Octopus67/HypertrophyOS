@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     R2_SECRET_KEY: str = ""
     R2_ENDPOINT_URL: str = ""
     R2_BUCKET_NAME: str = "repwise-uploads"
+    EXPO_ACCESS_TOKEN: str = ""
     FCM_SERVER_KEY: str = ""
     APNS_KEY_ID: str = ""
     APNS_TEAM_ID: str = ""

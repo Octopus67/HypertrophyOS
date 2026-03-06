@@ -61,6 +61,22 @@ class TrainingService:
             for pr in prs
         ]
 
+        # --- PR celebration notification (Phase 4) ---
+        if prs:
+            try:
+                from src.modules.notifications.service import NotificationService
+
+                notif_svc = NotificationService(self.session)
+                await notif_svc.send_push(
+                    user_id=user_id,
+                    title="New PR!",
+                    body=f"You hit {len(prs)} personal record(s)!",
+                    notification_type="pr_celebration",
+                    data={"screen": "SessionDetail", "sessionId": str(training.id)},
+                )
+            except Exception:
+                logger.exception("PR celebration notification failed")
+
         # --- Achievement evaluation (never breaks session creation) ---
         achievement_unlocks: list[NewlyUnlockedAchievement] = []
         try:

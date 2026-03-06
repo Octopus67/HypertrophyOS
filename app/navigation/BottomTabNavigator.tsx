@@ -20,6 +20,7 @@ import { FounderStoryScreen } from '../screens/founder/FounderStoryScreen';
 
 import { ExercisePickerScreen } from '../screens/exercise-picker/ExercisePickerScreen';
 import { ProgressPhotosScreen } from '../screens/profile/ProgressPhotosScreen';
+import { NotificationSettingsScreen } from '../screens/settings/NotificationSettingsScreen';
 import { NutritionReportScreen } from '../screens/nutrition/NutritionReportScreen';
 import { MicronutrientDashboardScreen } from '../screens/nutrition/MicronutrientDashboardScreen';
 import { MealPlanScreen } from '../screens/meal-prep/MealPlanScreen';
@@ -87,6 +88,7 @@ export type ProfileStackParamList = {
   MealPlan: undefined;
   ShoppingList: { planId: string };
   PrepSunday: undefined;
+  NotificationSettings: undefined;
 };
 
 export type BottomTabParamList = {
@@ -100,7 +102,7 @@ export type BottomTabParamList = {
 
 export const TAB_NAMES: (keyof BottomTabParamList)[] = ['Home', 'Log', 'Analytics', 'Profile'];
 export const PROFILE_STACK_ROUTES: (keyof ProfileStackParamList)[] = [
-  'ProfileHome', 'Learn', 'ArticleDetail', 'Coaching', 'Community', 'FounderStory', 'ProgressPhotos', 'MealPlan', 'ShoppingList', 'PrepSunday',
+  'ProfileHome', 'Learn', 'ArticleDetail', 'Coaching', 'Community', 'FounderStory', 'ProgressPhotos', 'MealPlan', 'ShoppingList', 'PrepSunday', 'NotificationSettings',
 ];
 
 // ─── Custom card style interpolator ──────────────────────────────────────────
@@ -293,6 +295,7 @@ function ProfileStackScreen() {
       <ProfileStack.Screen name="MealPlan" component={MealPlanScreen} />
       <ProfileStack.Screen name="ShoppingList" component={ShoppingListView} />
       <ProfileStack.Screen name="PrepSunday" component={PrepSundayFlow} />
+      <ProfileStack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
     </ProfileStack.Navigator>
     </ErrorBoundary>
   );

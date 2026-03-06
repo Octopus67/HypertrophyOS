@@ -14,6 +14,7 @@ import { ForgotPasswordScreen } from './screens/auth/ForgotPasswordScreen';
 // import { OnboardingScreen } from './screens/onboarding/OnboardingScreen';
 import { OnboardingWizard } from './screens/onboarding/OnboardingWizard';
 import { initAnalytics } from './services/analytics';
+import { registerForPushNotifications, setupNotificationListeners, handleInitialNotification } from './services/notifications';
 import { useStore } from './store';
 import { useActiveWorkoutStore } from './store/activeWorkoutSlice';
 import { isPremiumWorkoutLoggerEnabled } from './utils/featureFlags';
@@ -167,6 +168,28 @@ export default function App() {
     // Small delay to allow AsyncStorage rehydration
     const timer = setTimeout(checkActiveWorkout, 500);
     return () => clearTimeout(timer);
+  }, [ready, isAuthenticated]);
+
+  // ── Push notifications: register token when authenticated ────────────────
+  useEffect(() => {
+    if (!ready || !isAuthenticated) return;
+    registerForPushNotifications().catch((err) =>
+      console.warn('[App] Push registration failed:', err),
+    );
+  }, [ready, isAuthenticated]);
+
+  // ── Push notifications: listeners + cold-start handler ─────────────────
+  useEffect(() => {
+    if (!ready || !isAuthenticated) return;
+    const nav = navigationRef.current
+      ? { navigate: (screen: string, params?: unknown) => {
+          const ref = navigationRef.current;
+          if (ref) (ref as { navigate: Function }).navigate(screen, params);
+        }}
+      : null;
+    const cleanup = setupNotificationListeners(nav);
+    handleInitialNotification(nav);
+    return cleanup;
   }, [ready, isAuthenticated]);
 
   if (!ready) {

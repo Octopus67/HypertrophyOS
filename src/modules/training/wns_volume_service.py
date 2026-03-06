@@ -282,4 +282,35 @@ class WNSVolumeService:
                 )
             )
 
+        # --- Volume warning notifications (Phase 4) ---
+        above_mrv_muscles = [r.muscle_group for r in results if r.status == "above_mrv"]
+        if above_mrv_muscles:
+            try:
+                from sqlalchemy import select, text, cast, String
+                from src.modules.notifications.models import NotificationLog
+                from src.modules.notifications.service import NotificationService
+
+                notif_svc = NotificationService(self.session)
+                for muscle in above_mrv_muscles:
+                    # Deduplicate: skip if volume_warning sent for this muscle in past 7 days
+                    stmt = select(NotificationLog.id).where(
+                        NotificationLog.user_id == user_id,
+                        NotificationLog.type == "volume_warning",
+                        cast(NotificationLog.data["muscle"], String) == muscle,
+                        NotificationLog.sent_at > text("NOW() - INTERVAL '7 days'"),
+                    ).limit(1)
+                    recent = (await self.session.execute(stmt)).scalar_one_or_none()
+                    if recent is not None:
+                        continue
+
+                    await notif_svc.send_push(
+                        user_id=user_id,
+                        title="Volume Warning",
+                        body=f"Your {muscle} volume is above MRV",
+                        notification_type="volume_warning",
+                        data={"screen": "Analytics", "muscle": muscle},
+                    )
+            except Exception:
+                logger.exception("Volume warning notification failed")
+
         return results
