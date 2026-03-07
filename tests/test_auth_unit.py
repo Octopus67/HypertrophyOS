@@ -143,7 +143,22 @@ async def test_refresh_invalid_token(client, override_get_db):
 
 
 # ------------------------------------------------------------------
-# 8. Rate limiting after threshold exceeded
+# 8. Apple OAuth returns 501 Not Implemented
+# ------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_apple_oauth_returns_501(client, override_get_db):
+    """POST /oauth/apple → 501, Apple Sign-In not yet implemented."""
+    resp = await client.post(
+        "/api/v1/auth/oauth/apple",
+        json={"provider": "apple", "token": "any-token"},
+    )
+    assert resp.status_code == 501
+    assert "not yet implemented" in resp.json()["detail"].lower()
+
+
+# ------------------------------------------------------------------
+# 9. Rate limiting after threshold exceeded
 # ------------------------------------------------------------------
 
 @pytest.mark.asyncio

@@ -91,13 +91,25 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 
 @pytest.fixture
 async def override_get_db(db_session: AsyncSession):
-    """Override the get_db dependency to use the test session."""
+    """Override the get_db dependency to use the test session.
+
+    Also patches ``async_session_factory`` so that background tasks
+    (e.g. ``_run_export``) use the same in-memory test database instead
+    of attempting to connect to the production PostgreSQL instance.
+    """
+    from unittest.mock import patch
+    from contextlib import asynccontextmanager
 
     async def _override() -> AsyncGenerator[AsyncSession, None]:
         yield db_session
 
+    @asynccontextmanager
+    async def _fake_factory():
+        yield db_session
+
     app.dependency_overrides[get_db] = _override
-    yield
+    with patch("src.config.database.async_session_factory", _fake_factory):
+        yield
     app.dependency_overrides.clear()
 
 

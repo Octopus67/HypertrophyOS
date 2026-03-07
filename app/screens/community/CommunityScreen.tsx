@@ -6,6 +6,7 @@ import { radius, spacing, typography } from '../../theme/tokens';
 import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../../components/common/Card';
 import { Icon } from '../../components/common/Icon';
+import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 
 const TELEGRAM_URL = 'https://t.me/repwiseCommunity';
 
@@ -17,7 +18,7 @@ const openTelegramLink = () => {
   }
 };
 
-export function CommunityScreen() {
+function CommunityScreenInner() {
   const c = useThemeColors();
   const styles = getThemedStyles(c);
   const navigation = useNavigation();
@@ -53,6 +54,14 @@ export function CommunityScreen() {
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+export function CommunityScreen() {
+  return (
+    <ErrorBoundary>
+      <CommunityScreenInner />
+    </ErrorBoundary>
   );
 }
 

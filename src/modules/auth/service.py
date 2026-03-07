@@ -96,9 +96,8 @@ class AuthService:
             except ValueError:
                 raise UnauthorizedError("Invalid Google token")
         elif provider == "apple":
-            # TODO: Implement Apple OAuth verification
-            provider_user_id = token  # placeholder
-            email = f"{hashlib.sha256(f'{provider}:{token}'.encode()).hexdigest()[:12]}@oauth.internal"
+            from fastapi import HTTPException
+            raise HTTPException(status_code=501, detail="Apple Sign-In not yet implemented")
         else:
             raise UnauthorizedError("Unsupported OAuth provider")
 

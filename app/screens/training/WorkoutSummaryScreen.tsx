@@ -24,6 +24,7 @@ import type { PersonalRecordResponse } from '../../types/training';
 import type { WorkoutSummaryResult } from '../../utils/workoutSummary';
 import { Icon } from '../../components/common/Icon';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
-export function WorkoutSummaryScreen({ route, navigation }: WorkoutSummaryScreenProps) {
+function WorkoutSummaryScreenInner({ route, navigation }: WorkoutSummaryScreenProps) {
   const c = useThemeColors();
   const styles = getThemedStyles(c);
   const { summary, duration, personalRecords, exerciseBreakdown } = route.params;
@@ -205,6 +206,14 @@ export function WorkoutSummaryScreen({ route, navigation }: WorkoutSummaryScreen
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+  );
+}
+
+export function WorkoutSummaryScreen(props: WorkoutSummaryScreenProps) {
+  return (
+    <ErrorBoundary>
+      <WorkoutSummaryScreenInner {...props} />
+    </ErrorBoundary>
   );
 }
 

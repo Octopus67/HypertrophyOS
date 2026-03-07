@@ -29,7 +29,7 @@ import {
   computeMacroSplit,
 } from '../../utils/onboardingCalculations';
 
-const STORAGE_KEY = 'rw_onboarding_wizard_v2';
+const STORAGE_KEY = 'rw_onboarding_wizard_v3';
 
 function getState() {
   return useOnboardingStore.getState();
@@ -221,35 +221,37 @@ describe('20.3 Optional Screens Skipped → Defaults', () => {
 // ─── State Persistence Tests ────────────────────────────────────────────────
 
 describe('State Persistence (localStorage)', () => {
-  test('after updateField, localStorage has the updated value', () => {
+  test('after updateField, localStorage has the updated value', async () => {
     getState().updateField('weightKg', 95);
+    await new Promise((r) => setTimeout(r, 0));
     const raw = localStorageMock.getItem(STORAGE_KEY);
     expect(raw).not.toBeNull();
     const parsed = JSON.parse(raw!);
-    expect(parsed.weightKg).toBe(95);
+    expect(parsed.version).toBe(3);
+    expect(parsed.state.weightKg).toBe(95);
   });
 
-  test('after reset(), localStorage key is removed', () => {
+  test('after reset(), localStorage key is removed', async () => {
     getState().updateField('weightKg', 95);
+    await new Promise((r) => setTimeout(r, 0));
     expect(localStorageMock.getItem(STORAGE_KEY)).not.toBeNull();
 
     getState().reset();
+    await new Promise((r) => setTimeout(r, 0));
     expect(localStorageMock.getItem(STORAGE_KEY)).toBeNull();
   });
 
   test('store initializes from localStorage if data exists', () => {
-    // Seed localStorage with custom state
-    const seeded = { currentStep: 4, weightKg: 88, sex: 'female' };
+    // Seed localStorage with v3 format
+    const seeded = { version: 3, state: { currentStep: 4, weightKg: 88, sex: 'female' } };
     localStorageMock.setItem(STORAGE_KEY, JSON.stringify(seeded));
 
-    // Destroy and recreate the store to trigger loadState
-    // Zustand stores are singletons, so we test via the persistence read path
-    // by verifying the saveState/loadState round-trip
     const raw = localStorageMock.getItem(STORAGE_KEY);
     const parsed = JSON.parse(raw!);
-    expect(parsed.currentStep).toBe(4);
-    expect(parsed.weightKg).toBe(88);
-    expect(parsed.sex).toBe('female');
+    expect(parsed.version).toBe(3);
+    expect(parsed.state.currentStep).toBe(4);
+    expect(parsed.state.weightKg).toBe(88);
+    expect(parsed.state.sex).toBe('female');
   });
 });
 
@@ -455,7 +457,7 @@ describe('computeAge edge cases', () => {
 
 describe('Persistence edge cases', () => {
   test('corrupted localStorage JSON → store uses defaults', () => {
-    localStorageMock.setItem('rw_onboarding_wizard_v2', 'not-valid-json{{{');
+    localStorageMock.setItem(STORAGE_KEY, 'not-valid-json{{{');
     // The store's loadState catches JSON.parse errors and returns null
     // Since the store is a singleton, we verify the catch path works
     // by checking that the store still functions after corruption
@@ -463,25 +465,29 @@ describe('Persistence edge cases', () => {
     expect(getState().weightKg).toBe(100);
   });
 
-  test('setStep also persists to localStorage', () => {
+  test('setStep also persists to localStorage', async () => {
     getState().setStep(5);
-    const raw = localStorageMock.getItem('rw_onboarding_wizard_v2');
+    await new Promise((r) => setTimeout(r, 0));
+    const raw = localStorageMock.getItem(STORAGE_KEY);
     expect(raw).not.toBeNull();
     const parsed = JSON.parse(raw!);
-    expect(parsed.currentStep).toBe(5);
+    expect(parsed.version).toBe(3);
+    expect(parsed.state.currentStep).toBe(5);
   });
 
-  test('multiple rapid updateField calls → all persisted correctly', () => {
+  test('multiple rapid updateField calls → all persisted correctly', async () => {
     getState().updateField('weightKg', 80);
     getState().updateField('heightCm', 175);
     getState().updateField('sex', 'female');
     getState().updateField('goalType', 'lose_fat');
 
-    const raw = localStorageMock.getItem('rw_onboarding_wizard_v2');
+    await new Promise((r) => setTimeout(r, 0));
+    const raw = localStorageMock.getItem(STORAGE_KEY);
     const parsed = JSON.parse(raw!);
-    expect(parsed.weightKg).toBe(80);
-    expect(parsed.heightCm).toBe(175);
-    expect(parsed.sex).toBe('female');
-    expect(parsed.goalType).toBe('lose_fat');
+    expect(parsed.version).toBe(3);
+    expect(parsed.state.weightKg).toBe(80);
+    expect(parsed.state.heightCm).toBe(175);
+    expect(parsed.state.sex).toBe('female');
+    expect(parsed.state.goalType).toBe('lose_fat');
   });
 });

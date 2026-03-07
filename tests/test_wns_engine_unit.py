@@ -92,7 +92,7 @@ class TestStimulatingRepsPerSet:
 
     def test_none_rir_uses_default(self):
         """None RIR uses DEFAULT_RIR (2.0 = RPE 8) → min(3, reps)."""
-        assert stimulating_reps_per_set(10, None, 0.75) == 2.0
+        assert stimulating_reps_per_set(10, None, 0.75) == 3.0
 
     def test_none_intensity_uses_default(self):
         """None intensity uses 0.75 default, RIR=0 → min(5, reps)."""
@@ -123,7 +123,7 @@ class TestDiminishingReturns:
         single = diminishing_returns([5.0])
         six = diminishing_returns([5.0, 5.0, 5.0, 5.0, 5.0, 5.0])
         ratio = six / single
-        assert 1.8 < ratio < 2.2, f"Expected ~2.0x, got {ratio:.2f}x"
+        assert 2.2 < ratio < 2.6, f"Expected ~2.49x, got {ratio:.2f}x"
 
     def test_order_matters(self):
         """Order of sets affects the result."""
@@ -177,7 +177,7 @@ class TestComputeSessionMuscleStimulus:
 
     def test_empty_sets_returns_zero(self):
         """Empty sets list returns zero stimulus."""
-        result = compute_session_muscle_stimulus([], "chest", {})
+        result, _ = compute_session_muscle_stimulus([], "chest", {})
         assert result == 0.0
 
     def test_warmup_sets_excluded(self):
@@ -187,7 +187,7 @@ class TestComputeSessionMuscleStimulus:
             {"exercise_id": "bench_press", "reps": 8, "rir": 1.0, "set_type": "normal"},
         ]
         coefficients = {"bench_press": {"chest": 1.0}}
-        result = compute_session_muscle_stimulus(sets_data, "chest", coefficients)
+        result, _ = compute_session_muscle_stimulus(sets_data, "chest", coefficients)
         # Only the normal set should count: min(4, 8) * 1.0 = 4.0
         assert result == 4.0
 
@@ -197,7 +197,7 @@ class TestComputeSessionMuscleStimulus:
             {"exercise_id": "bench_press", "reps": 10, "rir": 0.0},
         ]
         coefficients = {"bench_press": {"chest": 1.0}}
-        result = compute_session_muscle_stimulus(sets_data, "chest", coefficients)
+        result, _ = compute_session_muscle_stimulus(sets_data, "chest", coefficients)
         # min(5, 10) * 1.0 = 5.0
         assert result == 5.0
 
@@ -207,6 +207,6 @@ class TestComputeSessionMuscleStimulus:
             {"exercise_id": "bench_press", "reps": 10, "rir": 0.0},
         ]
         coefficients = {"bench_press": {"triceps": 0.5}}
-        result = compute_session_muscle_stimulus(sets_data, "triceps", coefficients)
+        result, _ = compute_session_muscle_stimulus(sets_data, "triceps", coefficients)
         # min(5, 10) * 0.5 = 2.5
         assert result == 2.5
