@@ -229,7 +229,7 @@ class AuthService:
         from src.services.email_service import EmailService, generate_otp
 
         code = generate_otp()
-        code_hash = pwd_context.hash(code)
+        code_hash = bcrypt.hashpw(code.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
 
         reset_code = PasswordResetCode(
@@ -265,7 +265,7 @@ class AuthService:
         codes = result.scalars().all()
 
         for rc in codes:
-            if pwd_context.verify(code, rc.code_hash):
+            if bcrypt.checkpw(code.encode("utf-8"), rc.code_hash.encode("utf-8")):
                 rc.used = True
                 user.hashed_password = _hash_password(new_password)
                 await self.session.flush()
@@ -282,7 +282,7 @@ class AuthService:
         from src.services.email_service import EmailService, generate_otp
 
         code = generate_otp()
-        code_hash = pwd_context.hash(code)
+        code_hash = bcrypt.hashpw(code.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
 
         verification = EmailVerificationCode(
@@ -311,7 +311,7 @@ class AuthService:
         codes = result.scalars().all()
 
         for vc in codes:
-            if pwd_context.verify(code, vc.code_hash):
+            if bcrypt.checkpw(code.encode("utf-8"), vc.code_hash.encode("utf-8")):
                 vc.used = True
                 user = await self.session.get(User, user_id)
                 if user:
