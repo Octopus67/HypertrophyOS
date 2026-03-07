@@ -225,9 +225,9 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
           </View>
           <Text style={{ color: getThemeColors().text.secondary, fontSize: typography.size.sm, lineHeight: typography.lineHeight.sm, flex: 1 }}>
             I agree to the{' '}
-            <Text style={{ color: getThemeColors().accent.primary, textDecorationLine: 'underline' }} onPress={() => Linking.openURL('https://repwise.app/terms')} accessibilityRole="link">Terms of Service</Text>
+            <Text style={{ color: getThemeColors().accent.primary, textDecorationLine: 'underline' }} onPress={() => Linking.openURL('https://www.termsfeed.com/blog/sample-terms-of-service-template/')} accessibilityRole="link">Terms of Service</Text>
             {' '}and{' '}
-            <Text style={{ color: getThemeColors().accent.primary, textDecorationLine: 'underline' }} onPress={() => Linking.openURL('https://repwise.app/privacy')} accessibilityRole="link">Privacy Policy</Text>
+            <Text style={{ color: getThemeColors().accent.primary, textDecorationLine: 'underline' }} onPress={() => Linking.openURL('https://www.termsfeed.com/blog/sample-privacy-policy-template/')} accessibilityRole="link">Privacy Policy</Text>
           </Text>
         </TouchableOpacity>
 
