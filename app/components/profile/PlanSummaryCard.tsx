@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography, letterSpacing as ls } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, letterSpacing as ls } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { Icon } from '../common/Icon';
 import { Button } from '../common/Button';
@@ -36,9 +36,9 @@ const DASH = '—';
 
 function LabelValue({ label, value }: { label: string; value: string }) {
   return (
-    <View style={styles.labelValue}>
-      <Text style={[styles.label, { color: colors.text.muted }]}>{label}</Text>
-      <Text style={[styles.value, value === DASH && styles.valueMuted]}>
+    <View style={getStyles().labelValue}>
+      <Text style={[getStyles().label, { color: getThemeColors().text.muted }]}>{label}</Text>
+      <Text style={[getStyles().value, value === DASH && getStyles().valueMuted]}>
         {value}
       </Text>
     </View>
@@ -53,18 +53,19 @@ export function PlanSummaryCard({
   onEdit,
 }: PlanSummaryCardProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const fields = formatSummaryFields(metrics, goals, adaptiveTargets, unitSystem);
 
   return (
     <Card>
       {/* Section header */}
-      <View style={styles.header}>
-        <Icon name="clipboard" size={20} color={c.accent.primary} />
-        <Text style={[styles.sectionTitle, { color: c.text.primary }]}>My Plan</Text>
+      <View style={getStyles().header}>
+        <Icon name="clipboard" size={20} color={getThemeColors().accent.primary} />
+        <Text style={[getStyles().sectionTitle, { color: getThemeColors().text.primary }]}>My Plan</Text>
       </View>
 
       {/* Body stats row */}
-      <View style={styles.row}>
+      <View style={getStyles().row}>
         <LabelValue label="Weight" value={fields.weight} />
         <LabelValue label="Height" value={fields.height} />
         <LabelValue label="Body Fat" value={fields.bodyFat} />
@@ -72,44 +73,44 @@ export function PlanSummaryCard({
       </View>
 
       {/* Goals row */}
-      <View style={styles.row}>
+      <View style={getStyles().row}>
         <LabelValue label="Goal" value={fields.goalType} />
         <LabelValue label="Target" value={fields.targetWeight} />
         <LabelValue label="Rate" value={fields.goalRate} />
       </View>
 
       {/* TDEE targets grid */}
-      <View style={[styles.divider, { backgroundColor: c.border.subtle }]} />
-      <Text style={[styles.targetsHeader, { color: c.text.secondary }]}>TDEE Targets</Text>
-      <View style={styles.targetsGrid}>
-        <View style={styles.targetItem}>
-          <Text style={[styles.targetValue, { color: c.macro.calories }, fields.calories === DASH && styles.valueMuted]}>
+      <View style={[getStyles().divider, { backgroundColor: getThemeColors().border.subtle }]} />
+      <Text style={[getStyles().targetsHeader, { color: getThemeColors().text.secondary }]}>TDEE Targets</Text>
+      <View style={getStyles().targetsGrid}>
+        <View style={getStyles().targetItem}>
+          <Text style={[getStyles().targetValue, { color: getThemeColors().macro.calories }, fields.calories === DASH && getStyles().valueMuted]}>
             {fields.calories}
           </Text>
-          <Text style={[styles.targetLabel, { color: c.text.muted }]}>kcal</Text>
+          <Text style={[getStyles().targetLabel, { color: getThemeColors().text.muted }]}>kcal</Text>
         </View>
-        <View style={styles.targetItem}>
-          <Text style={[styles.targetValue, { color: c.macro.protein }, fields.protein === DASH && styles.valueMuted]}>
+        <View style={getStyles().targetItem}>
+          <Text style={[getStyles().targetValue, { color: getThemeColors().macro.protein }, fields.protein === DASH && getStyles().valueMuted]}>
             {fields.protein}
           </Text>
-          <Text style={[styles.targetLabel, { color: c.text.muted }]}>protein</Text>
+          <Text style={[getStyles().targetLabel, { color: getThemeColors().text.muted }]}>protein</Text>
         </View>
-        <View style={styles.targetItem}>
-          <Text style={[styles.targetValue, { color: c.macro.carbs }, fields.carbs === DASH && styles.valueMuted]}>
+        <View style={getStyles().targetItem}>
+          <Text style={[getStyles().targetValue, { color: getThemeColors().macro.carbs }, fields.carbs === DASH && getStyles().valueMuted]}>
             {fields.carbs}
           </Text>
-          <Text style={[styles.targetLabel, { color: c.text.muted }]}>carbs</Text>
+          <Text style={[getStyles().targetLabel, { color: getThemeColors().text.muted }]}>carbs</Text>
         </View>
-        <View style={styles.targetItem}>
-          <Text style={[styles.targetValue, { color: c.macro.fat }, fields.fat === DASH && styles.valueMuted]}>
+        <View style={getStyles().targetItem}>
+          <Text style={[getStyles().targetValue, { color: getThemeColors().macro.fat }, fields.fat === DASH && getStyles().valueMuted]}>
             {fields.fat}
           </Text>
-          <Text style={[styles.targetLabel, { color: c.text.muted }]}>fat</Text>
+          <Text style={[getStyles().targetLabel, { color: getThemeColors().text.muted }]}>fat</Text>
         </View>
       </View>
 
       {/* Edit CTA */}
-      <View style={styles.buttonContainer}>
+      <View style={getStyles().buttonContainer}>
         <Button title="Edit My Plan" onPress={onEdit} variant="secondary" />
       </View>
     </Card>
@@ -117,7 +118,10 @@ export function PlanSummaryCard({
 }
 
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -125,7 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   sectionTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
   },
@@ -140,26 +144,26 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[1],
   },
   value: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
   valueMuted: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   divider: {
     height: 1,
-    backgroundColor: colors.border.subtle,
+    backgroundColor: getThemeColors().border.subtle,
     marginBottom: spacing[3],
   },
   targetsHeader: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     textTransform: 'uppercase',
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   targetLabel: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
   },

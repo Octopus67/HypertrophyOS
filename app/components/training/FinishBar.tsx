@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { formatMiniSummary } from '../../utils/workoutSummaryFormatter';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface FinishBarProps {
   exerciseCount: number;
@@ -21,6 +21,7 @@ export const FinishBar = ({
   onFinish,
 }: FinishBarProps) => {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const summary = formatMiniSummary({
     exerciseCount,
     completedSetCount,
@@ -49,22 +50,22 @@ export const FinishBar = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     height: 72,
-    backgroundColor: colors.bg.base,
+    backgroundColor: getThemeColors().bg.base,
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
     paddingHorizontal: spacing[4],
     justifyContent: 'center',
   },
   summaryText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     marginBottom: spacing[1],
   },
   button: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.md,
     paddingVertical: spacing[3],
     alignItems: 'center',
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   buttonText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: typography.weight.bold,
     fontSize: typography.size.md,
   },

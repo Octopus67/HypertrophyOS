@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 const STYLES = [
   { value: 'balanced', title: 'Balanced', desc: 'Even split of carbs and fats' },
@@ -14,6 +15,8 @@ interface Props {
 }
 
 export function DietStylePicker({ value, onChange }: Props) {
+  const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Diet style</Text>
@@ -37,36 +40,36 @@ export function DietStylePicker({ value, onChange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { marginBottom: spacing[3] },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
     marginBottom: spacing[2],
   },
   card: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     padding: spacing[3],
     marginBottom: spacing[2],
   },
   cardActive: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.base,
   },
-  titleActive: { color: colors.accent.primary },
+  titleActive: { color: getThemeColors().accent.primary },
   desc: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     marginTop: spacing[0.5],

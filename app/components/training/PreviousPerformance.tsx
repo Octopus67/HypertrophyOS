@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { formatWeight } from '../../utils/unitConversion';
 import { useStore } from '../../store';
 import { useSkeletonPulse } from '../../hooks/useSkeletonPulse';
@@ -21,6 +21,7 @@ interface PreviousPerformanceData {
 
 export function PreviousPerformance({ exerciseName }: PreviousPerformanceProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const unitSystem = useStore((s) => s.unitSystem);
   const [data, setData] = useState<PreviousPerformanceData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +66,7 @@ export function PreviousPerformance({ exerciseName }: PreviousPerformanceProps) 
   if (!data) {
     return (
       <View style={styles.container}>
-        <Text style={[styles.firstTime, { color: c.text.muted }]}>First time</Text>
+        <Text style={[styles.firstTime, { color: getThemeColors().text.muted }]}>First time</Text>
       </View>
     );
   }
@@ -74,7 +75,7 @@ export function PreviousPerformance({ exerciseName }: PreviousPerformanceProps) 
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.previousText, { color: c.text.secondary }]}>{formatted}</Text>
+      <Text style={[styles.previousText, { color: getThemeColors().text.secondary }]}>{formatted}</Text>
     </View>
   );
 }
@@ -91,22 +92,22 @@ export function formatPreviousPerformance(
   return `Last time: ${formatWeight(weightKg, unitSystem)} × ${reps}`;
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     paddingTop: spacing[1],
     paddingBottom: spacing[1],
   },
   skeleton: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
   },
   firstTime: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     fontStyle: 'italic',
   },
   previousText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
   },
 });

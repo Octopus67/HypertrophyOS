@@ -6,8 +6,8 @@ import Animated, {
   withTiming,
   interpolateColor,
 } from 'react-native-reanimated';
-import { colors, radius, spacing, typography, motion } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, motion } from '../../theme/tokens';
+import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
 import { usePressAnimation } from '../../hooks/usePressAnimation';
 import { useHoverState } from '../../hooks/useHoverState';
 
@@ -28,15 +28,15 @@ export function getFilterPillStyles(active: boolean): {
 } {
   if (active) {
     return {
-      backgroundColor: colors.accent.primaryMuted,
-      borderColor: colors.accent.primary,
-      textColor: colors.accent.primary,
+      backgroundColor: getThemeColors().accent.primaryMuted,
+      borderColor: getThemeColors().accent.primary,
+      textColor: getThemeColors().accent.primary,
     };
   }
   return {
-    backgroundColor: colors.bg.surface,
-    borderColor: colors.border.subtle,
-    textColor: colors.text.muted,
+    backgroundColor: getThemeColors().bg.surface,
+    borderColor: getThemeColors().border.subtle,
+    textColor: getThemeColors().text.muted,
   };
 }
 
@@ -56,12 +56,12 @@ export function FilterPill({ label, active, onPress }: FilterPillProps) {
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1],
-      [c.bg.surface, c.accent.primaryMuted],
+      [getThemeColors().bg.surface, getThemeColors().accent.primaryMuted],
     );
     const borderColor = interpolateColor(
       progress.value,
       [0, 1],
-      [c.border.subtle, c.accent.primary],
+      [getThemeColors().border.subtle, getThemeColors().accent.primary],
     );
     return { backgroundColor, borderColor };
   });
@@ -70,13 +70,13 @@ export function FilterPill({ label, active, onPress }: FilterPillProps) {
     const color = interpolateColor(
       progress.value,
       [0, 1],
-      [c.text.muted, c.accent.primary],
+      [getThemeColors().text.muted, getThemeColors().accent.primary],
     );
     return { color };
   });
 
   const hoverBorderStyle = Platform.OS === 'web' && isHovered
-    ? { borderColor: c.accent.primary }
+    ? { borderColor: getThemeColors().accent.primary }
     : undefined;
 
   return (

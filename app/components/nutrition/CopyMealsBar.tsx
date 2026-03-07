@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { colors, spacing, typography, radius, opacityScale } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius, opacityScale } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import api from '../../services/api';
 
 interface CopyMealsBarProps {
@@ -19,6 +19,7 @@ interface CopyMealsBarProps {
 
 export function CopyMealsBar({ targetDate, onCopyComplete }: CopyMealsBarProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [loading, setLoading] = useState(false);
   const [showDateInput, setShowDateInput] = useState(false);
   const [sourceDate, setSourceDate] = useState('');
@@ -76,9 +77,9 @@ export function CopyMealsBar({ targetDate, onCopyComplete }: CopyMealsBarProps) 
           activeOpacity={0.7}
         >
           {loading && !showDateInput ? (
-            <ActivityIndicator color={c.text.primary} size="small" />
+            <ActivityIndicator color={getThemeColors().text.primary} size="small" />
           ) : (
-            <Text style={[styles.buttonText, { color: c.text.primary }]}>Copy Yesterday</Text>
+            <Text style={[styles.buttonText, { color: getThemeColors().text.primary }]}>Copy Yesterday</Text>
           )}
         </TouchableOpacity>
 
@@ -88,18 +89,18 @@ export function CopyMealsBar({ targetDate, onCopyComplete }: CopyMealsBarProps) 
           disabled={loading}
           activeOpacity={0.7}
         >
-          <Text style={[styles.buttonText, { color: c.text.primary }]}>Copy from Date</Text>
+          <Text style={[styles.buttonText, { color: getThemeColors().text.primary }]}>Copy from Date</Text>
         </TouchableOpacity>
       </View>
 
       {showDateInput && (
         <View style={styles.dateInputRow}>
           <TextInput
-            style={[styles.dateInput, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+            style={[styles.dateInput, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
             value={sourceDate}
             onChangeText={setSourceDate}
             placeholder="YYYY-MM-DD"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
             autoFocus
           />
           <TouchableOpacity
@@ -109,9 +110,9 @@ export function CopyMealsBar({ targetDate, onCopyComplete }: CopyMealsBarProps) 
             activeOpacity={0.7}
           >
             {loading ? (
-              <ActivityIndicator color={c.text.primary} size="small" />
+              <ActivityIndicator color={getThemeColors().text.primary} size="small" />
             ) : (
-              <Text style={[styles.goButtonText, { color: c.text.primary }]}>Copy</Text>
+              <Text style={[styles.goButtonText, { color: getThemeColors().text.primary }]}>Copy</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -121,7 +122,7 @@ export function CopyMealsBar({ targetDate, onCopyComplete }: CopyMealsBarProps) 
 }
 
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     marginBottom: spacing[3],
   },
@@ -131,10 +132,10 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     paddingVertical: spacing[2],
     alignItems: 'center',
     minHeight: 44,
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: typography.size.sm,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
   },
@@ -156,17 +157,17 @@ const styles = StyleSheet.create({
   },
   dateInput: {
     flex: 1,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
   },
   goButton: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[4],
     justifyContent: 'center',
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
   },
   goButtonText: {
     fontSize: typography.size.sm,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.sm,
   },

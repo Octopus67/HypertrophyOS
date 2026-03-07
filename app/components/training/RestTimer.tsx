@@ -8,8 +8,8 @@ import {
   Modal,
 } from 'react-native';
 import Animated, { Layout } from 'react-native-reanimated';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 import { formatTimer } from '../../utils/formatTimer';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
@@ -31,6 +31,7 @@ export function RestTimer({
   onSettingsChange,
 }: RestTimerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [remaining, setRemaining] = useState(durationSeconds);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onCompleteRef = useRef(onComplete);
@@ -134,59 +135,59 @@ export function RestTimer({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleSkip}>
-      <View style={[styles.overlay, { backgroundColor: c.bg.overlay }]}>
+      <View style={[styles.overlay, { backgroundColor: getThemeColors().bg.overlay }]}>
         <View style={styles.container}>
           {/* Header with gear icon */}
           <View style={styles.header}>
-            <Text style={[styles.label, { color: c.text.secondary }]}>Rest Timer</Text>
+            <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Rest Timer</Text>
             {onSettingsChange && (
               <TouchableOpacity
                 style={styles.gearBtn}
                 onPress={toggleSettings}
                 activeOpacity={0.7}
               >
-                <Icon name="gear" size={18} color={c.text.muted} />
+                <Icon name="gear" size={18} color={getThemeColors().text.muted} />
               </TouchableOpacity>
             )}
           </View>
 
-          <Text style={[styles.countdown, { color: c.accent.primary }]}>{formatTimer(remaining)}</Text>
+          <Text style={[styles.countdown, { color: getThemeColors().accent.primary }]}>{formatTimer(remaining)}</Text>
 
           {/* Inline settings panel */}
           {settingsOpen && (
-            <Animated.View layout={reduceMotion ? undefined : Layout} style={[styles.settingsPanel, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+            <Animated.View layout={reduceMotion ? undefined : Layout} style={[styles.settingsPanel, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}>
               <View style={styles.settingsRow}>
-                <Text style={[styles.settingsLabel, { color: c.text.secondary }]}>Compound rest (s)</Text>
+                <Text style={[styles.settingsLabel, { color: getThemeColors().text.secondary }]}>Compound rest (s)</Text>
                 <TextInput
-                  style={[styles.settingsInput, { color: c.text.primary, backgroundColor: c.bg.surface, borderColor: c.border.default }]}
+                  style={[styles.settingsInput, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.default }]}
                   value={compoundDraft}
                   onChangeText={setCompoundDraft}
                   keyboardType="numeric"
-                  placeholderTextColor={c.text.muted}
+                  placeholderTextColor={getThemeColors().text.muted}
                 />
               </View>
               <View style={styles.settingsRow}>
-                <Text style={[styles.settingsLabel, { color: c.text.secondary }]}>Isolation rest (s)</Text>
+                <Text style={[styles.settingsLabel, { color: getThemeColors().text.secondary }]}>Isolation rest (s)</Text>
                 <TextInput
-                  style={[styles.settingsInput, { color: c.text.primary, backgroundColor: c.bg.surface, borderColor: c.border.default }]}
+                  style={[styles.settingsInput, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.default }]}
                   value={isolationDraft}
                   onChangeText={setIsolationDraft}
                   keyboardType="numeric"
-                  placeholderTextColor={c.text.muted}
+                  placeholderTextColor={getThemeColors().text.muted}
                 />
               </View>
               <TouchableOpacity
-                style={[styles.settingsSaveBtn, { backgroundColor: c.accent.primary }]}
+                style={[styles.settingsSaveBtn, { backgroundColor: getThemeColors().accent.primary }]}
                 onPress={handleSaveSettings}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.settingsSaveText, { color: c.text.primary }]}>Save</Text>
+                <Text style={[styles.settingsSaveText, { color: getThemeColors().text.primary }]}>Save</Text>
               </TouchableOpacity>
             </Animated.View>
           )}
 
-          <TouchableOpacity style={[styles.skipBtn, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]} onPress={handleSkip} activeOpacity={0.7}>
-            <Text style={[styles.skipText, { color: c.text.secondary }]}>Skip</Text>
+          <TouchableOpacity style={[styles.skipBtn, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]} onPress={handleSkip} activeOpacity={0.7}>
+            <Text style={[styles.skipText, { color: getThemeColors().text.secondary }]}>Skip</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -199,10 +200,10 @@ RestTimer.updateDrafts = undefined as
   | ((compound: number, isolation: number) => void)
   | undefined;
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: colors.bg.overlay,
+    backgroundColor: getThemeColors().bg.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
     fontWeight: typography.weight.medium,
@@ -228,32 +229,32 @@ const styles = StyleSheet.create({
   },
   gearIcon: {},
   countdown: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size['3xl'] * 2,
     lineHeight: typography.lineHeight['5xl'],
     fontWeight: typography.weight.bold,
     marginBottom: spacing[6],
   },
   skipBtn: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[3],
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   skipText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
     fontWeight: typography.weight.medium,
   },
   // Settings panel
   settingsPanel: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     padding: spacing[4],
     marginBottom: spacing[4],
     width: '100%',
@@ -265,32 +266,32 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   settingsLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     flex: 1,
   },
   settingsInput: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
     minWidth: 70,
     textAlign: 'center',
   },
   settingsSaveBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     paddingVertical: spacing[2],
     alignItems: 'center',
   },
   settingsSaveText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.semibold,

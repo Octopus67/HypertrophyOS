@@ -11,8 +11,8 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
-import { colors, radius, spacing, typography, letterSpacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, letterSpacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Button } from '../../components/common/Button';
 import api from '../../services/api';
 
@@ -151,6 +151,7 @@ function validateBodyStats(data: OnboardingData): ValidationErrors {
 
 export function OnboardingScreen({ onComplete, onSkip }: OnboardingScreenProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [step, setStep] = useState(1);
   const [data, setData] = useState<OnboardingData>(INITIAL_DATA);
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -242,24 +243,24 @@ export function OnboardingScreen({ onComplete, onSkip }: OnboardingScreenProps) 
 
   if (restoring) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: c.bg.base }]}>
-        <View style={styles.centered}>
-          <ActivityIndicator color={c.accent.primary} size="large" />
+      <SafeAreaView style={[getStyles().container, { backgroundColor: getThemeColors().bg.base }]}>
+        <View style={getStyles().centered}>
+          <ActivityIndicator color={getThemeColors().accent.primary} size="large" />
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.bg.base }]}>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+    <SafeAreaView style={[getStyles().container, { backgroundColor: getThemeColors().bg.base }]}>
+      <ScrollView contentContainerStyle={getStyles().scroll} keyboardShouldPersistTaps="handled">
         {/* Progress indicator */}
-        <View style={styles.progressRow}>
+        <View style={getStyles().progressRow}>
           {[1, 2, 3].map((s) => (
-            <View key={s} style={[styles.dot, s === step && styles.dotActive, s < step && styles.dotDone]} />
+            <View key={s} style={[getStyles().dot, s === step && getStyles().dotActive, s < step && getStyles().dotDone]} />
           ))}
         </View>
-        <Text style={[styles.stepLabel, { color: c.text.muted }]}>Step {step} of 3</Text>
+        <Text style={[getStyles().stepLabel, { color: getThemeColors().text.muted }]}>Step {step} of 3</Text>
 
         {step === 1 && (
           <StepGoal
@@ -318,28 +319,28 @@ function StepGoal({
   const c = useThemeColors();
   return (
     <View>
-      <Text style={[styles.heading, { color: c.text.primary }]}>What's your goal?</Text>
-      <Text style={[styles.subheading, { color: c.text.secondary }]}>We'll tailor your targets accordingly</Text>
+      <Text style={[getStyles().heading, { color: getThemeColors().text.primary }]}>What's your goal?</Text>
+      <Text style={[getStyles().subheading, { color: getThemeColors().text.secondary }]}>We'll tailor your targets accordingly</Text>
 
       {GOALS.map((g) => (
         <TouchableOpacity
           key={g.type}
-          style={[styles.goalCard, selected === g.type && styles.goalCardSelected]}
+          style={[getStyles().goalCard, selected === g.type && getStyles().goalCardSelected]}
           onPress={() => onSelect(g.type)}
           activeOpacity={0.7}
         >
-          <Text style={styles.goalEmoji}>{g.emoji}</Text>
+          <Text style={getStyles().goalEmoji}>{g.emoji}</Text>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.goalTitle, { color: c.text.primary }]}>{g.title}</Text>
-            <Text style={[styles.goalDesc, { color: c.text.secondary }]}>{g.desc}</Text>
+            <Text style={[getStyles().goalTitle, { color: getThemeColors().text.primary }]}>{g.title}</Text>
+            <Text style={[getStyles().goalDesc, { color: getThemeColors().text.secondary }]}>{g.desc}</Text>
           </View>
-          {selected === g.type && <Text style={[styles.checkmark, { color: c.accent.primary }]}>✓</Text>}
+          {selected === g.type && <Text style={[getStyles().checkmark, { color: getThemeColors().accent.primary }]}>✓</Text>}
         </TouchableOpacity>
       ))}
 
-      <Button title="Next" onPress={onNext} disabled={!selected} style={styles.mainBtn} />
-      <TouchableOpacity onPress={onSkip} style={styles.skipLink}>
-        <Text style={[styles.skipText, { color: c.text.muted }]}>Skip for now</Text>
+      <Button title="Next" onPress={onNext} disabled={!selected} style={getStyles().mainBtn} />
+      <TouchableOpacity onPress={onSkip} style={getStyles().skipLink}>
+        <Text style={[getStyles().skipText, { color: getThemeColors().text.muted }]}>Skip for now</Text>
       </TouchableOpacity>
     </View>
   );
@@ -369,65 +370,65 @@ function StepBodyStats({
   const c = useThemeColors();
   return (
     <View>
-      <Text style={[styles.heading, { color: c.text.primary }]}>Your body stats</Text>
-      <Text style={[styles.subheading, { color: c.text.secondary }]}>Used to calculate your targets</Text>
+      <Text style={[getStyles().heading, { color: getThemeColors().text.primary }]}>Your body stats</Text>
+      <Text style={[getStyles().subheading, { color: getThemeColors().text.secondary }]}>Used to calculate your targets</Text>
 
-      {apiError ? <Text style={[styles.error, { color: c.semantic.negative, backgroundColor: c.semantic.negativeSubtle }]}>{apiError}</Text> : null}
+      {apiError ? <Text style={[getStyles().error, { color: getThemeColors().semantic.negative, backgroundColor: getThemeColors().semantic.negativeSubtle }]}>{apiError}</Text> : null}
 
-      <Text style={[styles.fieldLabel, { color: c.text.secondary }]}>Height (cm)</Text>
+      <Text style={[getStyles().fieldLabel, { color: getThemeColors().text.secondary }]}>Height (cm)</Text>
       <TextInput
-        style={[styles.input, errors.height_cm ? styles.inputError : null]}
+        style={[getStyles().input, errors.height_cm ? getStyles().inputError : null]}
         placeholder="175"
-        placeholderTextColor={c.text.muted}
+        placeholderTextColor={getThemeColors().text.muted}
         keyboardType="numeric"
         value={data.height_cm}
         onChangeText={(v) => onUpdate('height_cm', v)}
       />
-      {errors.height_cm ? <Text style={[styles.fieldError, { color: c.semantic.negative }]}>{errors.height_cm}</Text> : null}
+      {errors.height_cm ? <Text style={[getStyles().fieldError, { color: getThemeColors().semantic.negative }]}>{errors.height_cm}</Text> : null}
 
-      <Text style={[styles.fieldLabel, { color: c.text.secondary }]}>Weight (kg)</Text>
+      <Text style={[getStyles().fieldLabel, { color: getThemeColors().text.secondary }]}>Weight (kg)</Text>
       <TextInput
-        style={[styles.input, errors.weight_kg ? styles.inputError : null]}
+        style={[getStyles().input, errors.weight_kg ? getStyles().inputError : null]}
         placeholder="80"
-        placeholderTextColor={c.text.muted}
+        placeholderTextColor={getThemeColors().text.muted}
         keyboardType="numeric"
         value={data.weight_kg}
         onChangeText={(v) => onUpdate('weight_kg', v)}
       />
-      {errors.weight_kg ? <Text style={[styles.fieldError, { color: c.semantic.negative }]}>{errors.weight_kg}</Text> : null}
+      {errors.weight_kg ? <Text style={[getStyles().fieldError, { color: getThemeColors().semantic.negative }]}>{errors.weight_kg}</Text> : null}
 
-      <Text style={[styles.fieldLabel, { color: c.text.secondary }]}>Body Fat % (optional)</Text>
+      <Text style={[getStyles().fieldLabel, { color: getThemeColors().text.secondary }]}>Body Fat % (optional)</Text>
       <TextInput
-        style={[styles.input, errors.body_fat_pct ? styles.inputError : null]}
+        style={[getStyles().input, errors.body_fat_pct ? getStyles().inputError : null]}
         placeholder="15"
-        placeholderTextColor={c.text.muted}
+        placeholderTextColor={getThemeColors().text.muted}
         keyboardType="numeric"
         value={data.body_fat_pct}
         onChangeText={(v) => onUpdate('body_fat_pct', v)}
       />
-      {errors.body_fat_pct ? <Text style={[styles.fieldError, { color: c.semantic.negative }]}>{errors.body_fat_pct}</Text> : null}
+      {errors.body_fat_pct ? <Text style={[getStyles().fieldError, { color: getThemeColors().semantic.negative }]}>{errors.body_fat_pct}</Text> : null}
 
-      <Text style={[styles.fieldLabel, { color: c.text.secondary }]}>Age</Text>
+      <Text style={[getStyles().fieldLabel, { color: getThemeColors().text.secondary }]}>Age</Text>
       <TextInput
-        style={[styles.input, errors.age ? styles.inputError : null]}
+        style={[getStyles().input, errors.age ? getStyles().inputError : null]}
         placeholder="25"
-        placeholderTextColor={c.text.muted}
+        placeholderTextColor={getThemeColors().text.muted}
         keyboardType="numeric"
         value={data.age}
         onChangeText={(v) => onUpdate('age', v)}
       />
-      {errors.age ? <Text style={[styles.fieldError, { color: c.semantic.negative }]}>{errors.age}</Text> : null}
+      {errors.age ? <Text style={[getStyles().fieldError, { color: getThemeColors().semantic.negative }]}>{errors.age}</Text> : null}
 
       {/* Sex toggle */}
-      <Text style={[styles.fieldLabel, { color: c.text.secondary }]}>Sex</Text>
-      <View style={styles.toggleRow}>
+      <Text style={[getStyles().fieldLabel, { color: getThemeColors().text.secondary }]}>Sex</Text>
+      <View style={getStyles().toggleRow}>
         {(['male', 'female'] as Sex[]).map((s) => (
           <TouchableOpacity
             key={s}
-            style={[styles.toggleBtn, data.sex === s && styles.toggleBtnActive]}
+            style={[getStyles().toggleBtn, data.sex === s && getStyles().toggleBtnActive]}
             onPress={() => onUpdate('sex', s)}
           >
-            <Text style={[styles.toggleText, data.sex === s && styles.toggleTextActive]}>
+            <Text style={[getStyles().toggleText, data.sex === s && getStyles().toggleTextActive]}>
               {s.charAt(0).toUpperCase() + s.slice(1)}
             </Text>
           </TouchableOpacity>
@@ -435,29 +436,29 @@ function StepBodyStats({
       </View>
 
       {/* Activity level */}
-      <Text style={[styles.fieldLabel, { color: c.text.secondary }]}>Activity Level</Text>
-      <View style={styles.activityRow}>
+      <Text style={[getStyles().fieldLabel, { color: getThemeColors().text.secondary }]}>Activity Level</Text>
+      <View style={getStyles().activityRow}>
         {ACTIVITY_LEVELS.map((al) => (
           <TouchableOpacity
             key={al.value}
-            style={[styles.activityChip, data.activity_level === al.value && styles.activityChipActive]}
+            style={[getStyles().activityChip, data.activity_level === al.value && getStyles().activityChipActive]}
             onPress={() => onUpdate('activity_level', al.value)}
           >
-            <Text style={[styles.activityText, data.activity_level === al.value && styles.activityTextActive]}>
+            <Text style={[getStyles().activityText, data.activity_level === al.value && getStyles().activityTextActive]}>
               {al.label}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <Button title="Calculate Targets" onPress={onSubmit} loading={loading} style={styles.mainBtn} />
+      <Button title="Calculate Targets" onPress={onSubmit} loading={loading} style={getStyles().mainBtn} />
 
-      <View style={styles.bottomRow}>
+      <View style={getStyles().bottomRow}>
         <TouchableOpacity onPress={onBack}>
-          <Text style={[styles.backText, { color: c.accent.primary }]}>← Back</Text>
+          <Text style={[getStyles().backText, { color: getThemeColors().accent.primary }]}>← Back</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onSkip}>
-          <Text style={[styles.skipText, { color: c.text.muted }]}>Skip for now</Text>
+          <Text style={[getStyles().skipText, { color: getThemeColors().text.muted }]}>Skip for now</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -520,24 +521,24 @@ function ProteinRangeBar({ value }: { value: number }) {
 
   return (
     <View style={infoStyles.rangeContainer}>
-      <Text style={[infoStyles.rangeLabelLeft, { color: c.text.muted }]}>1.2 g/kg</Text>
-      <View style={[infoStyles.rangeTrack, { backgroundColor: c.border.default }]}>
+      <Text style={[infoStyles.rangeLabelLeft, { color: getThemeColors().text.muted }]}>1.2 g/kg</Text>
+      <View style={[infoStyles.rangeTrack, { backgroundColor: getThemeColors().border.default }]}>
         <View
           style={[
             infoStyles.rangeOptimalZone,
             {
-              backgroundColor: c.semantic.positiveSubtle,
+              backgroundColor: getThemeColors().semantic.positiveSubtle,
               left: `${((1.6 - minRange) / (maxRange - minRange)) * 100}%`,
               width: `${((2.2 - 1.6) / (maxRange - minRange)) * 100}%`,
             },
           ]}
         />
         <View style={[infoStyles.rangeMarker, { left: `${pct}%` }]}>
-          <View style={[infoStyles.rangeMarkerDot, { backgroundColor: c.accent.primary, borderColor: c.text.primary }]} />
-          <Text style={[infoStyles.rangeMarkerLabel, { color: c.accent.primary }]}>{value.toFixed(1)}</Text>
+          <View style={[infoStyles.rangeMarkerDot, { backgroundColor: getThemeColors().accent.primary, borderColor: getThemeColors().text.primary }]} />
+          <Text style={[infoStyles.rangeMarkerLabel, { color: getThemeColors().accent.primary }]}>{value.toFixed(1)}</Text>
         </View>
       </View>
-      <Text style={[infoStyles.rangeLabelRight, { color: c.text.muted }]}>2.5 g/kg</Text>
+      <Text style={[infoStyles.rangeLabelRight, { color: getThemeColors().text.muted }]}>2.5 g/kg</Text>
     </View>
   );
 }
@@ -563,20 +564,20 @@ function MacroInfoPanel({
     const rangeEnd = data.goal_type === 'cutting' ? 'higher' : data.goal_type === 'bulking' ? 'middle' : 'middle';
     const goalPhrase = data.goal_type === 'cutting' ? 'cut' : data.goal_type === 'bulking' ? 'bulk' : 'maintain';
     return (
-      <View style={[infoStyles.panel, { backgroundColor: c.bg.surface }]}>
-        <Text style={[infoStyles.sectionHeader, { color: c.text.primary }]}>How we calculated this</Text>
-        <Text style={[infoStyles.sectionBody, { color: c.text.secondary }]}>
+      <View style={[infoStyles.panel, { backgroundColor: getThemeColors().bg.surface }]}>
+        <Text style={[infoStyles.sectionHeader, { color: getThemeColors().text.primary }]}>How we calculated this</Text>
+        <Text style={[infoStyles.sectionBody, { color: getThemeColors().text.secondary }]}>
           We set your protein at {proteinPerKgNum.toFixed(1)} g/kg of bodyweight. Research consistently shows 1.6–2.2 g/kg is optimal for muscle protein synthesis during {goalLabel} phases. We've targeted the {rangeEnd} end of this range based on your goal.
         </Text>
-        <Text style={[infoStyles.sectionHeader, { color: c.text.primary }]}>Why protein matters</Text>
-        <Text style={[infoStyles.sectionBody, { color: c.text.secondary }]}>
+        <Text style={[infoStyles.sectionHeader, { color: getThemeColors().text.primary }]}>Why protein matters</Text>
+        <Text style={[infoStyles.sectionBody, { color: getThemeColors().text.secondary }]}>
           Protein is the building block of muscle tissue. During a {goalPhrase}, adequate protein:{'\n'}
           (1) maximizes muscle protein synthesis{'\n'}
           (2) preserves lean mass during caloric deficits{'\n'}
           (3) increases satiety helping you feel full longer{'\n'}
           (4) has the highest thermic effect of food (~20-30% of calories burned during digestion).
         </Text>
-        <Text style={[infoStyles.sectionHeader, { color: c.text.primary }]}>Optimal range</Text>
+        <Text style={[infoStyles.sectionHeader, { color: getThemeColors().text.primary }]}>Optimal range</Text>
         <ProteinRangeBar value={proteinPerKgNum} />
       </View>
     );
@@ -586,13 +587,13 @@ function MacroInfoPanel({
     const carbKcal = Math.round(target_carbs_g * 4);
     const carbPct = target_calories > 0 ? Math.round((carbKcal / target_calories) * 100) : 0;
     return (
-      <View style={[infoStyles.panel, { backgroundColor: c.bg.surface }]}>
-        <Text style={[infoStyles.sectionHeader, { color: c.text.primary }]}>How we calculated this</Text>
-        <Text style={[infoStyles.sectionBody, { color: c.text.secondary }]}>
+      <View style={[infoStyles.panel, { backgroundColor: getThemeColors().bg.surface }]}>
+        <Text style={[infoStyles.sectionHeader, { color: getThemeColors().text.primary }]}>How we calculated this</Text>
+        <Text style={[infoStyles.sectionBody, { color: getThemeColors().text.secondary }]}>
           Carbs make up the remaining calories after protein and fat are set. Your {Math.round(target_carbs_g)}g provides {carbKcal} kcal ({carbPct}% of total calories).
         </Text>
-        <Text style={[infoStyles.sectionHeader, { color: c.text.primary }]}>Why carbs matter</Text>
-        <Text style={[infoStyles.sectionBody, { color: c.text.secondary }]}>
+        <Text style={[infoStyles.sectionHeader, { color: getThemeColors().text.primary }]}>Why carbs matter</Text>
+        <Text style={[infoStyles.sectionBody, { color: getThemeColors().text.secondary }]}>
           Carbohydrates are your body's preferred fuel for high-intensity training. They:{'\n'}
           (1) replenish muscle glycogen depleted during resistance training{'\n'}
           (2) support training performance and recovery{'\n'}
@@ -601,8 +602,8 @@ function MacroInfoPanel({
         </Text>
         {data.goal_type === 'cutting' && (
           <>
-            <Text style={[infoStyles.sectionHeader, { color: c.text.primary }]}>Note for cutting</Text>
-            <Text style={[infoStyles.sectionBody, { color: c.text.secondary }]}>
+            <Text style={[infoStyles.sectionHeader, { color: getThemeColors().text.primary }]}>Note for cutting</Text>
+            <Text style={[infoStyles.sectionBody, { color: getThemeColors().text.secondary }]}>
               We keep carbs moderate during a cut to maintain training intensity while still achieving a deficit.
             </Text>
           </>
@@ -616,13 +617,13 @@ function MacroInfoPanel({
   const fatPct = target_calories > 0 ? Math.round((fatKcal / target_calories) * 100) : 0;
   const fatPerKg = weightKg > 0 ? (target_fat_g / weightKg).toFixed(1) : '—';
   return (
-    <View style={[infoStyles.panel, { backgroundColor: c.bg.surface }]}>
-      <Text style={[infoStyles.sectionHeader, { color: c.text.primary }]}>How we calculated this</Text>
-      <Text style={[infoStyles.sectionBody, { color: c.text.secondary }]}>
+    <View style={[infoStyles.panel, { backgroundColor: getThemeColors().bg.surface }]}>
+      <Text style={[infoStyles.sectionHeader, { color: getThemeColors().text.primary }]}>How we calculated this</Text>
+      <Text style={[infoStyles.sectionBody, { color: getThemeColors().text.secondary }]}>
         We set fat at ~{fatPct}% of total calories ({fatPerKg} g/kg bodyweight). The minimum recommended is 0.5 g/kg for hormonal health.
       </Text>
-      <Text style={[infoStyles.sectionHeader, { color: c.text.primary }]}>Why fat matters</Text>
-      <Text style={[infoStyles.sectionBody, { color: c.text.secondary }]}>
+      <Text style={[infoStyles.sectionHeader, { color: getThemeColors().text.primary }]}>Why fat matters</Text>
+      <Text style={[infoStyles.sectionBody, { color: getThemeColors().text.secondary }]}>
         Dietary fat is essential for:{'\n'}
         (1) testosterone and estrogen production — critical for muscle growth and recovery{'\n'}
         (2) absorption of fat-soluble vitamins (A, D, E, K){'\n'}
@@ -661,53 +662,53 @@ function StepResults({
   return (
     <View>
       {/* Personal greeting */}
-      <Text style={[styles.heading, { color: c.text.primary }]}>Your plan is ready! 🎯</Text>
-      <Text style={[styles.subheading, { color: c.text.secondary }]}>
+      <Text style={[getStyles().heading, { color: getThemeColors().text.primary }]}>Your plan is ready! 🎯</Text>
+      <Text style={[getStyles().subheading, { color: getThemeColors().text.secondary }]}>
         Here's what we've built for you — backed by science, tailored to your body.
       </Text>
 
       {/* TDEE breakdown card */}
-      <View style={[resultStyles.card, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.subtle }]}>
-        <Text style={[resultStyles.cardTitle, { color: c.text.secondary }]}>Your Energy Expenditure</Text>
+      <View style={[resultStyles.card, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.subtle }]}>
+        <Text style={[resultStyles.cardTitle, { color: getThemeColors().text.secondary }]}>Your Energy Expenditure</Text>
         <View style={resultStyles.tdeeRow}>
           <View style={resultStyles.tdeeItem}>
-            <Text style={[resultStyles.tdeeValue, { color: c.text.primary }]}>{bmr}</Text>
-            <Text style={[resultStyles.tdeeLabel, { color: c.text.muted }]}>BMR (kcal)</Text>
+            <Text style={[resultStyles.tdeeValue, { color: getThemeColors().text.primary }]}>{bmr}</Text>
+            <Text style={[resultStyles.tdeeLabel, { color: getThemeColors().text.muted }]}>BMR (kcal)</Text>
           </View>
-          <Text style={[resultStyles.tdeeArrow, { color: c.text.muted }]}>→</Text>
+          <Text style={[resultStyles.tdeeArrow, { color: getThemeColors().text.muted }]}>→</Text>
           <View style={resultStyles.tdeeItem}>
-            <Text style={[resultStyles.tdeeValue, { color: c.accent.primary }]}>{tdee}</Text>
-            <Text style={[resultStyles.tdeeLabel, { color: c.text.muted }]}>TDEE (kcal)</Text>
+            <Text style={[resultStyles.tdeeValue, { color: getThemeColors().accent.primary }]}>{tdee}</Text>
+            <Text style={[resultStyles.tdeeLabel, { color: getThemeColors().text.muted }]}>TDEE (kcal)</Text>
           </View>
         </View>
-        <Text style={[resultStyles.explanation, { color: c.text.secondary }]}>
+        <Text style={[resultStyles.explanation, { color: getThemeColors().text.secondary }]}>
           Your body burns approximately {bmr} kcal/day at rest (BMR) and ~{tdee} kcal/day with your
           activity level (TDEE).
         </Text>
       </View>
 
       {/* Goal-adjusted targets card */}
-      <View style={[resultStyles.card, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.subtle }]}>
-        <Text style={[resultStyles.cardTitle, { color: c.text.secondary }]}>Daily Calorie Target</Text>
-        <Text style={[resultStyles.calorieValue, { color: c.chart.calories }]}>
+      <View style={[resultStyles.card, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.subtle }]}>
+        <Text style={[resultStyles.cardTitle, { color: getThemeColors().text.secondary }]}>Daily Calorie Target</Text>
+        <Text style={[resultStyles.calorieValue, { color: getThemeColors().chart.calories }]}>
           {Math.round(target_calories)}
           <Text style={resultStyles.calorieUnit}> kcal/day</Text>
         </Text>
-        <Text style={[resultStyles.explanation, { color: c.text.secondary }]}>{getGoalExplanation(data.goal_type)}</Text>
+        <Text style={[resultStyles.explanation, { color: getThemeColors().text.secondary }]}>{getGoalExplanation(data.goal_type)}</Text>
       </View>
 
       {/* Macro breakdown with rationale + expandable info panels */}
-      <View style={[resultStyles.card, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.subtle }]}>
-        <Text style={[resultStyles.cardTitle, { color: c.text.secondary }]}>Macro Breakdown</Text>
+      <View style={[resultStyles.card, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.subtle }]}>
+        <Text style={[resultStyles.cardTitle, { color: getThemeColors().text.secondary }]}>Macro Breakdown</Text>
 
         {/* Protein row */}
         <View style={resultStyles.macroRow}>
-          <View style={[resultStyles.macroIndicator, { backgroundColor: c.semantic.positive }]} />
+          <View style={[resultStyles.macroIndicator, { backgroundColor: getThemeColors().semantic.positive }]} />
           <View style={resultStyles.macroContent}>
             <View style={resultStyles.macroHeader}>
-              <Text style={[resultStyles.macroValue, { color: c.text.primary, flex: 1 }]}>
+              <Text style={[resultStyles.macroValue, { color: getThemeColors().text.primary, flex: 1 }]}>
                 {Math.round(target_protein_g)}g Protein
-                <Text style={[resultStyles.macroMeta, { color: c.text.muted }]}> ({proteinPerKg} g/kg bodyweight)</Text>
+                <Text style={[resultStyles.macroMeta, { color: getThemeColors().text.muted }]}> ({proteinPerKg} g/kg bodyweight)</Text>
               </Text>
               <TouchableOpacity
                 onPress={() => toggleMacro('protein')}
@@ -716,10 +717,10 @@ function StepResults({
                 accessibilityLabel="Protein info"
                 accessibilityRole="button"
               >
-                <Text style={[infoStyles.infoBtnText, { color: c.accent.primary }, expandedMacro === 'protein' && infoStyles.infoBtnTextActive]}>ⓘ</Text>
+                <Text style={[infoStyles.infoBtnText, { color: getThemeColors().accent.primary }, expandedMacro === 'protein' && infoStyles.infoBtnTextActive]}>ⓘ</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[resultStyles.macroRationale, { color: c.text.secondary }]}>
+            <Text style={[resultStyles.macroRationale, { color: getThemeColors().text.secondary }]}>
               Higher protein supports muscle recovery and satiety
             </Text>
           </View>
@@ -730,10 +731,10 @@ function StepResults({
 
         {/* Carbs row */}
         <View style={resultStyles.macroRow}>
-          <View style={[resultStyles.macroIndicator, { backgroundColor: c.semantic.warning }]} />
+          <View style={[resultStyles.macroIndicator, { backgroundColor: getThemeColors().semantic.warning }]} />
           <View style={resultStyles.macroContent}>
             <View style={resultStyles.macroHeader}>
-              <Text style={[resultStyles.macroValue, { color: c.text.primary, flex: 1 }]}>
+              <Text style={[resultStyles.macroValue, { color: getThemeColors().text.primary, flex: 1 }]}>
                 {Math.round(target_carbs_g)}g Carbs
               </Text>
               <TouchableOpacity
@@ -743,10 +744,10 @@ function StepResults({
                 accessibilityLabel="Carbs info"
                 accessibilityRole="button"
               >
-                <Text style={[infoStyles.infoBtnText, { color: c.accent.primary }, expandedMacro === 'carbs' && infoStyles.infoBtnTextActive]}>ⓘ</Text>
+                <Text style={[infoStyles.infoBtnText, { color: getThemeColors().accent.primary }, expandedMacro === 'carbs' && infoStyles.infoBtnTextActive]}>ⓘ</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[resultStyles.macroRationale, { color: c.text.secondary }]}>
+            <Text style={[resultStyles.macroRationale, { color: getThemeColors().text.secondary }]}>
               Fuels your training sessions and recovery
             </Text>
           </View>
@@ -757,10 +758,10 @@ function StepResults({
 
         {/* Fat row */}
         <View style={resultStyles.macroRow}>
-          <View style={[resultStyles.macroIndicator, { backgroundColor: c.chart.calories }]} />
+          <View style={[resultStyles.macroIndicator, { backgroundColor: getThemeColors().chart.calories }]} />
           <View style={resultStyles.macroContent}>
             <View style={resultStyles.macroHeader}>
-              <Text style={[resultStyles.macroValue, { color: c.text.primary, flex: 1 }]}>
+              <Text style={[resultStyles.macroValue, { color: getThemeColors().text.primary, flex: 1 }]}>
                 {Math.round(target_fat_g)}g Fat
               </Text>
               <TouchableOpacity
@@ -770,10 +771,10 @@ function StepResults({
                 accessibilityLabel="Fat info"
                 accessibilityRole="button"
               >
-                <Text style={[infoStyles.infoBtnText, { color: c.accent.primary }, expandedMacro === 'fat' && infoStyles.infoBtnTextActive]}>ⓘ</Text>
+                <Text style={[infoStyles.infoBtnText, { color: getThemeColors().accent.primary }, expandedMacro === 'fat' && infoStyles.infoBtnTextActive]}>ⓘ</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[resultStyles.macroRationale, { color: c.text.secondary }]}>
+            <Text style={[resultStyles.macroRationale, { color: getThemeColors().text.secondary }]}>
               Essential for hormones, brain function, and nutrient absorption
             </Text>
           </View>
@@ -784,14 +785,14 @@ function StepResults({
       </View>
 
       {/* Training importance callout */}
-      <View style={[resultStyles.calloutCard, { backgroundColor: c.accent.primaryMuted, borderColor: c.accent.primary }]}>
-        <Text style={[resultStyles.calloutText, { color: c.text.primary }]}>{getTrainingCallout(data.goal_type)}</Text>
+      <View style={[resultStyles.calloutCard, { backgroundColor: getThemeColors().accent.primaryMuted, borderColor: getThemeColors().accent.primary }]}>
+        <Text style={[resultStyles.calloutText, { color: getThemeColors().text.primary }]}>{getTrainingCallout(data.goal_type)}</Text>
       </View>
 
-      <Button title="Get Started" onPress={onGetStarted} style={styles.mainBtn} />
+      <Button title="Get Started" onPress={onGetStarted} style={getStyles().mainBtn} />
 
-      <TouchableOpacity onPress={onSkip} style={styles.skipLink}>
-        <Text style={[styles.skipText, { color: c.text.muted }]}>Skip for now</Text>
+      <TouchableOpacity onPress={onSkip} style={getStyles().skipLink}>
+        <Text style={[getStyles().skipText, { color: getThemeColors().text.muted }]}>Skip for now</Text>
       </TouchableOpacity>
     </View>
   );
@@ -973,7 +974,10 @@ const resultStyles = StyleSheet.create({
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   scroll: { flexGrow: 1, padding: spacing[6], paddingBottom: spacing[12] },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -984,10 +988,10 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.border.default,
+    backgroundColor: getThemeColors().border.default,
   },
-  dotActive: { backgroundColor: colors.accent.primary, width: 24 },
-  dotDone: { backgroundColor: colors.accent.primary },
+  dotActive: { backgroundColor: getThemeColors().accent.primary, width: 24 },
+  dotDone: { backgroundColor: getThemeColors().accent.primary },
   stepLabel: {
     fontSize: typography.size.sm,
     textAlign: 'center',
@@ -1015,16 +1019,16 @@ const styles = StyleSheet.create({
   goalCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     padding: spacing[4],
     marginBottom: spacing[3],
   },
   goalCardSelected: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   goalEmoji: { fontSize: 28, marginRight: spacing[3] },
   goalTitle: {
@@ -1044,16 +1048,16 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.sm,
   },
   input: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
-    color: colors.text.primary,
+    borderColor: getThemeColors().border.subtle,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     padding: spacing[3],
     lineHeight: typography.lineHeight.base,
   },
-  inputError: { borderColor: colors.semantic.negative },
+  inputError: { borderColor: getThemeColors().semantic.negative },
   fieldError: {
     fontSize: typography.size.xs,
     marginTop: spacing[1],
@@ -1075,15 +1079,15 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     alignItems: 'center',
   },
   toggleBtnActive: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
-  toggleText: { color: colors.text.secondary, fontSize: typography.size.base, lineHeight: typography.lineHeight.base },
-  toggleTextActive: { color: colors.accent.primary, fontWeight: typography.weight.semibold },
+  toggleText: { color: getThemeColors().text.secondary, fontSize: typography.size.base, lineHeight: typography.lineHeight.base },
+  toggleTextActive: { color: getThemeColors().accent.primary, fontWeight: typography.weight.semibold },
 
   // Activity chips
   activityRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
@@ -1092,16 +1096,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     borderRadius: radius.full,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     minHeight: 44,
     justifyContent: 'center',
   },
   activityChipActive: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
-  activityText: { color: colors.text.secondary, fontSize: typography.size.sm, lineHeight: typography.lineHeight.sm },
-  activityTextActive: { color: colors.accent.primary, fontWeight: typography.weight.semibold },
+  activityText: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, lineHeight: typography.lineHeight.sm },
+  activityTextActive: { color: getThemeColors().accent.primary, fontWeight: typography.weight.semibold },
 
   // Buttons & links
   mainBtn: { marginTop: spacing[6] },

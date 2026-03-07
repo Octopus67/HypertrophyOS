@@ -1,10 +1,11 @@
-import { colors } from '../theme/tokens';
+;
+import { getThemeColors } from '../hooks/useThemeColors';
 
 // Semantic color constants matching the design token system
-const POSITIVE = colors.semantic.positive;
-const WARNING = colors.semantic.warning;
-const NEGATIVE = colors.semantic.negative;
-const MUTED = colors.text.muted;
+const POSITIVE = getThemeColors().semantic.positive;
+const WARNING = getThemeColors().semantic.warning;
+const NEGATIVE = getThemeColors().semantic.negative;
+const MUTED = getThemeColors().text.muted;
 
 /**
  * Returns a semantic color based on how close `actual` is to `target`.

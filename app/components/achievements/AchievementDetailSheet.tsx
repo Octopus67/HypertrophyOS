@@ -8,8 +8,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { ModalContainer } from '../common/ModalContainer';
 import { Icon, IconName } from '../common/Icon';
-import { colors, spacing, typography, radius, glowShadow } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius, glowShadow } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface AchievementDetailSheetProps {
   visible: boolean;
@@ -37,11 +37,11 @@ function getAchievementIcon(iconStr: string): IconName {
 }
 
 function getAchievementColor(iconStr: string): string {
-  if (iconStr.includes('bench') || iconStr.includes('squat') || iconStr.includes('dl') || iconStr.includes('deadlift')) return colors.macro.protein;
-  if (iconStr.includes('streak')) return colors.semantic.warning;
+  if (iconStr.includes('bench') || iconStr.includes('squat') || iconStr.includes('dl') || iconStr.includes('deadlift')) return getThemeColors().macro.protein;
+  if (iconStr.includes('streak')) return getThemeColors().semantic.warning;
   if (iconStr.includes('vol')) return '#8B5CF6';
-  if (iconStr.includes('nutr')) return colors.macro.calories;
-  return colors.accent.primary;
+  if (iconStr.includes('nutr')) return getThemeColors().macro.calories;
+  return getThemeColors().accent.primary;
 }
 
 function formatProgressText(category: string, currentValue: number | undefined, threshold: number, progress: number, unlocked: boolean): string {
@@ -75,6 +75,7 @@ function getCategoryLabel(category: string): string {
 
 export function AchievementDetailSheet({ visible, onClose, achievement }: AchievementDetailSheetProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const progressWidth = useSharedValue(0);
 
   useEffect(() => {
@@ -122,15 +123,15 @@ export function AchievementDetailSheet({ visible, onClose, achievement }: Achiev
             <Icon
               name={iconName}
               size={32}
-              color={achievement.unlocked ? categoryColor : c.text.muted}
+              color={achievement.unlocked ? categoryColor : getThemeColors().text.muted}
             />
           </View>
-          <Text style={[styles.title, { color: c.text.primary }]}>{achievement.title}</Text>
-          <Text style={[styles.category, { color: c.text.muted }]}>{getCategoryLabel(achievement.category)}</Text>
+          <Text style={[styles.title, { color: getThemeColors().text.primary }]}>{achievement.title}</Text>
+          <Text style={[styles.category, { color: getThemeColors().text.muted }]}>{getCategoryLabel(achievement.category)}</Text>
           {achievement.unlocked && achievement.unlocked_at && (
             <View style={styles.unlockedRow}>
-              <Icon name="check" size={14} color={c.semantic.positive} />
-              <Text style={[styles.unlockedDate, { color: c.semantic.positive }]}>
+              <Icon name="check" size={14} color={getThemeColors().semantic.positive} />
+              <Text style={[styles.unlockedDate, { color: getThemeColors().semantic.positive }]}>
                 Unlocked {new Date(achievement.unlocked_at).toLocaleDateString(undefined, { 
                   month: 'long', 
                   day: 'numeric',
@@ -143,40 +144,40 @@ export function AchievementDetailSheet({ visible, onClose, achievement }: Achiev
 
         {/* Progress */}
         <View style={styles.progressSection}>
-          <View style={[styles.progressTrack, { backgroundColor: c.bg.surfaceRaised }]}>
+          <View style={[styles.progressTrack, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
             <Animated.View 
               style={[
                 styles.progressFill, 
-                { backgroundColor: achievement.unlocked ? categoryColor : c.accent.primary },
+                { backgroundColor: achievement.unlocked ? categoryColor : getThemeColors().accent.primary },
                 achievement.unlocked && glowShadow(categoryColor, 4, 0.3),
                 progressStyle
               ]} 
             />
           </View>
-          <Text style={[styles.progressText, { color: c.text.secondary }]}>{progressText}</Text>
+          <Text style={[styles.progressText, { color: getThemeColors().text.secondary }]}>{progressText}</Text>
         </View>
 
         {/* Description */}
         <View style={styles.descriptionSection}>
-          <Text style={[styles.descriptionTitle, { color: c.text.primary }]}>About this achievement</Text>
-          <Text style={[styles.description, { color: c.text.secondary }]}>{achievement.description}</Text>
+          <Text style={[styles.descriptionTitle, { color: getThemeColors().text.primary }]}>About this achievement</Text>
+          <Text style={[styles.description, { color: getThemeColors().text.secondary }]}>{achievement.description}</Text>
           {!achievement.unlocked && (
-            <Text style={[styles.requirement, { color: c.text.muted }]}>
+            <Text style={[styles.requirement, { color: getThemeColors().text.muted }]}>
               You need {Math.ceil((1 - achievement.progress) * achievement.threshold)} more to unlock this
             </Text>
           )}
         </View>
 
         {/* Close Button */}
-        <TouchableOpacity style={[styles.closeButton, { backgroundColor: c.accent.primary }]} onPress={onClose}>
-          <Text style={[styles.closeButtonText, { color: c.text.primary }]}>Close</Text>
+        <TouchableOpacity style={[styles.closeButton, { backgroundColor: getThemeColors().accent.primary }]} onPress={onClose}>
+          <Text style={[styles.closeButtonText, { color: getThemeColors().text.primary }]}>Close</Text>
         </TouchableOpacity>
       </View>
     </ModalContainer>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   content: {
     paddingTop: spacing[2],
   },
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing[4],
@@ -196,13 +197,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.bold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     textAlign: 'center',
     marginBottom: spacing[1],
   },
   category: {
     fontSize: typography.size.sm,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: spacing[2],
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   },
   unlockedDate: {
     fontSize: typography.size.sm,
-    color: colors.semantic.positive,
+    color: getThemeColors().semantic.positive,
     fontWeight: typography.weight.medium,
   },
   progressSection: {
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     height: 8,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: 4,
     overflow: 'hidden',
     marginBottom: spacing[3],
@@ -233,7 +234,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: typography.size.base,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     textAlign: 'center',
     fontWeight: typography.weight.medium,
   },
@@ -243,22 +244,22 @@ const styles = StyleSheet.create({
   descriptionTitle: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginBottom: spacing[2],
   },
   description: {
     fontSize: typography.size.base,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     lineHeight: typography.lineHeight.base,
     marginBottom: spacing[3],
   },
   requirement: {
     fontSize: typography.size.sm,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontStyle: 'italic',
   },
   closeButton: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.md,
     paddingVertical: spacing[3],
     alignItems: 'center',
@@ -266,6 +267,6 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
   },
 });

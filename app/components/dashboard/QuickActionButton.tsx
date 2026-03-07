@@ -3,8 +3,8 @@ import { Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Card } from '../common/Card';
 import { usePressAnimation } from '../../hooks/usePressAnimation';
-import { colors, typography, spacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon, IconName } from '../common/Icon';
 
 interface QuickActionButtonProps {
@@ -25,6 +25,7 @@ export function QuickActionButton({
   onPress,
 }: QuickActionButtonProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const { animatedStyle, onPressIn, onPressOut } = usePressAnimation();
 
   return (
@@ -39,10 +40,10 @@ export function QuickActionButton({
           <View style={styles.iconArea}>
             <Icon name={icon} size={24} color={accentColor} />
           </View>
-          <Text style={[styles.label, { color: c.text.secondary }]}>{label}</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>{label}</Text>
           {completed && (
-            <View style={[styles.badge, { backgroundColor: c.semantic.positive }]} testID="checkmark-badge">
-              <Icon name="check" size={12} color={c.semantic.positive} />
+            <View style={[styles.badge, { backgroundColor: getThemeColors().semantic.positive }]} testID="checkmark-badge">
+              <Icon name="check" size={12} color={getThemeColors().semantic.positive} />
             </View>
           )}
         </Card>
@@ -51,7 +52,7 @@ export function QuickActionButton({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
     borderLeftWidth: 4,
     position: 'relative' as const,
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     marginTop: spacing[1],
   },
   badge: {
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: colors.semantic.positive,
+    backgroundColor: getThemeColors().semantic.positive,
     justifyContent: 'center',
     alignItems: 'center',
   },

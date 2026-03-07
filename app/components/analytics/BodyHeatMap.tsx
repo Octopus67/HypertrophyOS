@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Skeleton } from '../common/Skeleton';
 import { MUSCLE_REGIONS, BODY_OUTLINES } from './anatomicalPaths';
 import { BodySilhouette } from './BodySilhouette';
@@ -25,6 +25,7 @@ interface BodyHeatMapProps {
 
 export function BodyHeatMap({ muscleVolumes, onMusclePress, isLoading, error }: BodyHeatMapProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const safeVolumes = Array.isArray(muscleVolumes) ? muscleVolumes : [];
   const volumeMap = new Map<string, MuscleGroupVolume>(
     safeVolumes.map((v) => [v.muscle_group, v]),
@@ -43,8 +44,8 @@ export function BodyHeatMap({ muscleVolumes, onMusclePress, isLoading, error }: 
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={[styles.errorText, { color: c.semantic.negative }]}>Unable to load volume data</Text>
-        <Text style={[styles.errorDetail, { color: c.text.muted }]}>{error}</Text>
+        <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>Unable to load volume data</Text>
+        <Text style={[styles.errorDetail, { color: getThemeColors().text.muted }]}>{error}</Text>
       </View>
     );
   }
@@ -57,11 +58,11 @@ export function BodyHeatMap({ muscleVolumes, onMusclePress, isLoading, error }: 
   return (
     <View>
       {!hasData && (
-        <Text style={[styles.noDataText, { color: c.text.muted }]}>No training data for this week</Text>
+        <Text style={[styles.noDataText, { color: getThemeColors().text.muted }]}>No training data for this week</Text>
       )}
       <View style={styles.diagramRow}>
         <View style={styles.diagramCol}>
-          <Text style={[styles.viewLabel, { color: c.text.secondary }]}>Front</Text>
+          <Text style={[styles.viewLabel, { color: getThemeColors().text.secondary }]}>Front</Text>
           <BodySilhouette
             view="front"
             regions={frontRegions}
@@ -71,7 +72,7 @@ export function BodyHeatMap({ muscleVolumes, onMusclePress, isLoading, error }: 
           />
         </View>
         <View style={styles.diagramCol}>
-          <Text style={[styles.viewLabel, { color: c.text.secondary }]}>Back</Text>
+          <Text style={[styles.viewLabel, { color: getThemeColors().text.secondary }]}>Back</Text>
           <BodySilhouette
             view="back"
             regions={backRegions}
@@ -86,25 +87,25 @@ export function BodyHeatMap({ muscleVolumes, onMusclePress, isLoading, error }: 
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   skeletonContainer: { padding: spacing[4] },
   errorContainer: {
     padding: spacing[4],
     alignItems: 'center',
   },
   errorText: {
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[1],
   },
   errorDetail: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     textAlign: 'center',
   },
   noDataText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     textAlign: 'center',
     marginBottom: spacing[2],
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   },
   diagramCol: { flex: 1, alignItems: 'center' },
   viewLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[1],

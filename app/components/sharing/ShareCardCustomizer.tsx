@@ -10,8 +10,8 @@ import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert,
 } from 'react-native';
 import type ViewShot from 'react-native-view-shot';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
 import { ModalContainer } from '../common/ModalContainer';
 import { Button } from '../common/Button';
 import {
@@ -20,8 +20,10 @@ import {
   type ShareCardTheme,
 } from './WorkoutShareCard';
 import { captureWorkoutAsImage, shareImage, saveImageToGallery } from '../../services/sharing';
+import { trackShareCustomizationOpened, trackWorkoutShared } from '../../services/analytics';
 import type { TrainingSessionResponse } from '../../types/training';
 import type { UnitSystem } from '../../utils/unitConversion';
+import { useStore } from '../../store';
 
 interface ShareCardCustomizerProps {
   visible: boolean;
@@ -42,6 +44,12 @@ export function ShareCardCustomizer({
   const c = useThemeColors();
   const viewShotRef = useRef<ViewShot>(null);
   const [sharing, setSharing] = useState(false);
+  const userId = useStore(s => s.user?.id);
+  const username = useStore(s => s.profile?.displayName ?? undefined);
+
+  React.useEffect(() => {
+    if (visible) trackShareCustomizationOpened(session.id);
+  }, [visible, session.id]);
 
   const [options, setOptions] = useState<ShareCardOptions>({
     showExercises: true,
@@ -63,11 +71,12 @@ export function ShareCardCustomizer({
     try {
       const uri = await captureWorkoutAsImage(viewShotRef);
       if (!uri) { Alert.alert('Error', 'Failed to capture image.'); return; }
-      await shareImage(uri);
+      await shareImage(uri, { sessionId: session.id, userId: userId ?? undefined });
+      trackWorkoutShared(session.id);
     } finally {
       setSharing(false);
     }
-  }, []);
+  }, [session.id, userId]);
 
   const handleSave = useCallback(async () => {
     setSharing(true);
@@ -91,12 +100,15 @@ export function ShareCardCustomizer({
             session={session}
             unitSystem={unitSystem}
             options={options}
+            sessionId={session.id}
+            userId={userId}
+            username={username}
           />
         </View>
 
         {/* Options */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: c.text.muted }]}>OPTIONS</Text>
+          <Text style={[styles.sectionTitle, { color: getThemeColors().text.muted }]}>OPTIONS</Text>
 
           <ToggleRow
             label="Show Exercises"
@@ -117,7 +129,7 @@ export function ShareCardCustomizer({
 
         {/* Theme picker */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: c.text.muted }]}>THEME</Text>
+          <Text style={[styles.sectionTitle, { color: getThemeColors().text.muted }]}>THEME</Text>
           <View style={styles.themeRow}>
             {THEMES.map(t => (
               <TouchableOpacity
@@ -125,7 +137,7 @@ export function ShareCardCustomizer({
                 style={[
                   styles.themeSwatch,
                   { backgroundColor: t.color },
-                  options.theme === t.key && { borderColor: c.accent.primary, borderWidth: 2 },
+                  options.theme === t.key && { borderColor: getThemeColors().accent.primary, borderWidth: 2 },
                 ]}
                 onPress={() => setTheme(t.key)}
                 accessibilityLabel={`${t.label} theme`}
@@ -151,12 +163,12 @@ function ToggleRow({ label, value, onToggle }: { label: string; value: boolean; 
   const c = useThemeColors();
   return (
     <View style={styles.toggleRow}>
-      <Text style={[styles.toggleLabel, { color: c.text.primary }]}>{label}</Text>
+      <Text style={[styles.toggleLabel, { color: getThemeColors().text.primary }]}>{label}</Text>
       <Switch
         value={value}
         onValueChange={onToggle}
-        trackColor={{ false: colors.bg.surfaceRaised, true: colors.accent.primaryMuted }}
-        thumbColor={value ? colors.accent.primary : colors.text.muted}
+        trackColor={{ false: getThemeColors().bg.surfaceRaised, true: getThemeColors().accent.primaryMuted }}
+        thumbColor={value ? getThemeColors().accent.primary : getThemeColors().text.muted}
         accessibilityLabel={label}
       />
     </View>

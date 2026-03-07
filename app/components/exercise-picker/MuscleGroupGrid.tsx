@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import { FlatList, TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { MUSCLE_GROUP_CONFIG, type MuscleGroupConfig } from '../../config/muscleGroups';
 import { Exercise } from '../../types/exercise';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { MuscleGroupIcon } from './MuscleGroupIcon';
 
 interface MuscleGroupGridProps {
@@ -20,6 +20,7 @@ function hexToRgba(hex: string, alpha: number): string {
 
 export function MuscleGroupGrid({ exercises, onSelectMuscleGroup }: MuscleGroupGridProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const counts = useMemo(() => {
     const map: Record<string, number> = {};
     for (const ex of exercises) {
@@ -41,8 +42,8 @@ export function MuscleGroupGrid({ exercises, onSelectMuscleGroup }: MuscleGroupG
         <View style={[styles.abbrevCircle, { backgroundColor: item.color }]}>
           <MuscleGroupIcon muscleGroup={item.key} size={28} color="#FFFFFF" />
         </View>
-        <Text style={[styles.label, { color: c.text.primary }]}>{item.label}</Text>
-        <Text style={[styles.count, { color: c.text.muted }]}>{count} exercises</Text>
+        <Text style={[styles.label, { color: getThemeColors().text.primary }]}>{item.label}</Text>
+        <Text style={[styles.count, { color: getThemeColors().text.muted }]}>{count} exercises</Text>
       </TouchableOpacity>
     );
   };
@@ -60,7 +61,7 @@ export function MuscleGroupGrid({ exercises, onSelectMuscleGroup }: MuscleGroupG
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   grid: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
@@ -84,13 +85,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   label: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.semibold,
   },
   count: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     marginTop: 2,

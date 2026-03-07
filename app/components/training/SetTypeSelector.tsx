@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 import { Text, TouchableOpacity, StyleSheet, ActionSheetIOS, Platform } from 'react-native';
 import type { SetType } from '../../types/training';
 import { SET_TYPE_ABBREVIATIONS, SET_TYPE_LABELS } from '../../utils/setTypeLabels';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
 
 // Re-export for consumers that import from the component
 export { SET_TYPE_ABBREVIATIONS } from '../../utils/setTypeLabels';
@@ -16,10 +16,10 @@ interface SetTypeSelectorProps {
 const SET_TYPE_OPTIONS: SetType[] = ['normal', 'warm-up', 'drop-set', 'amrap'];
 
 const SET_TYPE_COLORS: Record<SetType, string> = {
-  normal: colors.text.secondary,
-  'warm-up': colors.text.muted,
-  'drop-set': colors.semantic.warning,
-  amrap: colors.accent.primary,
+  normal: getThemeColors().text.secondary,
+  'warm-up': getThemeColors().text.muted,
+  'drop-set': getThemeColors().semantic.warning,
+  amrap: getThemeColors().accent.primary,
 };
 
 export function SetTypeSelector({ value, onChange }: SetTypeSelectorProps) {

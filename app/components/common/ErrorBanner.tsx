@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { colors, spacing, radius, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, radius, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from './Icon';
 
 type ErrorBannerVariant = 'error' | 'warning' | 'info';
@@ -16,18 +16,18 @@ interface ErrorBannerProps {
 
 const variantConfig: Record<ErrorBannerVariant, { bg: string; accent: string; icon: string }> = {
   error: {
-    bg: colors.semantic.negativeSubtle,
-    accent: colors.semantic.negative,
+    bg: getThemeColors().semantic.negativeSubtle,
+    accent: getThemeColors().semantic.negative,
     icon: 'alert-circle',
   },
   warning: {
-    bg: colors.semantic.warningSubtle,
-    accent: colors.semantic.warning,
+    bg: getThemeColors().semantic.warningSubtle,
+    accent: getThemeColors().semantic.warning,
     icon: 'alert-triangle',
   },
   info: {
-    bg: colors.accent.primaryMuted,
-    accent: colors.accent.primary,
+    bg: getThemeColors().accent.primaryMuted,
+    accent: getThemeColors().accent.primary,
     icon: 'info',
   },
 };
@@ -40,6 +40,7 @@ export function ErrorBanner({
   testID,
 }: ErrorBannerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const config = variantConfig[variant];
 
   return (
@@ -52,7 +53,7 @@ export function ErrorBanner({
       testID={testID}
     >
       <Icon name={config.icon as any} size={20} color={config.accent} />
-      <Text style={[styles.message, { color: c.text.secondary }]} numberOfLines={3}>
+      <Text style={[styles.message, { color: getThemeColors().text.secondary }]} numberOfLines={3}>
         {message}
       </Text>
       {onRetry && (
@@ -63,7 +64,7 @@ export function ErrorBanner({
           accessibilityRole="button"
           accessibilityLabel="Retry"
         >
-          <Text style={[styles.retryText, { color: c.accent.primary }]}>Retry</Text>
+          <Text style={[styles.retryText, { color: getThemeColors().accent.primary }]}>Retry</Text>
         </TouchableOpacity>
       )}
       {onDismiss && (
@@ -74,14 +75,14 @@ export function ErrorBanner({
           accessibilityRole="button"
           accessibilityLabel="Dismiss"
         >
-          <Icon name="x" size={16} color={c.text.muted} />
+          <Icon name="x" size={16} color={getThemeColors().text.muted} />
         </TouchableOpacity>
       )}
     </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
   },
   message: {
     flex: 1,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.regular,
     lineHeight: typography.lineHeight.sm,
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   retryText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },

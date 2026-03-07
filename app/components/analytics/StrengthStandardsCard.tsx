@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { Icon } from '../common/Icon';
 
@@ -20,10 +20,10 @@ interface StrengthStandardsCardProps {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-  beginner: colors.text.muted,
-  intermediate: colors.semantic.warning,
-  advanced: colors.accent.primary,
-  elite: colors.premium.gold,
+  beginner: getThemeColors().text.muted,
+  intermediate: getThemeColors().semantic.warning,
+  advanced: getThemeColors().accent.primary,
+  elite: getThemeColors().premium.gold,
 };
 
 function formatExerciseName(name: string): string {
@@ -31,10 +31,10 @@ function formatExerciseName(name: string): string {
 }
 
 function LevelBadge({ level }: { level: string }) {
-  const color = LEVEL_COLORS[level] ?? colors.text.muted;
+  const color = LEVEL_COLORS[level] ?? getThemeColors().text.muted;
   return (
-    <View style={[styles.badge, { borderColor: color }]}>
-      <Text style={[styles.badgeText, { color }]}>
+    <View style={[getStyles().badge, { borderColor: color }]}>
+      <Text style={[getStyles().badgeText, { color }]}>
         {level.charAt(0).toUpperCase() + level.slice(1)}
       </Text>
     </View>
@@ -43,12 +43,13 @@ function LevelBadge({ level }: { level: string }) {
 
 export function StrengthStandardsCard({ classifications, bodyweightKg }: StrengthStandardsCardProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (bodyweightKg == null) {
     return (
       <Card>
-        <View style={styles.emptyContainer}>
-          <Icon name="scale" size={24} color={c.text.muted} />
-          <Text style={[styles.emptyText, { color: c.text.muted }]}>Log your bodyweight to see strength standards</Text>
+        <View style={getStyles().emptyContainer}>
+          <Icon name="scale" size={24} color={getThemeColors().text.muted} />
+          <Text style={[getStyles().emptyText, { color: getThemeColors().text.muted }]}>Log your bodyweight to see strength standards</Text>
         </View>
       </Card>
     );
@@ -57,9 +58,9 @@ export function StrengthStandardsCard({ classifications, bodyweightKg }: Strengt
   if (classifications.length === 0) {
     return (
       <Card>
-        <View style={styles.emptyContainer}>
-          <Icon name="dumbbell" size={24} color={c.text.muted} />
-          <Text style={[styles.emptyText, { color: c.text.muted }]}>Log training sessions with supported lifts to see standards</Text>
+        <View style={getStyles().emptyContainer}>
+          <Icon name="dumbbell" size={24} color={getThemeColors().text.muted} />
+          <Text style={[getStyles().emptyText, { color: getThemeColors().text.muted }]}>Log training sessions with supported lifts to see standards</Text>
         </View>
       </Card>
     );
@@ -68,14 +69,14 @@ export function StrengthStandardsCard({ classifications, bodyweightKg }: Strengt
   return (
     <Card>
       {classifications.map((c, idx) => (
-        <View key={c.exercise_name} style={[styles.row, idx > 0 && styles.rowBorder]}>
-          <View style={styles.rowLeft}>
-            <Text style={[styles.exerciseName, { color: colors.text.primary }]}>{formatExerciseName(c.exercise_name)}</Text>
-            <Text style={[styles.ratio, { color: colors.text.secondary }]}>{c.bodyweight_ratio.toFixed(2)}× BW</Text>
+        <View key={c.exercise_name} style={[getStyles().row, idx > 0 && getStyles().rowBorder]}>
+          <View style={getStyles().rowLeft}>
+            <Text style={[getStyles().exerciseName, { color: getThemeColors().text.primary }]}>{formatExerciseName(c.exercise_name)}</Text>
+            <Text style={[getStyles().ratio, { color: getThemeColors().text.secondary }]}>{c.bodyweight_ratio.toFixed(2)}× BW</Text>
           </View>
-          <View style={styles.rowRight}>
+          <View style={getStyles().rowRight}>
             <LevelBadge level={c.level} />
-            <Text style={[styles.e1rm, { color: colors.text.secondary }]}>{Math.round(c.e1rm_kg)} kg</Text>
+            <Text style={[getStyles().e1rm, { color: getThemeColors().text.secondary }]}>{Math.round(c.e1rm_kg)} kg</Text>
           </View>
         </View>
       ))}
@@ -83,14 +84,17 @@ export function StrengthStandardsCard({ classifications, bodyweightKg }: Strengt
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   emptyContainer: {
     alignItems: 'center',
     gap: spacing[2],
     paddingVertical: spacing[4],
   },
   emptyText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     textAlign: 'center',
   },
@@ -102,22 +106,22 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
   },
   rowLeft: { flex: 1 },
   rowRight: { alignItems: 'flex-end', gap: spacing[1] },
   exerciseName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
   ratio: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
     marginTop: 2,
   },
   e1rm: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
   },
   badge: {

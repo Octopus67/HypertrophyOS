@@ -6,8 +6,8 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { colors, motion } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { motion } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface SkeletonProps {
   width: DimensionValue;
@@ -23,6 +23,7 @@ export function Skeleton({
   variant = 'rect',
 }: SkeletonProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const resolvedRadius = variant === 'circle' ? height / 2 : borderRadius;
 
   if (Platform.OS === 'web') {
@@ -30,7 +31,7 @@ export function Skeleton({
       <View
         style={[
           styles.base,
-          { width, height, borderRadius: resolvedRadius, opacity: 0.5, backgroundColor: c.bg.surfaceRaised },
+          { width, height, borderRadius: resolvedRadius, opacity: 0.5, backgroundColor: getThemeColors().bg.surfaceRaised },
         ]}
       />
     );
@@ -50,15 +51,15 @@ export function Skeleton({
     <Animated.View
       style={[
         styles.base,
-        { width, height, borderRadius: resolvedRadius, backgroundColor: c.bg.surfaceRaised },
+        { width, height, borderRadius: resolvedRadius, backgroundColor: getThemeColors().bg.surfaceRaised },
         animatedStyle,
       ]}
     />
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   base: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
   },
 });

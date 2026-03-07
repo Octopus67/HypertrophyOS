@@ -11,8 +11,8 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { Platform } from 'react-native';
-import { colors, typography, springs, spacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, springs, spacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { computeRingFill, formatRingLabel } from '../../utils/progressRingLogic';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
@@ -93,7 +93,7 @@ export const ProgressRing = memo(function ProgressRing({
 
   return (
     <View
-      style={[styles.container, { width: size, height: size }]}
+      style={[getStyles().container, { width: size, height: size }]}
       accessibilityRole="progressbar"
       accessibilityValue={{
         min: 0,
@@ -128,22 +128,22 @@ export const ProgressRing = memo(function ProgressRing({
           />
         )}
       </Svg>
-      <View style={styles.labelContainer}>
+      <View style={getStyles().labelContainer}>
         {fill.isMissing ? (
           <TouchableOpacity onPress={onTargetMissing}>
-            <Text style={styles.setTargetsText}>Set targets</Text>
+            <Text style={getStyles().setTargetsText}>Set targets</Text>
           </TouchableOpacity>
         ) : (
           <>
             <Text
               style={[
-                styles.centerText,
-                fill.isOvershoot && { color: colors.semantic.warning },
+                getStyles().centerText,
+                fill.isOvershoot && { color: getThemeColors().semantic.warning },
               ]}
             >
               {animated && !reduceMotion ? animatedValue : ringLabel.centerText}
             </Text>
-            <Text style={styles.subText}>{ringLabel.subText}</Text>
+            <Text style={getStyles().subText}>{ringLabel.subText}</Text>
           </>
         )}
       </View>
@@ -151,7 +151,10 @@ export const ProgressRing = memo(function ProgressRing({
   );
 });
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -162,16 +165,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   centerText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
   },
   subText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
   },
   setTargetsText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
   },

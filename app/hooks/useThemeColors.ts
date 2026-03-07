@@ -2,7 +2,7 @@
  * useThemeColors — Returns the active color palette based on current theme.
  *
  * Usage: const c = useThemeColors();
- * Then use c.bg.base, c.text.primary, etc. instead of colors.xxx
+ * Then use getThemeColors().bg.base, getThemeColors().text.primary, etc. instead of colors.xxx
  */
 
 import { useMemo } from 'react';

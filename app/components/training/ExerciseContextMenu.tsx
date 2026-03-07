@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, TouchableWithoutFeedback, StyleSheet } from 'react-native';
-import { colors, radius, spacing, typography, shadows } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, shadows } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 export interface ExerciseContextMenuProps {
   visible: boolean;
@@ -28,6 +28,7 @@ export function ExerciseContextMenu({
   onDismiss,
 }: ExerciseContextMenuProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (!visible) return null;
 
   const items: { label: string; onPress: () => void }[] = [
@@ -51,7 +52,7 @@ export function ExerciseContextMenu({
         <View style={styles.backdrop} />
       </TouchableWithoutFeedback>
 
-      <View style={[styles.menu, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+      <View style={[styles.menu, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}>
         {items.map((item, index) => (
           <TouchableOpacity
             key={item.label}
@@ -59,7 +60,7 @@ export function ExerciseContextMenu({
             onPress={() => handleItemPress(item.onPress)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.menuItemText, { color: c.text.primary }]}>{item.label}</Text>
+            <Text style={[styles.menuItemText, { color: getThemeColors().text.primary }]}>{item.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -67,7 +68,7 @@ export function ExerciseContextMenu({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   backdrop: {
     position: 'absolute',
     top: -1000,
@@ -81,9 +82,9 @@ const styles = StyleSheet.create({
     right: 0,
     top: '100%',
     zIndex: 100,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     borderRadius: radius.md,
     minWidth: 200,
     overflow: 'hidden',
@@ -95,10 +96,10 @@ const styles = StyleSheet.create({
   },
   menuItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.default,
+    borderBottomColor: getThemeColors().border.default,
   },
   menuItemText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },

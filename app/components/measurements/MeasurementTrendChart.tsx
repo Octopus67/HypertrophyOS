@@ -5,8 +5,8 @@
 
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { TrendLineChart } from '../charts/TrendLineChart';
 import { TimeRangeSelector } from '../charts/TimeRangeSelector';
@@ -24,6 +24,7 @@ interface MeasurementTrendChartProps {
 
 export function MeasurementTrendChart({ measurements }: MeasurementTrendChartProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const unitSystem = useStore((s) => s.unitSystem);
   const [metric, setMetric] = useState<Metric>('weight');
   const [range, setRange] = useState<TimeRange>('30d');
@@ -38,7 +39,7 @@ export function MeasurementTrendChart({ measurements }: MeasurementTrendChartPro
 
   const filtered = filterByTimeRange(dataPoints, range);
 
-  const chartColor = metric === 'weight' ? c.accent.primary : c.semantic.warning;
+  const chartColor = metric === 'weight' ? getThemeColors().accent.primary : getThemeColors().semantic.warning;
   const suffix = metric === 'weight'
     ? (unitSystem === 'imperial' ? ' lbs' : ' kg')
     : '%';
@@ -46,8 +47,8 @@ export function MeasurementTrendChart({ measurements }: MeasurementTrendChartPro
   return (
     <Card style={styles.card}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: c.text.primary }]}>Trends</Text>
-        <View style={[styles.metricToggle, { backgroundColor: c.bg.surfaceRaised }]}>
+        <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Trends</Text>
+        <View style={[styles.metricToggle, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
           {(['weight', 'bodyFat'] as const).map((m) => (
             <TouchableOpacity
               key={m}
@@ -78,29 +79,29 @@ export function MeasurementTrendChart({ measurements }: MeasurementTrendChartPro
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: { marginBottom: spacing[3] },
   header: {
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: spacing[3],
   },
   title: {
-    color: colors.text.primary, fontSize: typography.size.md,
+    color: getThemeColors().text.primary, fontSize: typography.size.md,
     fontWeight: typography.weight.semibold, lineHeight: typography.lineHeight.md,
   },
   metricToggle: {
-    flexDirection: 'row', backgroundColor: colors.bg.surfaceRaised,
+    flexDirection: 'row', backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm, padding: 2,
   },
   toggleBtn: {
     paddingHorizontal: spacing[3], paddingVertical: spacing[1],
     borderRadius: radius.sm - 2,
   },
-  toggleBtnActive: { backgroundColor: colors.accent.primary },
+  toggleBtnActive: { backgroundColor: getThemeColors().accent.primary },
   toggleText: {
-    color: colors.text.secondary, fontSize: typography.size.xs,
+    color: getThemeColors().text.secondary, fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
   },
-  toggleTextActive: { color: colors.text.inverse, fontWeight: typography.weight.semibold },
+  toggleTextActive: { color: getThemeColors().text.inverse, fontWeight: typography.weight.semibold },
   chartWrap: { marginTop: spacing[3] },
 });

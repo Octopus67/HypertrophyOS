@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 
 interface WaterTrackerProps {
@@ -17,11 +17,12 @@ export function WaterTracker({
   maxGlasses = 12,
 }: WaterTrackerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const icons = Array.from({ length: maxGlasses }, (_, i) => i < glasses);
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: c.text.secondary }]}>Water Intake</Text>
+      <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Water Intake</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -35,23 +36,23 @@ export function WaterTracker({
             style={styles.glassBtn}
             activeOpacity={0.7}
           >
-            {filled ? <Icon name="droplet-filled" size={20} color={c.accent.primary} /> : <Icon name="droplet-empty" size={20} color={c.text.muted} />}
+            {filled ? <Icon name="droplet-filled" size={20} color={getThemeColors().accent.primary} /> : <Icon name="droplet-empty" size={20} color={getThemeColors().text.muted} />}
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <Text style={[styles.summary, { color: c.text.muted }]}>
+      <Text style={[styles.summary, { color: getThemeColors().text.muted }]}>
         {glasses} glasses ({glasses * 250}ml)
       </Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     marginBottom: spacing[3],
   },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
   },
   glassIcon: {},
   summary: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginTop: spacing[1],

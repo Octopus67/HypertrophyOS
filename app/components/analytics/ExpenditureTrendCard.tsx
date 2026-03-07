@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography, letterSpacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, letterSpacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { TrendLineChart } from '../charts/TrendLineChart';
 import {
@@ -18,6 +18,7 @@ const MIN_DATA_DAYS = 14;
 
 export function ExpenditureTrendCard({ weightHistory, caloriesByDate }: ExpenditureTrendCardProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const estimate = computeTDEEEstimate(weightHistory, caloriesByDate);
 
   // Build trend data points for the chart from calorie data
@@ -34,13 +35,13 @@ export function ExpenditureTrendCard({ weightHistory, caloriesByDate }: Expendit
 
     return (
       <Card variant="flat">
-        <Text style={[styles.title, { color: c.text.primary }]}>Expenditure Trend</Text>
-        <Text style={[styles.emptyText, { color: c.text.muted }]}>
+        <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Expenditure Trend</Text>
+        <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>
           {daysNeeded > 0
             ? `${daysNeeded} more day${daysNeeded === 1 ? '' : 's'} needed`
             : 'Insufficient data for TDEE estimation'}
         </Text>
-        <Text style={[styles.emptySubtext, { color: c.text.muted }]}>
+        <Text style={[styles.emptySubtext, { color: getThemeColors().text.muted }]}>
           Log bodyweight and nutrition daily for accurate estimates.
         </Text>
       </Card>
@@ -49,21 +50,21 @@ export function ExpenditureTrendCard({ weightHistory, caloriesByDate }: Expendit
 
   return (
     <Card variant="flat">
-      <Text style={[styles.title, { color: c.text.primary }]}>Expenditure Trend</Text>
+      <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Expenditure Trend</Text>
 
       {/* Prominent TDEE number */}
       <View style={styles.tdeeRow}>
-        <Text style={[styles.tdeeValue, { color: c.text.primary }]}>{Math.round(estimate.tdee)}</Text>
-        <Text style={[styles.tdeeUnit, { color: c.text.secondary }]}>kcal/day</Text>
+        <Text style={[styles.tdeeValue, { color: getThemeColors().text.primary }]}>{Math.round(estimate.tdee)}</Text>
+        <Text style={[styles.tdeeUnit, { color: getThemeColors().text.secondary }]}>kcal/day</Text>
       </View>
-      <Text style={[styles.tdeeLabel, { color: c.text.muted }]}>Estimated TDEE ({estimate.windowDays}-day window)</Text>
+      <Text style={[styles.tdeeLabel, { color: getThemeColors().text.muted }]}>Estimated TDEE ({estimate.windowDays}-day window)</Text>
 
       {/* Trend line chart */}
       {chartData.length > 1 && (
         <View style={styles.chartContainer}>
           <TrendLineChart
             data={chartData}
-            color={c.chart.calories}
+            color={getThemeColors().chart.calories}
             targetLine={estimate.tdee}
             suffix=" kcal"
           />
@@ -74,11 +75,11 @@ export function ExpenditureTrendCard({ weightHistory, caloriesByDate }: Expendit
 }
 
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   title: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginBottom: spacing[2],
     lineHeight: typography.lineHeight.md,
   },
@@ -91,19 +92,19 @@ const styles = StyleSheet.create({
   tdeeValue: {
     fontSize: typography.size['3xl'],
     fontWeight: typography.weight.bold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontVariant: typography.numeric.fontVariant as any,
     letterSpacing: letterSpacing.tighter,
     lineHeight: typography.lineHeight['3xl'],
   },
   tdeeUnit: {
     fontSize: typography.size.base,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     lineHeight: typography.lineHeight.base,
   },
   tdeeLabel: {
     fontSize: typography.size.xs,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     marginBottom: spacing[3],
     lineHeight: typography.lineHeight.xs,
   },
@@ -112,14 +113,14 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: typography.size.base,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     textAlign: 'center',
     paddingVertical: spacing[2],
     lineHeight: typography.lineHeight.base,
   },
   emptySubtext: {
     fontSize: typography.size.sm,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     textAlign: 'center',
     paddingBottom: spacing[2],
     lineHeight: typography.lineHeight.sm,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 
 interface TrialBadgeProps {
@@ -11,8 +11,8 @@ interface TrialBadgeProps {
 export function TrialBadge({ daysRemaining }: TrialBadgeProps) {
   const c = useThemeColors();
   const isUrgent = daysRemaining <= 2;
-  const bgColor = isUrgent ? c.semantic.warningSubtle : c.accent.primaryMuted;
-  const textColor = isUrgent ? c.semantic.warning : c.accent.primary;
+  const bgColor = isUrgent ? getThemeColors().semantic.warningSubtle : getThemeColors().accent.primaryMuted;
+  const textColor = isUrgent ? getThemeColors().semantic.warning : getThemeColors().accent.primary;
 
   return (
     <View

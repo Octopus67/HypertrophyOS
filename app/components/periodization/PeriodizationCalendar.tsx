@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { EmptyState } from '../common/EmptyState';
 import { Icon } from '../common/Icon';
@@ -18,6 +18,7 @@ import api from '../../services/api';
 
 export function PeriodizationCalendar() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [blocks, setBlocks] = useState<TrainingBlock[]>([]);
   const [sessionDates, setSessionDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,23 +129,23 @@ export function PeriodizationCalendar() {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing[2] },
-  headerBtn: { paddingHorizontal: spacing[3], paddingVertical: spacing[1], borderRadius: radius.full, backgroundColor: colors.bg.surfaceRaised, borderWidth: 1, borderColor: colors.border.subtle },
-  headerBtnText: { color: colors.text.secondary, fontSize: typography.size.sm },
-  fab: { paddingHorizontal: spacing[3], paddingVertical: spacing[1], borderRadius: radius.full, backgroundColor: colors.accent.primaryMuted, borderWidth: 1, borderColor: colors.accent.primary },
-  fabText: { color: colors.accent.primary, fontSize: typography.size.sm, fontWeight: typography.weight.medium },
-  deloadBanner: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], backgroundColor: colors.semantic.warningSubtle, borderRadius: radius.sm, padding: spacing[3], marginBottom: spacing[2] },
-  deloadText: { color: colors.semantic.warning, fontSize: typography.size.sm },
-  weekRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border.subtle, paddingVertical: spacing[2] },
-  currentWeek: { backgroundColor: colors.accent.primaryMuted, borderRadius: radius.sm },
+  headerBtn: { paddingHorizontal: spacing[3], paddingVertical: spacing[1], borderRadius: radius.full, backgroundColor: getThemeColors().bg.surfaceRaised, borderWidth: 1, borderColor: getThemeColors().border.subtle },
+  headerBtnText: { color: getThemeColors().text.secondary, fontSize: typography.size.sm },
+  fab: { paddingHorizontal: spacing[3], paddingVertical: spacing[1], borderRadius: radius.full, backgroundColor: getThemeColors().accent.primaryMuted, borderWidth: 1, borderColor: getThemeColors().accent.primary },
+  fabText: { color: getThemeColors().accent.primary, fontSize: typography.size.sm, fontWeight: typography.weight.medium },
+  deloadBanner: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], backgroundColor: getThemeColors().semantic.warningSubtle, borderRadius: radius.sm, padding: spacing[3], marginBottom: spacing[2] },
+  deloadText: { color: getThemeColors().semantic.warning, fontSize: typography.size.sm },
+  weekRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: getThemeColors().border.subtle, paddingVertical: spacing[2] },
+  currentWeek: { backgroundColor: getThemeColors().accent.primaryMuted, borderRadius: radius.sm },
   phaseBand: { width: 4, borderRadius: 2, marginRight: spacing[2] },
   weekContent: { flex: 1 },
   weekTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  blockName: { color: colors.text.primary, fontSize: typography.size.base, fontWeight: typography.weight.medium, flex: 1 },
-  nutritionBadge: { backgroundColor: colors.bg.surfaceRaised, paddingHorizontal: spacing[2], paddingVertical: 2, borderRadius: radius.full },
-  nutritionText: { color: colors.text.secondary, fontSize: typography.size.xs },
-  weekLabel: { color: colors.text.muted, fontSize: typography.size.xs, marginTop: 2 },
+  blockName: { color: getThemeColors().text.primary, fontSize: typography.size.base, fontWeight: typography.weight.medium, flex: 1 },
+  nutritionBadge: { backgroundColor: getThemeColors().bg.surfaceRaised, paddingHorizontal: spacing[2], paddingVertical: 2, borderRadius: radius.full },
+  nutritionText: { color: getThemeColors().text.secondary, fontSize: typography.size.xs },
+  weekLabel: { color: getThemeColors().text.muted, fontSize: typography.size.xs, marginTop: 2 },
   dots: { flexDirection: 'row', gap: 4, marginTop: 4 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent.primary },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: getThemeColors().accent.primary },
 });

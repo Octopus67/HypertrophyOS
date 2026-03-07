@@ -1,5 +1,6 @@
 import Svg, { Path, Circle, Line, Rect, Polyline } from 'react-native-svg';
-import { colors } from '../../theme/tokens';
+;
+import { getThemeColors } from '../../hooks/useThemeColors';
 
 export type IconName =
   // Activity/Fitness
@@ -64,7 +65,9 @@ interface IconProps {
   color?: string;
 }
 
-export function Icon({ name, size = 20, color = colors.text.secondary }: IconProps) {
+export function Icon({ name, size = 20, color }: IconProps) {
+  const themeC = getThemeColors();
+  if (!color) color = themeC.text.secondary;
   const sw = 1.8;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

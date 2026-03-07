@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { colors, spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors } from '../../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { Button } from '../../../components/common/Button';
 import { ErrorBanner } from '../../../components/common/ErrorBanner';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
@@ -39,6 +39,7 @@ function SummaryRow({ index, children }: { index: number; children: React.ReactN
 
 export function SummaryStep({ onComplete, onEditStep }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const store = useOnboardingStore();
   const mainStore = useMainStore();
   const age = computeAge(store.birthYear, store.birthMonth);
@@ -138,12 +139,12 @@ export function SummaryStep({ onComplete, onEditStep }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <Text style={[styles.heading, { color: c.text.primary }]}>Your Plan</Text>
-      <Text style={[styles.subheading, { color: c.text.secondary }]}>Review your personalized numbers — tap any row to edit</Text>
+      <Text style={[styles.heading, { color: getThemeColors().text.primary }]}>Your Plan</Text>
+      <Text style={[styles.subheading, { color: getThemeColors().text.secondary }]}>Review your personalized numbers — tap any row to edit</Text>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
-      <View style={[styles.card, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+      <View style={[styles.card, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}>
         {rows.map((row, i) => (
           <SummaryRow key={row.label} index={i}>
             <TouchableOpacity
@@ -154,10 +155,10 @@ export function SummaryStep({ onComplete, onEditStep }: Props) {
               accessibilityLabel={`Edit ${row.label}: ${row.value}`}
               accessibilityRole="button"
             >
-              <Text style={[styles.rowLabel, { color: c.text.secondary }]}>{row.label}</Text>
+              <Text style={[styles.rowLabel, { color: getThemeColors().text.secondary }]}>{row.label}</Text>
               <View style={styles.rowRight}>
-                <Text style={[styles.rowValue, { color: c.text.primary }]}>{row.value}</Text>
-                <Text style={[styles.editIcon, { color: c.text.muted }]}>›</Text>
+                <Text style={[styles.rowValue, { color: getThemeColors().text.primary }]}>{row.value}</Text>
+                <Text style={[styles.editIcon, { color: getThemeColors().text.muted }]}>›</Text>
               </View>
             </TouchableOpacity>
           </SummaryRow>
@@ -179,15 +180,15 @@ export function SummaryStep({ onComplete, onEditStep }: Props) {
 }
 
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scroll: { paddingBottom: spacing[8] },
-  heading: { color: colors.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2] },
-  subheading: { color: colors.text.secondary, fontSize: typography.size.base, marginBottom: spacing[6] },
+  heading: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2] },
+  subheading: { color: getThemeColors().text.secondary, fontSize: typography.size.base, marginBottom: spacing[6] },
   card: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     overflow: 'hidden',
     marginBottom: spacing[6],
   },
@@ -198,10 +199,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[4],
     paddingHorizontal: spacing[4],
   },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border.subtle },
-  rowLabel: { color: colors.text.secondary, fontSize: typography.size.base },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: getThemeColors().border.subtle },
+  rowLabel: { color: getThemeColors().text.secondary, fontSize: typography.size.base },
   rowRight: { flexDirection: 'row', alignItems: 'center' },
-  rowValue: { color: colors.text.primary, fontSize: typography.size.base, fontWeight: typography.weight.semibold, marginRight: spacing[2] },
-  editIcon: { color: colors.text.muted, fontSize: typography.size.lg },
+  rowValue: { color: getThemeColors().text.primary, fontSize: typography.size.base, fontWeight: typography.weight.semibold, marginRight: spacing[2] },
+  editIcon: { color: getThemeColors().text.muted, fontSize: typography.size.lg },
   btn: { marginTop: spacing[2] },
 });

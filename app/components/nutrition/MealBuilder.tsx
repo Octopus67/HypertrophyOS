@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { ModalContainer } from '../common/ModalContainer';
 import { AddNutritionModal } from '../modals/AddNutritionModal';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { useStore } from '../../store';
 import { Icon } from '../common/Icon';
 import api from '../../services/api';
@@ -35,6 +35,7 @@ interface Props {
 
 export function MealBuilder({ visible, onClose, onSuccess }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const selectedDate = useStore((s) => s.selectedDate);
   const [state, dispatch] = useReducer(mealBuilderReducer, undefined, createInitialState);
   const [showFoodSearch, setShowFoodSearch] = useState(false);
@@ -140,30 +141,30 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
 
   const renderItem = useCallback(
     ({ item }: { item: MealBuilderItem }) => (
-      <View style={[styles.itemRow, { borderBottomColor: c.border.default }]}>
+      <View style={[styles.itemRow, { borderBottomColor: getThemeColors().border.default }]}>
         <View style={styles.itemInfo}>
-          <Text style={[styles.itemName, { color: c.text.primary }]} numberOfLines={1}>
+          <Text style={[styles.itemName, { color: getThemeColors().text.primary }]} numberOfLines={1}>
             {item.foodName}
           </Text>
-          <Text style={[styles.itemMacros, { color: c.text.secondary }]}>
+          <Text style={[styles.itemMacros, { color: getThemeColors().text.secondary }]}>
             {Math.round(item.scaledMacros.calories)} cal · {Math.round(item.scaledMacros.protein_g)}P ·{' '}
             {Math.round(item.scaledMacros.carbs_g)}C · {Math.round(item.scaledMacros.fat_g)}F
           </Text>
         </View>
         <View style={styles.itemActions}>
           <TextInput
-            style={[styles.servingInput, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+            style={[styles.servingInput, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
             value={String(item.servingMultiplier)}
             onChangeText={(text) => handleUpdateServing(item.tempId, text)}
             keyboardType="numeric"
             selectTextOnFocus
           />
-          <Text style={[styles.servingLabel, { color: c.text.muted }]}>×</Text>
+          <Text style={[styles.servingLabel, { color: getThemeColors().text.muted }]}>×</Text>
           <TouchableOpacity
             onPress={() => handleRemoveItem(item.tempId)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={[styles.removeBtn, { color: c.semantic.negative }]}>✕</Text>
+            <Text style={[styles.removeBtn, { color: getThemeColors().semantic.negative }]}>✕</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -178,26 +179,26 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
       <ModalContainer visible={visible} onClose={handleClose} title="Build Meal">
         {/* Meal Name Input */}
         <TextInput
-          style={[styles.mealNameInput, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+          style={[styles.mealNameInput, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
           value={state.mealName}
           onChangeText={(text) => dispatch({ type: 'SET_MEAL_NAME', payload: text })}
           placeholder="Meal name"
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
         />
 
         {/* Running Totals Bar */}
-        <View style={[styles.totalsBar, { backgroundColor: c.bg.surfaceRaised }]}>
+        <View style={[styles.totalsBar, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
           <View style={styles.totalItemRow}>
-            <Icon name="flame" size={14} color={c.text.secondary} />
-            <Text style={[styles.totalItem, { color: c.text.primary }]}> {Math.round(runningTotals.calories)}</Text>
+            <Icon name="flame" size={14} color={getThemeColors().text.secondary} />
+            <Text style={[styles.totalItem, { color: getThemeColors().text.primary }]}> {Math.round(runningTotals.calories)}</Text>
           </View>
-          <Text style={[styles.totalItem, { color: c.macro.protein }]}>
+          <Text style={[styles.totalItem, { color: getThemeColors().macro.protein }]}>
             P {Math.round(runningTotals.protein_g)}g
           </Text>
-          <Text style={[styles.totalItem, { color: c.macro.carbs }]}>
+          <Text style={[styles.totalItem, { color: getThemeColors().macro.carbs }]}>
             C {Math.round(runningTotals.carbs_g)}g
           </Text>
-          <Text style={[styles.totalItem, { color: c.macro.fat ?? c.text.secondary }]}>
+          <Text style={[styles.totalItem, { color: getThemeColors().macro.fat ?? getThemeColors().text.secondary }]}>
             F {Math.round(runningTotals.fat_g)}g
           </Text>
         </View>
@@ -205,7 +206,7 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
         {/* Meal Item List */}
         {state.items.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: c.text.muted }]}>No items yet. Tap "Add Item" to start building your meal.</Text>
+            <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>No items yet. Tap "Add Item" to start building your meal.</Text>
           </View>
         ) : (
           <FlatList
@@ -218,11 +219,11 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
 
         {/* Add Item Button */}
         <TouchableOpacity
-          style={[styles.addItemBtn, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+          style={[styles.addItemBtn, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
           onPress={() => setShowFoodSearch(true)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.addItemBtnText, { color: c.accent.primary }]}>+ Add Item</Text>
+          <Text style={[styles.addItemBtnText, { color: getThemeColors().accent.primary }]}>+ Add Item</Text>
         </TouchableOpacity>
 
         {/* Action Buttons */}
@@ -234,9 +235,9 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
             activeOpacity={0.7}
           >
             {saving ? (
-              <ActivityIndicator color={c.text.primary} />
+              <ActivityIndicator color={getThemeColors().text.primary} />
             ) : (
-              <Text style={[styles.saveBtnText, { color: c.text.primary }]}>Save Meal</Text>
+              <Text style={[styles.saveBtnText, { color: getThemeColors().text.primary }]}>Save Meal</Text>
             )}
           </TouchableOpacity>
 
@@ -247,9 +248,9 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
             activeOpacity={0.7}
           >
             {savingFavorite ? (
-              <ActivityIndicator color={c.text.primary} />
+              <ActivityIndicator color={getThemeColors().text.primary} />
             ) : (
-              <Text style={[styles.favBtnText, { color: c.text.primary }]}>⭐ Save as Favorite</Text>
+              <Text style={[styles.favBtnText, { color: getThemeColors().text.primary }]}>⭐ Save as Favorite</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -268,27 +269,27 @@ export function MealBuilder({ visible, onClose, onSuccess }: Props) {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   mealNameInput: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[3],
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     marginBottom: spacing[3],
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   totalsBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[3],
     marginBottom: spacing[3],
   },
   totalItem: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },
@@ -306,19 +307,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[2],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.default,
+    borderBottomColor: getThemeColors().border.default,
   },
   itemInfo: {
     flex: 1,
     marginRight: spacing[2],
   },
   itemName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
   itemMacros: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
     marginTop: 2,
   },
@@ -328,23 +329,23 @@ const styles = StyleSheet.create({
     gap: spacing[1],
   },
   servingInput: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     width: 48,
     textAlign: 'center',
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   servingLabel: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
   },
   removeBtn: {
-    color: colors.semantic.negative ?? '#ef4444',
+    color: getThemeColors().semantic.negative ?? '#ef4444',
     fontSize: 16,
     fontWeight: typography.weight.bold,
     paddingHorizontal: spacing[2],
@@ -354,22 +355,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     textAlign: 'center',
   },
   addItemBtn: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[3],
     alignItems: 'center',
     marginVertical: spacing[3],
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     borderStyle: 'dashed',
   },
   addItemBtnText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },
@@ -379,27 +380,27 @@ const styles = StyleSheet.create({
   },
   saveBtn: {
     flex: 1,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.md,
     padding: spacing[3],
     alignItems: 'center',
   },
   saveBtnText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },
   favBtn: {
     flex: 1,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[3],
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   favBtnText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },

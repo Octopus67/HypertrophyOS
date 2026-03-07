@@ -11,8 +11,8 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { documentDirectory, getInfoAsync, makeDirectoryAsync, copyAsync, deleteAsync } from 'expo-file-system/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors, radius, spacing, typography, shadows } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, shadows } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 
 const PHOTO_DIR = `${documentDirectory ?? ''}measurement_photos/`;
@@ -55,6 +55,7 @@ async function requestPermission(type: 'camera' | 'library'): Promise<boolean> {
 
 export function ProgressPhotoGrid({ photos, onPhotosChange, loading }: ProgressPhotoGridProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [saving, setSaving] = useState(false);
 
   const handleAdd = useCallback(async (source: 'camera' | 'library') => {
@@ -131,20 +132,20 @@ export function ProgressPhotoGrid({ photos, onPhotosChange, loading }: ProgressP
 
   const renderItem = ({ item }: { item: PhotoItem }) => (
     <TouchableOpacity
-      style={[styles.photoCard, { backgroundColor: c.bg.surface, borderColor: c.border.subtle }]}
+      style={[styles.photoCard, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.subtle }]}
       onLongPress={() => handleDelete(item)}
       activeOpacity={0.8}
       accessibilityLabel={`Progress photo from ${item.date}. Long press to delete.`}
       accessibilityRole="image"
     >
-      <Image source={{ uri: item.uri }} style={[styles.photoImage, { backgroundColor: c.bg.surfaceRaised }]} />
-      <Text style={[styles.photoDate, { color: c.text.secondary }]}>{item.date}</Text>
+      <Image source={{ uri: item.uri }} style={[styles.photoImage, { backgroundColor: getThemeColors().bg.surfaceRaised }]} />
+      <Text style={[styles.photoDate, { color: getThemeColors().text.secondary }]}>{item.date}</Text>
     </TouchableOpacity>
   );
 
   const renderAddButton = () => (
     <TouchableOpacity
-      style={[styles.addCard, { backgroundColor: c.accent.primaryMuted, borderColor: c.accent.primary }]}
+      style={[styles.addCard, { backgroundColor: getThemeColors().accent.primaryMuted, borderColor: getThemeColors().accent.primary }]}
       onPress={showAddOptions}
       disabled={saving}
       activeOpacity={0.7}
@@ -152,11 +153,11 @@ export function ProgressPhotoGrid({ photos, onPhotosChange, loading }: ProgressP
       accessibilityLabel="Add progress photo"
     >
       {saving ? (
-        <ActivityIndicator color={c.accent.primary} size="small" />
+        <ActivityIndicator color={getThemeColors().accent.primary} size="small" />
       ) : (
         <>
-          <Icon name="camera" size={24} color={c.accent.primary} />
-          <Text style={[styles.addText, { color: c.accent.primary }]}>Add Photo</Text>
+          <Icon name="camera" size={24} color={getThemeColors().accent.primary} />
+          <Text style={[styles.addText, { color: getThemeColors().accent.primary }]}>Add Photo</Text>
         </>
       )}
     </TouchableOpacity>
@@ -165,7 +166,7 @@ export function ProgressPhotoGrid({ photos, onPhotosChange, loading }: ProgressP
   if (loading) {
     return (
       <View style={styles.loadingWrap}>
-        <ActivityIndicator color={c.accent.primary} size="large" />
+        <ActivityIndicator color={getThemeColors().accent.primary} size="large" />
       </View>
     );
   }
@@ -187,29 +188,29 @@ export function ProgressPhotoGrid({ photos, onPhotosChange, loading }: ProgressP
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   grid: { paddingVertical: spacing[2] },
   gridRow: { gap: COLUMN_GAP },
   photoCard: {
     flex: 1, marginBottom: spacing[3], borderRadius: radius.md,
-    overflow: 'hidden', backgroundColor: colors.bg.surface,
-    borderWidth: 1, borderColor: colors.border.subtle,
+    overflow: 'hidden', backgroundColor: getThemeColors().bg.surface,
+    borderWidth: 1, borderColor: getThemeColors().border.subtle,
   },
   photoImage: {
-    width: '100%', aspectRatio: 3 / 4, backgroundColor: colors.bg.surfaceRaised,
+    width: '100%', aspectRatio: 3 / 4, backgroundColor: getThemeColors().bg.surfaceRaised,
   },
   photoDate: {
-    color: colors.text.secondary, fontSize: typography.size.xs,
+    color: getThemeColors().text.secondary, fontSize: typography.size.xs,
     textAlign: 'center', paddingVertical: spacing[2],
   },
   addCard: {
     flex: 1, aspectRatio: 3 / 4, marginBottom: spacing[3],
     borderRadius: radius.md, borderWidth: 1, borderStyle: 'dashed',
-    borderColor: colors.accent.primary, backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary, backgroundColor: getThemeColors().accent.primaryMuted,
     alignItems: 'center', justifyContent: 'center', gap: spacing[2],
   },
   addText: {
-    color: colors.accent.primary, fontSize: typography.size.sm,
+    color: getThemeColors().accent.primary, fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
   loadingWrap: {

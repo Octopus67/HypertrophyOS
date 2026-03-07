@@ -10,8 +10,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { ModalContainer } from '../common/ModalContainer';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { getVolumeStatus, type VolumeLandmarks, type VolumeStatus } from '../../utils/wnsRecommendations';
 
 export interface WorkoutSummaryModalProps {
@@ -33,10 +33,10 @@ const STATUS_LABEL: Record<VolumeStatus, { label: string; emoji: string }> = {
 };
 
 const STATUS_COLORS: Record<VolumeStatus, string> = {
-  below_mev: colors.semantic.warning,
-  optimal: colors.semantic.positive,
-  near_mrv: colors.semantic.caution,
-  above_mrv: colors.semantic.negative,
+  below_mev: getThemeColors().semantic.warning,
+  optimal: getThemeColors().semantic.positive,
+  near_mrv: getThemeColors().semantic.caution,
+  above_mrv: getThemeColors().semantic.negative,
 };
 
 function formatMuscle(muscle: string): string {
@@ -57,6 +57,7 @@ export function WorkoutSummaryModal({
   onShowExplainer,
 }: WorkoutSummaryModalProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const muscleEntries = Object.entries(huByMuscle).filter(([, hu]) => hu > 0);
   const totalHU = muscleEntries.reduce((sum, [, hu]) => sum + hu, 0);
 
@@ -66,30 +67,30 @@ export function WorkoutSummaryModal({
         {/* Summary stats */}
         <View style={styles.statsRow}>
           <View style={styles.stat}>
-            <Text style={[styles.statValue, { color: c.accent.primary }]}>{durationFormatted}</Text>
-            <Text style={[styles.statLabel, { color: c.text.muted }]}>Duration</Text>
+            <Text style={[styles.statValue, { color: getThemeColors().accent.primary }]}>{durationFormatted}</Text>
+            <Text style={[styles.statLabel, { color: getThemeColors().text.muted }]}>Duration</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={[styles.statValue, { color: c.accent.primary }]}>{totalSets}</Text>
-            <Text style={[styles.statLabel, { color: c.text.muted }]}>Sets</Text>
+            <Text style={[styles.statValue, { color: getThemeColors().accent.primary }]}>{totalSets}</Text>
+            <Text style={[styles.statLabel, { color: getThemeColors().text.muted }]}>Sets</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={[styles.statValue, { color: c.accent.primary }]}>{totalHU.toFixed(1)}</Text>
-            <Text style={[styles.statLabel, { color: c.text.muted }]}>Total HU</Text>
+            <Text style={[styles.statValue, { color: getThemeColors().accent.primary }]}>{totalHU.toFixed(1)}</Text>
+            <Text style={[styles.statLabel, { color: getThemeColors().text.muted }]}>Total HU</Text>
           </View>
         </View>
 
         {/* HU by muscle */}
         {muscleEntries.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: c.text.primary }]}>Stimulus by Muscle</Text>
+            <Text style={[styles.sectionTitle, { color: getThemeColors().text.primary }]}>Stimulus by Muscle</Text>
             {muscleEntries.map(([muscle, hu]) => {
               const lm = landmarksByMuscle?.[muscle];
               const status = lm ? getVolumeStatus(hu, lm) : 'optimal';
               const statusInfo = STATUS_LABEL[status];
               return (
                 <View key={muscle} style={styles.muscleRow}>
-                  <Text style={[styles.muscleName, { color: c.text.primary }]}>{formatMuscle(muscle)}</Text>
+                  <Text style={[styles.muscleName, { color: getThemeColors().text.primary }]}>{formatMuscle(muscle)}</Text>
                   <View style={styles.muscleRight}>
                     <Text style={[styles.muscleHU, { color: STATUS_COLORS[status] }]}>
                       {hu.toFixed(1)} HU
@@ -107,9 +108,9 @@ export function WorkoutSummaryModal({
         {/* Recommendations */}
         {recommendations.length > 0 && (
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: c.text.primary }]}>Recommendations</Text>
+            <Text style={[styles.sectionTitle, { color: getThemeColors().text.primary }]}>Recommendations</Text>
             {recommendations.map((rec, i) => (
-              <Text key={i} style={[styles.recText, { color: c.text.secondary }]}>
+              <Text key={i} style={[styles.recText, { color: getThemeColors().text.secondary }]}>
                 • {rec}
               </Text>
             ))}
@@ -124,24 +125,24 @@ export function WorkoutSummaryModal({
             accessibilityRole="button"
             accessibilityLabel="Learn about Hard Units"
           >
-            <Text style={[styles.whyText, { color: c.accent.primary }]}>Why these numbers? →</Text>
+            <Text style={[styles.whyText, { color: getThemeColors().accent.primary }]}>Why these numbers? →</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
 
       <TouchableOpacity
-        style={[styles.doneButton, { backgroundColor: c.accent.primary }]}
+        style={[styles.doneButton, { backgroundColor: getThemeColors().accent.primary }]}
         onPress={onClose}
         accessibilityRole="button"
         accessibilityLabel="Done"
       >
-        <Text style={[styles.doneText, { color: c.text.inverse }]}>Done</Text>
+        <Text style={[styles.doneText, { color: getThemeColors().text.inverse }]}>Done</Text>
       </TouchableOpacity>
     </ModalContainer>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scroll: { maxHeight: 420 },
   statsRow: {
     flexDirection: 'row',
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[5],
     paddingVertical: spacing[3],
     borderRadius: radius.sm,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
   },
   stat: { alignItems: 'center' },
   statValue: {
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing[2],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: getThemeColors().border.subtle,
   },
   muscleName: {
     fontSize: typography.size.base,

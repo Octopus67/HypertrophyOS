@@ -10,8 +10,8 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import type { MuscleVolumeEntry } from '../../utils/volumeAggregator';
-import { colors, typography, spacing, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 export interface VolumePillsProps {
   muscleVolumes: MuscleVolumeEntry[];
@@ -20,15 +20,16 @@ export interface VolumePillsProps {
 }
 
 function getPillColor(current: number, mavLow: number, mavHigh: number) {
-  if (mavHigh <= 0) return { bg: colors.bg.surfaceRaised, text: colors.text.secondary };
-  if (current > mavHigh) return { bg: colors.semantic.negativeSubtle, text: colors.semantic.negative };
-  if (current >= mavHigh * 0.9) return { bg: colors.semantic.warningSubtle, text: colors.semantic.warning };
-  if (current >= mavLow) return { bg: colors.semantic.positiveSubtle, text: colors.semantic.positive };
-  return { bg: colors.bg.surfaceRaised, text: colors.text.secondary };
+  if (mavHigh <= 0) return { bg: getThemeColors().bg.surfaceRaised, text: getThemeColors().text.secondary };
+  if (current > mavHigh) return { bg: getThemeColors().semantic.negativeSubtle, text: getThemeColors().semantic.negative };
+  if (current >= mavHigh * 0.9) return { bg: getThemeColors().semantic.warningSubtle, text: getThemeColors().semantic.warning };
+  if (current >= mavLow) return { bg: getThemeColors().semantic.positiveSubtle, text: getThemeColors().semantic.positive };
+  return { bg: getThemeColors().bg.surfaceRaised, text: getThemeColors().text.secondary };
 }
 
 export const VolumePills: React.FC<VolumePillsProps> = ({ muscleVolumes, goalMultiplier }) => {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (!muscleVolumes.length) return null;
 
   return (
@@ -65,7 +66,7 @@ export const VolumePills: React.FC<VolumePillsProps> = ({ muscleVolumes, goalMul
   );
 };
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scroll: {
     flexGrow: 0,
   },
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
   },
   adjustmentText: {
     fontSize: typography.size.xs,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     marginTop: spacing[0.5],
   },
 });

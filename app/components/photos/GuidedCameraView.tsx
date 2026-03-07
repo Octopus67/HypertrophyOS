@@ -15,8 +15,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { PoseType } from '../../utils/progressPhotoTypes';
 import { PoseOverlay } from './PoseOverlay';
 
@@ -31,27 +31,28 @@ const CAMERA_HEIGHT = SCREEN_WIDTH * 1.33;
 
 export function GuidedCameraView({ poseType, onCapture, onCancel }: GuidedCameraViewProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const cameraRef = useRef<CameraView>(null);
   const [capturing, setCapturing] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
 
   if (!permission) {
     return (
-      <View style={[styles.center, { backgroundColor: c.bg.base }]}>
-        <ActivityIndicator color={c.accent.primary} />
+      <View style={[styles.center, { backgroundColor: getThemeColors().bg.base }]}>
+        <ActivityIndicator color={getThemeColors().accent.primary} />
       </View>
     );
   }
 
   if (!permission.granted) {
     return (
-      <View style={[styles.center, { backgroundColor: c.bg.base }]}>
-        <Text style={[styles.permText, { color: c.text.secondary }]}>Camera access is required for progress photos.</Text>
-        <TouchableOpacity style={[styles.permBtn, { backgroundColor: c.accent.primary }]} onPress={requestPermission}>
-          <Text style={[styles.permBtnText, { color: c.text.inverse }]}>Grant Permission</Text>
+      <View style={[styles.center, { backgroundColor: getThemeColors().bg.base }]}>
+        <Text style={[styles.permText, { color: getThemeColors().text.secondary }]}>Camera access is required for progress photos.</Text>
+        <TouchableOpacity style={[styles.permBtn, { backgroundColor: getThemeColors().accent.primary }]} onPress={requestPermission}>
+          <Text style={[styles.permBtnText, { color: getThemeColors().text.inverse }]}>Grant Permission</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
-          <Text style={[styles.cancelText, { color: c.accent.primary }]}>Cancel</Text>
+          <Text style={[styles.cancelText, { color: getThemeColors().accent.primary }]}>Cancel</Text>
         </TouchableOpacity>
       </View>
     );
@@ -73,7 +74,7 @@ export function GuidedCameraView({ poseType, onCapture, onCancel }: GuidedCamera
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: c.bg.base }]}>
+    <View style={[styles.container, { backgroundColor: getThemeColors().bg.base }]}>
       <View style={styles.cameraContainer}>
         <CameraView
           ref={cameraRef}
@@ -89,7 +90,7 @@ export function GuidedCameraView({ poseType, onCapture, onCancel }: GuidedCamera
 
       <View style={styles.controls}>
         <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
-          <Text style={[styles.cancelText, { color: c.accent.primary }]}>Cancel</Text>
+          <Text style={[styles.cancelText, { color: getThemeColors().accent.primary }]}>Cancel</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -99,9 +100,9 @@ export function GuidedCameraView({ poseType, onCapture, onCancel }: GuidedCamera
           activeOpacity={0.7}
         >
           {capturing ? (
-            <ActivityIndicator color={c.text.inverse} size="small" />
+            <ActivityIndicator color={getThemeColors().text.inverse} size="small" />
           ) : (
-            <View style={[styles.captureInner, { backgroundColor: c.text.primary }]} />
+            <View style={[styles.captureInner, { backgroundColor: getThemeColors().text.primary }]} />
           )}
         </TouchableOpacity>
 
@@ -111,16 +112,16 @@ export function GuidedCameraView({ poseType, onCapture, onCancel }: GuidedCamera
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg.base,
+    backgroundColor: getThemeColors().bg.base,
   },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.bg.base,
+    backgroundColor: getThemeColors().bg.base,
     padding: spacing[4],
   },
   cameraContainer: {
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 36,
     borderWidth: 4,
-    borderColor: colors.text.primary,
+    borderColor: getThemeColors().text.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -155,31 +156,31 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.text.primary,
+    backgroundColor: getThemeColors().text.primary,
   },
   cancelBtn: {
     width: 60,
     padding: spacing[2],
   },
   cancelText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.base,
   },
   permText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     textAlign: 'center',
     marginBottom: spacing[4],
   },
   permBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[6],
     marginBottom: spacing[2],
   },
   permBtnText: {
-    color: colors.text.inverse,
+    color: getThemeColors().text.inverse,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
   },

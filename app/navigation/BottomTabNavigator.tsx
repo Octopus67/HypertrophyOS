@@ -3,10 +3,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator, StackCardInterpolationProps } from '@react-navigation/stack';
 import { Animated, Easing, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Svg, { Path, Circle, Rect, Line } from 'react-native-svg';
-import { colors, typography, spacing, motion } from '../theme/tokens';
+import { typography, spacing, motion } from '../theme/tokens';
 import { triggerHaptic } from '../hooks/useHaptics';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
-import { useThemeColors } from '../hooks/useThemeColors';
+import { useThemeColors, getThemeColors, ThemeColors } from '../hooks/useThemeColors';
 
 // Screen imports
 import { DashboardScreen } from '../screens/dashboard/DashboardScreen';
@@ -173,11 +173,11 @@ function DashboardStackScreen() {
         console.error('[ErrorBoundary:Home] Component:', errorInfo.componentStack);
       }}
       fallback={(error, retry) => (
-        <View style={styles.errorFallback}>
-          <Text style={styles.errorTitle}>Dashboard unavailable</Text>
-          <Text style={styles.errorMessage}>{error.message}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={retry}>
-            <Text style={styles.retryText}>Try Again</Text>
+        <View style={getStyles().errorFallback}>
+          <Text style={getStyles().errorTitle}>Dashboard unavailable</Text>
+          <Text style={getStyles().errorMessage}>{error.message}</Text>
+          <TouchableOpacity style={getStyles().retryButton} onPress={retry}>
+            <Text style={getStyles().retryText}>Try Again</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -212,11 +212,11 @@ function LogsStackScreen() {
         console.error('[ErrorBoundary:Log] Component:', errorInfo.componentStack);
       }}
       fallback={(error, retry) => (
-        <View style={styles.errorFallback}>
-          <Text style={styles.errorTitle}>Logs unavailable</Text>
-          <Text style={styles.errorMessage}>{error.message}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={retry}>
-            <Text style={styles.retryText}>Try Again</Text>
+        <View style={getStyles().errorFallback}>
+          <Text style={getStyles().errorTitle}>Logs unavailable</Text>
+          <Text style={getStyles().errorMessage}>{error.message}</Text>
+          <TouchableOpacity style={getStyles().retryButton} onPress={retry}>
+            <Text style={getStyles().retryText}>Try Again</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -241,11 +241,11 @@ function AnalyticsStackScreen() {
         console.error('[ErrorBoundary:Analytics] Component:', errorInfo.componentStack);
       }}
       fallback={(error, retry) => (
-        <View style={styles.errorFallback}>
-          <Text style={styles.errorTitle}>Analytics unavailable</Text>
-          <Text style={styles.errorMessage}>{error.message}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={retry}>
-            <Text style={styles.retryText}>Try Again</Text>
+        <View style={getStyles().errorFallback}>
+          <Text style={getStyles().errorTitle}>Analytics unavailable</Text>
+          <Text style={getStyles().errorMessage}>{error.message}</Text>
+          <TouchableOpacity style={getStyles().retryButton} onPress={retry}>
+            <Text style={getStyles().retryText}>Try Again</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -269,11 +269,11 @@ function ProfileStackScreen() {
         console.error('[ErrorBoundary:Profile] Component:', errorInfo.componentStack);
       }}
       fallback={(error, retry) => (
-        <View style={styles.errorFallback}>
-          <Text style={styles.errorTitle}>Profile unavailable</Text>
-          <Text style={styles.errorMessage}>{error.message}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={retry}>
-            <Text style={styles.retryText}>Try Again</Text>
+        <View style={getStyles().errorFallback}>
+          <Text style={getStyles().errorTitle}>Profile unavailable</Text>
+          <Text style={getStyles().errorMessage}>{error.message}</Text>
+          <TouchableOpacity style={getStyles().retryButton} onPress={retry}>
+            <Text style={getStyles().retryText}>Try Again</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -359,12 +359,12 @@ export function BottomTabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: [styles.tabBar, { backgroundColor: themeColors.bg.surface, borderTopColor: themeColors.border.subtle }],
+        tabBarStyle: [getStyles().tabBar, { backgroundColor: themeColors.bg.surface, borderTopColor: themeColors.border.subtle }],
         tabBarActiveTintColor: themeColors.accent.primary,
         tabBarInactiveTintColor: themeColors.text.muted,
-        tabBarLabelStyle: styles.tabLabel,
+        tabBarLabelStyle: getStyles().tabLabel,
         tabBarIcon: ({ focused }) => (
-          <View style={[styles.iconWrap, focused && { backgroundColor: themeColors.accent.primaryMuted }]}>
+          <View style={[getStyles().iconWrap, focused && { backgroundColor: themeColors.accent.primaryMuted }]}>
             <TabSvgIcon
               name={route.name as keyof BottomTabParamList}
               color={focused ? themeColors.accent.primary : themeColors.text.muted}
@@ -383,9 +383,12 @@ export function BottomTabNavigator() {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderTopColor: 'rgba(255,255,255,0.06)',
     borderTopWidth: 1,
     height: 64,
@@ -405,35 +408,35 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   iconWrapActive: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   errorFallback: {
     flex: 1,
-    backgroundColor: colors.bg.base,
+    backgroundColor: getThemeColors().bg.base,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing[6],
   },
   errorTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     marginBottom: spacing[2],
   },
   errorMessage: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     textAlign: 'center',
     marginBottom: spacing[4],
   },
   retryButton: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[3],
     borderRadius: 8,
   },
   retryText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
   },

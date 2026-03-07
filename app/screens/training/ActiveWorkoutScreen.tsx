@@ -32,8 +32,8 @@ import { useActiveWorkoutStore } from '../../store/activeWorkoutSlice';
 import { useStore } from '../../store';
 import { useWorkoutPreferencesStore } from '../../store/workoutPreferencesStore';
 import api from '../../services/api';
-import { colors, spacing, typography, radius, shadows, letterSpacing as ls } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius, shadows, letterSpacing as ls } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 // Phase 4 components
 import { VolumePills } from '../../components/training/VolumePills';
@@ -77,6 +77,7 @@ function ExerciseCardWrapper({ children, index }: { children: React.ReactNode; i
 
 export function ActiveWorkoutScreen({ route, navigation }: any) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const { mode, sessionId, templateId, sessionDate } = route.params ?? {};
 
   // ── Store ──
@@ -501,12 +502,12 @@ export function ActiveWorkoutScreen({ route, navigation }: any) {
   // ── Render ──
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: c.bg.base }]} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: getThemeColors().bg.base }]} edges={['top']}>
       {/* Header: date, duration, overflow menu */}
-      <View style={[styles.topBar, { borderBottomColor: c.border.subtle }]}>
+      <View style={[styles.topBar, { borderBottomColor: getThemeColors().border.subtle }]}>
         <View style={styles.headerLeft}>
-          <Text style={[styles.dateText, { color: c.accent.primary }]}>{formattedDate}</Text>
-          <Text style={[styles.durationText, { color: c.text.secondary }]}>{durationFormatted}</Text>
+          <Text style={[styles.dateText, { color: getThemeColors().accent.primary }]}>{formattedDate}</Text>
+          <Text style={[styles.durationText, { color: getThemeColors().text.secondary }]}>{durationFormatted}</Text>
         </View>
         <TouchableOpacity
           onPress={() => setOverflowMenuVisible(!overflowMenuVisible)}
@@ -514,7 +515,7 @@ export function ActiveWorkoutScreen({ route, navigation }: any) {
           accessibilityRole="button"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={[styles.overflowBtn, { color: c.text.muted }]}>•••</Text>
+          <Text style={[styles.overflowBtn, { color: getThemeColors().text.muted }]}>•••</Text>
         </TouchableOpacity>
       </View>
 
@@ -522,7 +523,7 @@ export function ActiveWorkoutScreen({ route, navigation }: any) {
       {overflowMenuVisible && (
         <>
           <Pressable style={styles.overflowBackdrop} onPress={() => setOverflowMenuVisible(false)} />
-          <View style={[styles.overflowMenu, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+          <View style={[styles.overflowMenu, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}>
             <TouchableOpacity
               style={styles.overflowMenuItem}
               onPress={() => { 
@@ -537,12 +538,12 @@ export function ActiveWorkoutScreen({ route, navigation }: any) {
               accessibilityLabel={showRpeRir ? 'Hide RPE/RIR column' : 'Show RPE/RIR column'}
               accessibilityRole="button"
             >
-              <Text style={[styles.overflowMenuItemText, { color: c.text.primary }]}>
+              <Text style={[styles.overflowMenuItemText, { color: getThemeColors().text.primary }]}>
                 {showRpeRir ? 'Hide RPE/RIR' : 'Show RPE/RIR'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.overflowMenuItem} onPress={handleDiscard}>
-              <Text style={[styles.overflowMenuItemTextDanger, { color: c.semantic.negative }]}>Discard Workout</Text>
+              <Text style={[styles.overflowMenuItemTextDanger, { color: getThemeColors().semantic.negative }]}>Discard Workout</Text>
             </TouchableOpacity>
           </View>
         </>
@@ -619,12 +620,12 @@ export function ActiveWorkoutScreen({ route, navigation }: any) {
 
         {/* Add Exercise button */}
         <TouchableOpacity
-          style={[styles.addExerciseBtn, { backgroundColor: c.bg.surface, borderColor: c.border.default }]}
+          style={[styles.addExerciseBtn, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.default }]}
           onPress={() => setExercisePickerVisible(true)}
           accessibilityLabel="Add exercise"
           accessibilityRole="button"
         >
-          <Text style={[styles.addExerciseText, { color: c.accent.primary }]}>+ Add Exercise</Text>
+          <Text style={[styles.addExerciseText, { color: getThemeColors().accent.primary }]}>+ Add Exercise</Text>
         </TouchableOpacity>
 
         {/* Bottom spacer for sticky bars */}
@@ -720,8 +721,8 @@ function getWeekMonday(): string {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base },
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base },
 
   topBar: {
     flexDirection: 'row',
@@ -730,7 +731,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: getThemeColors().border.subtle,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -738,18 +739,18 @@ const styles = StyleSheet.create({
     gap: spacing[3],
   },
   dateText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },
   durationText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     fontVariant: ['tabular-nums'],
   },
   overflowBtn: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
     paddingHorizontal: spacing[2],
@@ -768,10 +769,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 56,
     right: spacing[4],
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     zIndex: 100,
     ...shadows.md,
     minWidth: 180,
@@ -781,12 +782,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
   },
   overflowMenuItemTextDanger: {
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },
   overflowMenuItemText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },
@@ -795,17 +796,17 @@ const styles = StyleSheet.create({
   scrollContent: { padding: spacing[4], paddingBottom: spacing[4] },
 
   addExerciseBtn: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     borderStyle: 'dashed',
     paddingVertical: spacing[4],
     alignItems: 'center',
     marginBottom: spacing[4],
   },
   addExerciseText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
   },

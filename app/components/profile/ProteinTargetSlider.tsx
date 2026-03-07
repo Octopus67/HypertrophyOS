@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 const MIN = 1.2;
 const MAX = 3.0;
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export function ProteinTargetSlider({ value, weightKg, onChange }: Props) {
+  const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const dailyGrams = Math.round(value * weightKg);
   const canDecrease = value > MIN + 0.01;
   const canIncrease = value < MAX - 0.01;
@@ -58,10 +61,10 @@ export function ProteinTargetSlider({ value, weightKg, onChange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { marginBottom: spacing[3] },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
@@ -77,30 +80,30 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: radius.md,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnDisabled: { opacity: 0.3 },
   btnText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
     lineHeight: typography.lineHeight.xl,
   },
-  btnTextDisabled: { color: colors.text.muted },
+  btnTextDisabled: { color: getThemeColors().text.muted },
   display: { alignItems: 'center' },
   valueText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight.lg,
   },
   dailyText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight.xs,
@@ -111,7 +114,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[1],
   },
   rangeText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
   },

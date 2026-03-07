@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { getWeekDates, formatDayCell } from '../../utils/dateScrollerLogic';
 import { Icon } from '../common/Icon';
 
@@ -12,6 +12,7 @@ interface WeeklyTrainingCalendarProps {
 
 export function WeeklyTrainingCalendar({ selectedDate, trainedDates }: WeeklyTrainingCalendarProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const weekDates = getWeekDates(selectedDate);
   const today = new Date().toISOString().split('T')[0];
 
@@ -50,7 +51,7 @@ export function WeeklyTrainingCalendar({ selectedDate, trainedDates }: WeeklyTra
                   <Icon
                     name="check"
                     size={12}
-                    color={c.bg.base}
+                    color={getThemeColors().bg.base}
                   />
                 </View>
               )}
@@ -64,7 +65,7 @@ export function WeeklyTrainingCalendar({ selectedDate, trainedDates }: WeeklyTra
 
 const CIRCLE_SIZE = 40;
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     marginVertical: spacing[3],
   },
@@ -80,15 +81,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     backgroundColor: 'transparent',
   },
   dayCircleTrained: {
-    backgroundColor: colors.accent.primary,
-    borderColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
+    borderColor: getThemeColors().accent.primary,
   },
   dayCircleToday: {
-    borderColor: colors.accent.primary,
+    borderColor: getThemeColors().accent.primary,
     borderWidth: 2,
   },
   dayCircleFuture: {
@@ -97,19 +98,19 @@ const styles = StyleSheet.create({
   dayLetter: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     lineHeight: typography.lineHeight.sm,
   },
   dayLetterTrained: {
-    color: colors.bg.base,
+    color: getThemeColors().bg.base,
     fontWeight: typography.weight.semibold,
   },
   dayLetterToday: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontWeight: typography.weight.semibold,
   },
   dayLetterFuture: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   checkIcon: {
     position: 'absolute',

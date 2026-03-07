@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface Props {
   value: number;
@@ -9,6 +10,8 @@ interface Props {
 const COUNTS = [1, 2, 3, 4, 5, 6, 7];
 
 export function ExerciseFrequencyPicker({ value, onChange }: Props) {
+  const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Sessions per week</Text>
@@ -36,10 +39,10 @@ export function ExerciseFrequencyPicker({ value, onChange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { marginBottom: spacing[3] },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
@@ -50,22 +53,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: radius.md,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnActive: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   text: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight.base,
   },
-  textActive: { color: colors.accent.primary },
+  textActive: { color: getThemeColors().accent.primary },
 });

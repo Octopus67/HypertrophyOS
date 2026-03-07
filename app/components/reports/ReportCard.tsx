@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface ReportCardProps {
   report: {
@@ -16,22 +16,23 @@ interface ReportCardProps {
 
 export const ReportCard = forwardRef<View, ReportCardProps>(({ report }, ref) => {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const topRec = (report.recommendations ?? [])[0] ?? '';
   const trend = report.body?.weight_trend_kg ?? null;
   const trendStr = trend != null ? `${trend > 0 ? '+' : ''}${trend.toFixed(1)} kg` : '—';
   const compliancePct = report.nutrition?.compliance_pct;
 
   return (
-    <View ref={ref} style={styles.card}>
-      <Text style={styles.weekLabel}>Week {report.week}, {report.year}</Text>
-      <View style={styles.row}>
+    <View ref={ref} style={getStyles().card}>
+      <Text style={getStyles().weekLabel}>Week {report.week}, {report.year}</Text>
+      <View style={getStyles().row}>
         <StatBox label="Volume" value={`${Math.round(report.training?.total_volume ?? 0)} kg`} />
         <StatBox label="Sessions" value={String(report.training?.session_count ?? 0)} />
         <StatBox label="Compliance" value={compliancePct != null ? `${compliancePct.toFixed(0)}%` : '—'} />
         <StatBox label="Weight Δ" value={trendStr} />
       </View>
-      {topRec ? <Text style={styles.rec}>💡 {topRec}</Text> : null}
-      <Text style={styles.brand}>Repwise</Text>
+      {topRec ? <Text style={getStyles().rec}>💡 {topRec}</Text> : null}
+      <Text style={getStyles().brand}>Repwise</Text>
     </View>
   );
 });
@@ -39,24 +40,27 @@ export const ReportCard = forwardRef<View, ReportCardProps>(({ report }, ref) =>
 function StatBox({ label, value }: { label: string; value: string }) {
   const c = useThemeColors();
   return (
-    <View style={styles.statBox}>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={getStyles().statBox}>
+      <Text style={getStyles().statValue}>{value}</Text>
+      <Text style={getStyles().statLabel}>{label}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.md,
     padding: spacing[5],
     marginTop: spacing[6],
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
   },
   weekLabel: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     textAlign: 'center',
@@ -64,8 +68,8 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
   statBox: { alignItems: 'center', flex: 1 },
-  statValue: { color: colors.text.primary, fontSize: typography.size.xl, fontWeight: typography.weight.bold },
-  statLabel: { color: colors.text.secondary, fontSize: typography.size.xs, marginTop: spacing[1] },
-  rec: { color: colors.text.primary, fontSize: typography.size.sm, marginTop: spacing[4], textAlign: 'center', lineHeight: 20 },
-  brand: { color: colors.text.muted, fontSize: typography.size.xs, textAlign: 'center', marginTop: spacing[4] },
+  statValue: { color: getThemeColors().text.primary, fontSize: typography.size.xl, fontWeight: typography.weight.bold },
+  statLabel: { color: getThemeColors().text.secondary, fontSize: typography.size.xs, marginTop: spacing[1] },
+  rec: { color: getThemeColors().text.primary, fontSize: typography.size.sm, marginTop: spacing[4], textAlign: 'center', lineHeight: 20 },
+  brand: { color: getThemeColors().text.muted, fontSize: typography.size.xs, textAlign: 'center', marginTop: spacing[4] },
 });

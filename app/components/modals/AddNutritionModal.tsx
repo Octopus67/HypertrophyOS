@@ -12,8 +12,8 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { ModalContainer } from '../common/ModalContainer';
 import api from '../../services/api';
 import { WaterTracker } from '../nutrition/WaterTracker';
@@ -96,6 +96,7 @@ export function scaleMacros(
 
 export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealName }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const selectedDate = useStore((s) => s.selectedDate);
   const isAuthenticated = useStore((s) => s.isAuthenticated);
 
@@ -771,10 +772,10 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
       <ScrollView keyboardShouldPersistTaps="handled">
         {/* ── Inline Success Message ──────────────────────────── */}
         {successMessage && (
-          <View style={[styles.successRow, { backgroundColor: c.semantic.positive }]}>
-            <Text style={[styles.successText, { color: c.semantic.positive }]}>{successMessage}</Text>
+          <View style={[styles.successRow, { backgroundColor: getThemeColors().semantic.positive }]}>
+            <Text style={[styles.successText, { color: getThemeColors().semantic.positive }]}>{successMessage}</Text>
             <TouchableOpacity onPress={handleSaveAsFavorite}>
-              <Text style={[styles.saveFavLink, { color: c.accent.primary }]}>Save as Favorite</Text>
+              <Text style={[styles.saveFavLink, { color: getThemeColors().accent.primary }]}>Save as Favorite</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -838,7 +839,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
         {activeTab === 'mealPlans' && (
           <View>
             {customMealsLoading && (
-              <ActivityIndicator color={c.accent.primary} style={{ marginVertical: spacing[3] }} />
+              <ActivityIndicator color={getThemeColors().accent.primary} style={{ marginVertical: spacing[3] }} />
             )}
 
             {!creatingPlan && (
@@ -846,140 +847,140 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                 {customMeals.map((meal) => (
                   <TouchableOpacity
                     key={meal.id}
-                    style={[styles.planCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                    style={[styles.planCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                     onPress={() => handleSelectPlan(meal)}
                     onLongPress={() => handleDeletePlan(meal)}
                     activeOpacity={0.7}
                   >
                     <View style={styles.planCardHeader}>
-                      <Text style={[styles.planCardName, { color: c.text.primary }]} numberOfLines={1}>{meal.name}</Text>
+                      <Text style={[styles.planCardName, { color: getThemeColors().text.primary }]} numberOfLines={1}>{meal.name}</Text>
                       <TouchableOpacity onPress={() => handleFavoritePlan(meal)} activeOpacity={0.7}>
                         <Text style={styles.planFavIcon}>⭐</Text>
                       </TouchableOpacity>
                     </View>
-                    <Text style={[styles.planCardMacros, { color: c.text.muted }]}>
+                    <Text style={[styles.planCardMacros, { color: getThemeColors().text.muted }]}>
                       {Math.round(meal.calories)} kcal · {Math.round(meal.protein_g)}g P · {Math.round(meal.carbs_g)}g C · {Math.round(meal.fat_g)}g F
                     </Text>
                   </TouchableOpacity>
                 ))}
 
                 {!customMealsLoading && customMeals.length === 0 && (
-                  <Text style={[styles.emptyText, { color: c.text.muted }]}>No saved meal plans yet.</Text>
+                  <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>No saved meal plans yet.</Text>
                 )}
 
                 <TouchableOpacity
-                  style={[styles.createPlanBtn, { borderColor: c.accent.primary }]}
+                  style={[styles.createPlanBtn, { borderColor: getThemeColors().accent.primary }]}
                   onPress={() => { setCreatingPlan(true); setPlanItems([]); setPlanName(''); }}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.createPlanBtnText, { color: c.accent.primary }]}>+ Create New Plan</Text>
+                  <Text style={[styles.createPlanBtnText, { color: getThemeColors().accent.primary }]}>+ Create New Plan</Text>
                 </TouchableOpacity>
               </>
             )}
 
             {creatingPlan && (
               <View style={styles.planForm}>
-                <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Plan Name</Text>
+                <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Plan Name</Text>
                 <TextInput
-                  style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                  style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                   value={planName}
                   onChangeText={setPlanName}
                   placeholder="e.g. Post-Workout Meal"
-                  placeholderTextColor={c.text.muted}
+                  placeholderTextColor={getThemeColors().text.muted}
                 />
 
                 {planItems.map((item, idx) => (
-                  <View key={idx} style={[styles.planItemCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+                  <View key={idx} style={[styles.planItemCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}>
                     <View style={styles.planItemHeaderRow}>
-                      <Text style={[styles.planItemIndex, { color: c.text.secondary }]}>Item {idx + 1}</Text>
+                      <Text style={[styles.planItemIndex, { color: getThemeColors().text.secondary }]}>Item {idx + 1}</Text>
                       <TouchableOpacity onPress={() => handleRemovePlanItem(idx)}>
-                        <Text style={[styles.planItemRemove, { color: c.semantic.negative }]}><Icon name="close" size={16} /></Text>
+                        <Text style={[styles.planItemRemove, { color: getThemeColors().semantic.negative }]}><Icon name="close" size={16} /></Text>
                       </TouchableOpacity>
                     </View>
                     <TextInput
-                      style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                      style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                       value={item.name}
                       onChangeText={(v) => handleUpdatePlanItem(idx, 'name', v)}
                       placeholder="Item name"
-                      placeholderTextColor={c.text.muted}
+                      placeholderTextColor={getThemeColors().text.muted}
                     />
                     <View style={styles.row}>
                       <View style={styles.fieldHalf}>
-                        <Text style={[styles.microLabel, { color: c.text.secondary }]}>Calories</Text>
+                        <Text style={[styles.microLabel, { color: getThemeColors().text.secondary }]}>Calories</Text>
                         <TextInput
-                          style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                          style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                           value={item.calories ? String(item.calories) : ''}
                           onChangeText={(v) => handleUpdatePlanItem(idx, 'calories', v)}
                           keyboardType="numeric"
                           placeholder="0"
-                          placeholderTextColor={c.text.muted}
+                          placeholderTextColor={getThemeColors().text.muted}
                         />
                       </View>
                       <View style={styles.fieldHalf}>
-                        <Text style={[styles.microLabel, { color: c.text.secondary }]}>Protein (g)</Text>
+                        <Text style={[styles.microLabel, { color: getThemeColors().text.secondary }]}>Protein (g)</Text>
                         <TextInput
-                          style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                          style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                           value={item.protein_g ? String(item.protein_g) : ''}
                           onChangeText={(v) => handleUpdatePlanItem(idx, 'protein_g', v)}
                           keyboardType="numeric"
                           placeholder="0"
-                          placeholderTextColor={c.text.muted}
+                          placeholderTextColor={getThemeColors().text.muted}
                         />
                       </View>
                     </View>
                     <View style={styles.row}>
                       <View style={styles.fieldHalf}>
-                        <Text style={[styles.microLabel, { color: c.text.secondary }]}>Carbs (g)</Text>
+                        <Text style={[styles.microLabel, { color: getThemeColors().text.secondary }]}>Carbs (g)</Text>
                         <TextInput
-                          style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                          style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                           value={item.carbs_g ? String(item.carbs_g) : ''}
                           onChangeText={(v) => handleUpdatePlanItem(idx, 'carbs_g', v)}
                           keyboardType="numeric"
                           placeholder="0"
-                          placeholderTextColor={c.text.muted}
+                          placeholderTextColor={getThemeColors().text.muted}
                         />
                       </View>
                       <View style={styles.fieldHalf}>
-                        <Text style={[styles.microLabel, { color: c.text.secondary }]}>Fat (g)</Text>
+                        <Text style={[styles.microLabel, { color: getThemeColors().text.secondary }]}>Fat (g)</Text>
                         <TextInput
-                          style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                          style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                           value={item.fat_g ? String(item.fat_g) : ''}
                           onChangeText={(v) => handleUpdatePlanItem(idx, 'fat_g', v)}
                           keyboardType="numeric"
                           placeholder="0"
-                          placeholderTextColor={c.text.muted}
+                          placeholderTextColor={getThemeColors().text.muted}
                         />
                       </View>
                     </View>
                     <View style={styles.fieldHalf}>
-                      <Text style={[styles.microLabel, { color: c.text.secondary }]}>Serving ×</Text>
+                      <Text style={[styles.microLabel, { color: getThemeColors().text.secondary }]}>Serving ×</Text>
                       <TextInput
-                        style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                        style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                         value={item.serving_multiplier ? String(item.serving_multiplier) : ''}
                         onChangeText={(v) => handleUpdatePlanItem(idx, 'serving_multiplier', v)}
                         keyboardType="numeric"
                         placeholder="1"
-                        placeholderTextColor={c.text.muted}
+                        placeholderTextColor={getThemeColors().text.muted}
                       />
                     </View>
                   </View>
                 ))}
 
                 <TouchableOpacity
-                  style={[styles.addItemBtn, { borderColor: c.border.default }]}
+                  style={[styles.addItemBtn, { borderColor: getThemeColors().border.default }]}
                   onPress={handleAddPlanItem}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.addItemBtnText, { color: c.text.secondary }]}>+ Add Item</Text>
+                  <Text style={[styles.addItemBtnText, { color: getThemeColors().text.secondary }]}>+ Add Item</Text>
                 </TouchableOpacity>
 
                 {planItems.length > 0 && (
-                  <View style={[styles.planAggregate, { backgroundColor: c.accent.primaryMuted }]}>
-                    <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Running Total</Text>
+                  <View style={[styles.planAggregate, { backgroundColor: getThemeColors().accent.primaryMuted }]}>
+                    <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Running Total</Text>
                     {(() => {
                       const agg = aggregateMealPlan(planItems);
                       return (
-                        <Text style={[styles.planAggregateMacros, { color: c.text.primary }]}>
+                        <Text style={[styles.planAggregateMacros, { color: getThemeColors().text.primary }]}>
                           {Math.round(agg.calories)} kcal · {Math.round(agg.protein_g)}g P · {Math.round(agg.carbs_g)}g C · {Math.round(agg.fat_g)}g F
                         </Text>
                       );
@@ -989,11 +990,11 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
 
                 <View style={styles.planFormActions}>
                   <TouchableOpacity
-                    style={[styles.cancelPlanBtn, { borderColor: c.border.default }]}
+                    style={[styles.cancelPlanBtn, { borderColor: getThemeColors().border.default }]}
                     onPress={() => { setCreatingPlan(false); setPlanItems([]); setPlanName(''); }}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.cancelPlanBtnText, { color: c.text.muted }]}>Cancel</Text>
+                    <Text style={[styles.cancelPlanBtnText, { color: getThemeColors().text.muted }]}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.submitBtn, savingPlan && styles.submitBtnDisabled]}
@@ -1002,9 +1003,9 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                     activeOpacity={0.7}
                   >
                     {savingPlan ? (
-                      <ActivityIndicator color={c.text.primary} />
+                      <ActivityIndicator color={getThemeColors().text.primary} />
                     ) : (
-                      <Text style={[styles.submitText, { color: c.text.primary }]}>Save Plan</Text>
+                      <Text style={[styles.submitText, { color: getThemeColors().text.primary }]}>Save Plan</Text>
                     )}
                   </TouchableOpacity>
                 </View>
@@ -1017,7 +1018,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
         {activeTab === 'recipes' && (
           <View>
             {recipesLoading && (
-              <ActivityIndicator color={c.accent.primary} style={{ marginVertical: spacing[3] }} />
+              <ActivityIndicator color={getThemeColors().accent.primary} style={{ marginVertical: spacing[3] }} />
             )}
 
             {!selectedRecipe ? (
@@ -1025,16 +1026,16 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                 {userRecipes.map((recipe) => (
                   <TouchableOpacity
                     key={recipe.id}
-                    style={[styles.planCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                    style={[styles.planCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                     onPress={() => handleSelectRecipe(recipe)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.planCardName, { color: c.text.primary }]} numberOfLines={1}>{recipe.name}</Text>
-                    <Text style={[styles.planCardMacros, { color: c.text.muted }]}>
+                    <Text style={[styles.planCardName, { color: getThemeColors().text.primary }]} numberOfLines={1}>{recipe.name}</Text>
+                    <Text style={[styles.planCardMacros, { color: getThemeColors().text.muted }]}>
                       {Math.round(recipe.calories)} kcal · {Math.round(recipe.protein_g)}g P · {Math.round(recipe.carbs_g)}g C · {Math.round(recipe.fat_g)}g F per serving
                     </Text>
                     {recipe.total_servings ? (
-                      <Text style={[styles.planCardMacros, { color: c.text.muted }]}>
+                      <Text style={[styles.planCardMacros, { color: getThemeColors().text.muted }]}>
                         {recipe.total_servings} total serving{recipe.total_servings !== 1 ? 's' : ''}
                       </Text>
                     ) : null}
@@ -1042,27 +1043,27 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                 ))}
 
                 {!recipesLoading && userRecipes.length === 0 && (
-                  <Text style={[styles.emptyText, { color: c.text.muted }]}>No recipes yet. Create one from the Quick Log tab.</Text>
+                  <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>No recipes yet. Create one from the Quick Log tab.</Text>
                 )}
               </>
             ) : (
               <View>
-                <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Log Recipe</Text>
-                <View style={[styles.planCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
-                  <Text style={[styles.planCardName, { color: c.text.primary }]}>{selectedRecipe.name}</Text>
-                  <Text style={[styles.planCardMacros, { color: c.text.muted }]}>
+                <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Log Recipe</Text>
+                <View style={[styles.planCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}>
+                  <Text style={[styles.planCardName, { color: getThemeColors().text.primary }]}>{selectedRecipe.name}</Text>
+                  <Text style={[styles.planCardMacros, { color: getThemeColors().text.muted }]}>
                     Per serving: {Math.round(selectedRecipe.calories)} kcal · {Math.round(selectedRecipe.protein_g)}g P · {Math.round(selectedRecipe.carbs_g)}g C · {Math.round(selectedRecipe.fat_g)}g F
                   </Text>
                 </View>
 
-                <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Servings Consumed</Text>
+                <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Servings Consumed</Text>
                 <TextInput
-                  style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                  style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                   value={recipeServings}
                   onChangeText={setRecipeServings}
                   keyboardType="numeric"
                   placeholder="1"
-                  placeholderTextColor={c.text.muted}
+                  placeholderTextColor={getThemeColors().text.muted}
                 />
 
                 {(() => {
@@ -1070,9 +1071,9 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                   if (s > 0) {
                     const scaled = scaleMacros(selectedRecipe, s);
                     return (
-                      <View style={[styles.planAggregate, { backgroundColor: c.accent.primaryMuted }]}>
-                        <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>You will log</Text>
-                        <Text style={[styles.planAggregateMacros, { color: c.text.primary }]}>
+                      <View style={[styles.planAggregate, { backgroundColor: getThemeColors().accent.primaryMuted }]}>
+                        <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>You will log</Text>
+                        <Text style={[styles.planAggregateMacros, { color: getThemeColors().text.primary }]}>
                           {Math.round(scaled.calories)} kcal · {Math.round(scaled.protein_g * 10) / 10}g P · {Math.round(scaled.carbs_g * 10) / 10}g C · {Math.round(scaled.fat_g * 10) / 10}g F
                         </Text>
                       </View>
@@ -1083,11 +1084,11 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
 
                 <View style={styles.planFormActions}>
                   <TouchableOpacity
-                    style={[styles.cancelPlanBtn, { borderColor: c.border.default }]}
+                    style={[styles.cancelPlanBtn, { borderColor: getThemeColors().border.default }]}
                     onPress={() => setSelectedRecipe(null)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.cancelPlanBtnText, { color: c.text.muted }]}>Back</Text>
+                    <Text style={[styles.cancelPlanBtnText, { color: getThemeColors().text.muted }]}>Back</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.submitBtn, loggingRecipe && styles.submitBtnDisabled]}
@@ -1096,9 +1097,9 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                     activeOpacity={0.7}
                   >
                     {loggingRecipe ? (
-                      <ActivityIndicator color={c.text.primary} />
+                      <ActivityIndicator color={getThemeColors().text.primary} />
                     ) : (
-                      <Text style={[styles.submitText, { color: c.text.primary }]}>Log Recipe</Text>
+                      <Text style={[styles.submitText, { color: getThemeColors().text.primary }]}>Log Recipe</Text>
                     )}
                   </TouchableOpacity>
                 </View>
@@ -1113,7 +1114,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
         {/* ── Favorites (rendered BEFORE search) ──────────────── */}
         {favorites.length > 0 && (
           <View style={styles.favoritesSection}>
-            <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>⭐ Favorites</Text>
+            <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>⭐ Favorites</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -1122,7 +1123,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
               {favorites.map((fav) => (
                 <TouchableOpacity
                   key={fav.id}
-                  style={[styles.favoriteChip, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                  style={[styles.favoriteChip, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                   onPress={() => {
                     if (isLongPressingRef.current) return;
                     handleSelectFavorite(fav);
@@ -1136,10 +1137,10 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                   }}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.favoriteChipName, { color: c.text.primary }]} numberOfLines={1}>
+                  <Text style={[styles.favoriteChipName, { color: getThemeColors().text.primary }]} numberOfLines={1}>
                     {fav.name}
                   </Text>
-                  <Text style={[styles.favoriteChipCal, { color: c.text.muted }]}>
+                  <Text style={[styles.favoriteChipCal, { color: getThemeColors().text.muted }]}>
                     {Math.round(fav.calories)} kcal
                   </Text>
                 </TouchableOpacity>
@@ -1148,34 +1149,34 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
           </View>
         )}
         {favoritesLoading && (
-          <ActivityIndicator color={c.accent.primary} style={{ marginBottom: spacing[2] }} />
+          <ActivityIndicator color={getThemeColors().accent.primary} style={{ marginBottom: spacing[2] }} />
         )}
 
         {/* ── Create Recipe Button ─────────────────────────── */}
         <TouchableOpacity
-          style={[styles.createPlanBtn, { borderColor: c.accent.primary }]}
+          style={[styles.createPlanBtn, { borderColor: getThemeColors().accent.primary }]}
           onPress={() => setShowRecipeBuilder(true)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.createPlanBtnText, { color: c.accent.primary }]}><Icon name="egg" /> Create Recipe</Text>
+          <Text style={[styles.createPlanBtnText, { color: getThemeColors().accent.primary }]}><Icon name="egg" /> Create Recipe</Text>
         </TouchableOpacity>
 
         {/* ── Food Search ─────────────────────────────────────── */}
         <View style={styles.searchSection}>
-          <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Search Food</Text>
+          <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Search Food</Text>
           <View style={styles.searchRow}>
             <TextInput
               style={[styles.input, styles.searchInput]}
               value={searchQuery}
               onChangeText={handleSearchChange}
               placeholder="Search foods (min 2 chars)..."
-              placeholderTextColor={c.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
               autoCorrect={false}
               testID="nutrition-food-name-input"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={handleClearSearch} style={styles.clearBtn}>
-                <Text style={[styles.clearBtnText, { color: c.text.muted }]}><Icon name="close" size={16} /></Text>
+                <Text style={[styles.clearBtnText, { color: getThemeColors().text.muted }]}><Icon name="close" size={16} /></Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
@@ -1190,7 +1191,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
               style={styles.barcodeBtn}
               activeOpacity={0.7}
             >
-              <Ionicons name="barcode-outline" size={24} color={c.accent.primary} />
+              <Ionicons name="barcode-outline" size={24} color={getThemeColors().accent.primary} />
             </TouchableOpacity>
           </View>
 
@@ -1203,15 +1204,15 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                     flex: 1,
                     height: 40,
                     borderWidth: 1,
-                    borderColor: c.accent.primary,
+                    borderColor: getThemeColors().accent.primary,
                     borderRadius: radius.sm,
                     paddingHorizontal: 12,
-                    color: c.text.primary,
+                    color: getThemeColors().text.primary,
                     fontSize: typography.size.md,
                     backgroundColor: 'transparent',
                   }}
                   placeholder="Enter barcode (8-14 digits)"
-                  placeholderTextColor={c.text.muted}
+                  placeholderTextColor={getThemeColors().text.muted}
                   value={manualBarcodeValue}
                   onChangeText={(t) => {
                     setManualBarcodeValue(t);
@@ -1236,7 +1237,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="search-outline" size={20} color={c.accent.primary} />
+                  <Ionicons name="search-outline" size={20} color={getThemeColors().accent.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.barcodeBtn}
@@ -1247,7 +1248,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
                   }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="close-outline" size={20} color={c.text.secondary} />
+                  <Ionicons name="close-outline" size={20} color={getThemeColors().text.secondary} />
                 </TouchableOpacity>
               </View>
               {manualBarcodeError ? (
@@ -1257,36 +1258,36 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
           )}
 
           {searchLoading && (
-            <ActivityIndicator color={c.accent.primary} style={styles.searchSpinner} />
+            <ActivityIndicator color={getThemeColors().accent.primary} style={styles.searchSpinner} />
           )}
 
           {searchError ? (
-            <Text style={[styles.errorText, { color: c.semantic.warning }]}>{searchError}</Text>
+            <Text style={[styles.errorText, { color: getThemeColors().semantic.warning }]}>{searchError}</Text>
           ) : null}
 
           {searchResults.length > 0 && (
-            <ScrollView style={[styles.resultsList, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]} nestedScrollEnabled keyboardShouldPersistTaps="handled">
+            <ScrollView style={[styles.resultsList, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]} nestedScrollEnabled keyboardShouldPersistTaps="handled">
               {searchResults.slice(0, 50).map((item) => (
                 <TouchableOpacity
                   key={item.id}
-                  style={[styles.resultItem, { borderBottomColor: c.border.subtle }]}
+                  style={[styles.resultItem, { borderBottomColor: getThemeColors().border.subtle }]}
                   onPress={() => handleSelectFood(item)}
                   activeOpacity={0.7}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={[styles.resultName, { color: c.text.primary }]} numberOfLines={1}>
+                    <Text style={[styles.resultName, { color: getThemeColors().text.primary }]} numberOfLines={1}>
                       {item.name}
                     </Text>
                     <SourceBadge source={item.source || 'community'} />
                   </View>
-                  <Text style={[styles.resultMeta, { color: c.text.muted }]}>
+                  <Text style={[styles.resultMeta, { color: getThemeColors().text.muted }]}>
                     {Math.round(item.calories)} kcal · {item.protein_g}g protein
                     {item.serving_size ? ` · ${item.serving_size}${item.serving_unit}` : ''}
                   </Text>
                 </TouchableOpacity>
               ))}
               {searchResults.length > 50 && (
-                <Text style={[styles.truncationText, { color: c.text.muted }]}>
+                <Text style={[styles.truncationText, { color: getThemeColors().text.muted }]}>
                   Showing 50 of {searchResults.length} results. Refine your search for more.
                 </Text>
               )}
@@ -1294,14 +1295,14 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
           )}
 
           {searchEmpty && searchResults.length === 0 && !searchLoading && (
-            <Text style={[styles.emptyText, { color: c.text.muted }]}>No results found — try a different term or enter macros manually</Text>
+            <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>No results found — try a different term or enter macros manually</Text>
           )}
         </View>
 
         {/* ── Serving Unit Selector (shown when food selected) ── */}
         {selectedFood && servingOptions.length > 0 && (
           <View style={styles.servingSelector}>
-            <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Serving Size</Text>
+            <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Serving Size</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {servingOptions.map((opt, i) => (
                 <TouchableOpacity
@@ -1329,8 +1330,8 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
 
         {/* ── Serving Multiplier (shown when food selected) ──── */}
         {selectedFood && (
-          <View style={[styles.multiplierSection, { backgroundColor: c.accent.primaryMuted }]}>
-            <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>
+          <View style={[styles.multiplierSection, { backgroundColor: getThemeColors().accent.primaryMuted }]}>
+            <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>
               Servings of {selectedFood.name}
             </Text>
             <TextInput
@@ -1339,9 +1340,9 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
               onChangeText={handleMultiplierChange}
               keyboardType="numeric"
               placeholder="1"
-              placeholderTextColor={c.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
             />
-            <Text style={[styles.multiplierHint, { color: c.text.muted }]}>
+            <Text style={[styles.multiplierHint, { color: getThemeColors().text.muted }]}>
               {selectedServing
                 ? `${selectedServing.grams}${selectedFood.serving_unit} per ${selectedServing.label}`
                 : `${selectedFood.serving_size}${selectedFood.serving_unit} per serving`}
@@ -1352,27 +1353,27 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
         {/* ── Manual Macro Fields ─────────────────────────────── */}
         <View style={styles.row}>
           <View style={styles.fieldHalf}>
-            <Text style={[styles.label, { color: c.text.secondary }]}>Calories</Text>
+            <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Calories</Text>
             <TextInput
               style={[styles.input, selectedFood && styles.inputLocked]}
               value={calories}
               onChangeText={setCalories}
               keyboardType="numeric"
               placeholder="kcal"
-              placeholderTextColor={c.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
               editable={!selectedFood}
               testID="nutrition-calories-input"
             />
           </View>
           <View style={styles.fieldHalf}>
-            <Text style={[styles.label, { color: c.text.secondary }]}>Protein (g)</Text>
+            <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Protein (g)</Text>
             <TextInput
               style={[styles.input, selectedFood && styles.inputLocked]}
               value={protein}
               onChangeText={setProtein}
               keyboardType="numeric"
               placeholder="g"
-              placeholderTextColor={c.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
               editable={!selectedFood}
               testID="nutrition-protein-input"
             />
@@ -1381,27 +1382,27 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
 
         <View style={styles.row}>
           <View style={styles.fieldHalf}>
-            <Text style={[styles.label, { color: c.text.secondary }]}>Carbs (g)</Text>
+            <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Carbs (g)</Text>
             <TextInput
               style={[styles.input, selectedFood && styles.inputLocked]}
               value={carbs}
               onChangeText={setCarbs}
               keyboardType="numeric"
               placeholder="g"
-              placeholderTextColor={c.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
               editable={!selectedFood}
               testID="nutrition-carbs-input"
             />
           </View>
           <View style={styles.fieldHalf}>
-            <Text style={[styles.label, { color: c.text.secondary }]}>Fat (g)</Text>
+            <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Fat (g)</Text>
             <TextInput
               style={[styles.input, selectedFood && styles.inputLocked]}
               value={fat}
               onChangeText={setFat}
               keyboardType="numeric"
               placeholder="g"
-              placeholderTextColor={c.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
               editable={!selectedFood}
               testID="nutrition-fat-input"
             />
@@ -1410,14 +1411,14 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
 
         {/* ── Fibre Field ─────────────────────────────────────── */}
         <View style={styles.field}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>Fibre (g)</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Fibre (g)</Text>
           <TextInput
-            style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+            style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
             value={fibre}
             onChangeText={setFibre}
             keyboardType="numeric"
             placeholder="g"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
           />
         </View>
 
@@ -1435,25 +1436,25 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
             onPress={() => setMicroExpanded(!microExpanded)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>
+            <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>
               Micronutrients ({countFilledFields(microNutrients)} filled)
             </Text>
-            <Text style={[styles.microChevron, { color: c.text.muted }]}>{microExpanded ? '▲' : '▼'}</Text>
+            <Text style={[styles.microChevron, { color: getThemeColors().text.muted }]}>{microExpanded ? '▲' : '▼'}</Text>
           </TouchableOpacity>
           {microExpanded && (
             <View style={styles.microGrid}>
               {MICRO_FIELDS.map((field) => (
                 <View key={field.key} style={styles.microFieldHalf}>
-                  <Text style={[styles.microLabel, { color: c.text.secondary }]}>{field.label}</Text>
+                  <Text style={[styles.microLabel, { color: getThemeColors().text.secondary }]}>{field.label}</Text>
                   <TextInput
-                    style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                    style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                     value={microNutrients[field.key] ?? ''}
                     onChangeText={(text) =>
                       setMicroNutrients((prev) => ({ ...prev, [field.key]: text }))
                     }
                     keyboardType="numeric"
                     placeholder="0"
-                    placeholderTextColor={c.text.muted}
+                    placeholderTextColor={getThemeColors().text.muted}
                   />
                 </View>
               ))}
@@ -1462,13 +1463,13 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>Notes (optional)</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Notes (optional)</Text>
           <TextInput
             style={[styles.input, styles.notesInput]}
             value={notes}
             onChangeText={setNotes}
             placeholder="e.g. Post-workout meal"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
             multiline
           />
         </View>
@@ -1485,15 +1486,15 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
         testID="nutrition-submit-button"
       >
         {loading ? (
-          <ActivityIndicator color={c.text.primary} />
+          <ActivityIndicator color={getThemeColors().text.primary} />
         ) : (
-          <Text style={[styles.submitText, { color: c.text.primary }]}>Save</Text>
+          <Text style={[styles.submitText, { color: getThemeColors().text.primary }]}>Save</Text>
         )}
       </TouchableOpacity>
       )}
 
       <TouchableOpacity onPress={handleCloseAfterSave} style={styles.doneBtn} activeOpacity={0.7}>
-        <Text style={[styles.doneBtnText, { color: c.text.muted }]}>Done</Text>
+        <Text style={[styles.doneBtnText, { color: getThemeColors().text.muted }]}>Done</Text>
       </TouchableOpacity>
     </ModalContainer>
 
@@ -1526,7 +1527,7 @@ export function AddNutritionModal({ visible, onClose, onSuccess, prefilledMealNa
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   // ── Search ───────────────────────────────────────────────────────────────
   searchSection: {
     marginBottom: spacing[3],
@@ -1534,7 +1535,7 @@ const styles = StyleSheet.create({
     position: 'relative' as const,
   },
   sectionLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
@@ -1552,7 +1553,7 @@ const styles = StyleSheet.create({
     padding: spacing[2],
   },
   clearBtnText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
   },
@@ -1566,23 +1567,23 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   errorText: {
-    color: colors.semantic.warning,
+    color: getThemeColors().semantic.warning,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginTop: spacing[1],
   },
   emptyText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginTop: spacing[1],
     textAlign: 'center' as const,
   },
   resultsList: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     marginTop: spacing[1],
     maxHeight: 300,
     overflow: 'hidden' as const,
@@ -1591,22 +1592,22 @@ const styles = StyleSheet.create({
   resultItem: {
     padding: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: getThemeColors().border.subtle,
   },
   resultName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     fontWeight: typography.weight.medium,
   },
   resultMeta: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     marginTop: spacing[1],
   },
   truncationText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     textAlign: 'center',
@@ -1617,7 +1618,7 @@ const styles = StyleSheet.create({
   // ── Multiplier ───────────────────────────────────────────────────────────
   multiplierSection: {
     marginBottom: spacing[3],
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     borderRadius: radius.sm,
     padding: spacing[3],
   },
@@ -1627,7 +1628,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[1],
   },
   multiplierHint: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     marginTop: spacing[1],
@@ -1641,22 +1642,22 @@ const styles = StyleSheet.create({
     height: 28,
     paddingHorizontal: spacing[3],
     borderRadius: radius.full,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing[2],
   },
   servingPillActive: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   servingPillText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
   },
   servingPillTextActive: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
 
   // ── Favorites ────────────────────────────────────────────────────────────
@@ -1667,10 +1668,10 @@ const styles = StyleSheet.create({
     marginTop: spacing[1],
   },
   favoriteChip: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[3],
     marginRight: spacing[2],
@@ -1678,14 +1679,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   favoriteChipName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
     maxWidth: 120,
   },
   favoriteChipCal: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     marginTop: spacing[1],
@@ -1700,25 +1701,25 @@ const styles = StyleSheet.create({
   field: { marginBottom: spacing[3] },
   fieldHalf: { flex: 1 },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[1],
   },
   input: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
-    color: colors.text.primary,
+    borderColor: getThemeColors().border.default,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     padding: spacing[3],
   },
   inputLocked: {
     opacity: 0.6,
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
   },
   notesInput: {
     minHeight: 60,
@@ -1727,7 +1728,7 @@ const styles = StyleSheet.create({
 
   // ── Submit ───────────────────────────────────────────────────────────────
   submitBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     padding: spacing[3],
     alignItems: 'center',
@@ -1735,7 +1736,7 @@ const styles = StyleSheet.create({
   },
   submitBtnDisabled: { opacity: 0.6 },
   submitText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
     fontWeight: typography.weight.semibold,
@@ -1752,7 +1753,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[2],
   },
   microChevron: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
@@ -1766,7 +1767,7 @@ const styles = StyleSheet.create({
     width: '47%' as unknown as number,
   },
   microLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     fontWeight: typography.weight.medium,
@@ -1778,19 +1779,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.semantic.positive + '18',
+    backgroundColor: getThemeColors().semantic.positive + '18',
     borderRadius: radius.sm,
     padding: spacing[3],
     marginBottom: spacing[3],
   },
   successText: {
-    color: colors.semantic.positive,
+    color: getThemeColors().semantic.positive,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
   },
   saveFavLink: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.semibold,
@@ -1802,7 +1803,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   doneBtnText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
   },
@@ -1821,24 +1822,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   tabActive: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   tabText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
   },
   tabTextActive: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
 
   // ── Meal Plan Cards ──────────────────────────────────────────────────────
   planCard: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     padding: spacing[3],
     marginBottom: spacing[2],
   },
@@ -1848,7 +1849,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   planCardName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     fontWeight: typography.weight.medium,
@@ -1860,7 +1861,7 @@ const styles = StyleSheet.create({
     marginLeft: spacing[2],
   },
   planCardMacros: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     marginTop: spacing[1],
@@ -1868,14 +1869,14 @@ const styles = StyleSheet.create({
   createPlanBtn: {
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.accent.primary,
+    borderColor: getThemeColors().accent.primary,
     borderStyle: 'dashed',
     padding: spacing[3],
     alignItems: 'center',
     marginTop: spacing[2],
   },
   createPlanBtnText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
@@ -1886,10 +1887,10 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   planItemCard: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     padding: spacing[3],
     marginTop: spacing[2],
     gap: spacing[2],
@@ -1900,13 +1901,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   planItemIndex: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
   },
   planItemRemove: {
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
     padding: spacing[1],
@@ -1914,24 +1915,24 @@ const styles = StyleSheet.create({
   addItemBtn: {
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     padding: spacing[2],
     alignItems: 'center',
     marginTop: spacing[2],
   },
   addItemBtnText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
   planAggregate: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     borderRadius: radius.sm,
     padding: spacing[3],
     marginTop: spacing[3],
   },
   planAggregateMacros: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     fontWeight: typography.weight.semibold,
@@ -1948,10 +1949,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   cancelPlanBtnText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
   },

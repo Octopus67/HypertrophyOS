@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { ModalContainer } from '../common/ModalContainer';
 import { validateQuickAdd } from '../../utils/quickAddValidation';
 import { Icon } from '../common/Icon';
@@ -24,6 +24,7 @@ interface QuickAddModalProps {
 
 export function QuickAddModal({ visible, onClose, onSuccess, targetDate }: QuickAddModalProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
@@ -89,16 +90,16 @@ export function QuickAddModal({ visible, onClose, onSuccess, targetDate }: Quick
   };
 
   return (
-    <ModalContainer visible={visible} onClose={handleClose} title={<><Icon name="lightning" size={18} color={c.accent.primary} /><Text style={{ fontSize: typography.size.lg, fontWeight: typography.weight.semibold, color: c.text.primary }}>Quick Add</Text></>} testID="quick-add-modal" closeButtonTestID="quickadd-cancel-button">
+    <ModalContainer visible={visible} onClose={handleClose} title={<><Icon name="lightning" size={18} color={getThemeColors().accent.primary} /><Text style={{ fontSize: typography.size.lg, fontWeight: typography.weight.semibold, color: getThemeColors().text.primary }}>Quick Add</Text></>} testID="quick-add-modal" closeButtonTestID="quickadd-cancel-button">
       <View style={styles.field}>
-        <Text style={[styles.label, { color: c.text.secondary }]}>Calories *</Text>
+        <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Calories *</Text>
         <TextInput
-          style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+          style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
           value={calories}
           onChangeText={setCalories}
           keyboardType="numeric"
           placeholder="e.g. 500"
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           autoFocus
           testID="quickadd-calories-input"
         />
@@ -106,38 +107,38 @@ export function QuickAddModal({ visible, onClose, onSuccess, targetDate }: Quick
 
       <View style={styles.optionalRow}>
         <View style={styles.optionalField}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>Protein (g)</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Protein (g)</Text>
           <TextInput
-            style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+            style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
             value={protein}
             onChangeText={setProtein}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
             testID="quickadd-protein-input"
           />
         </View>
         <View style={styles.optionalField}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>Carbs (g)</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Carbs (g)</Text>
           <TextInput
-            style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+            style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
             value={carbs}
             onChangeText={setCarbs}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
             testID="quickadd-carbs-input"
           />
         </View>
         <View style={styles.optionalField}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>Fat (g)</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Fat (g)</Text>
           <TextInput
-            style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+            style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
             value={fat}
             onChangeText={setFat}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
             testID="quickadd-fat-input"
           />
         </View>
@@ -151,9 +152,9 @@ export function QuickAddModal({ visible, onClose, onSuccess, targetDate }: Quick
         testID="quickadd-submit-button"
       >
         {loading ? (
-          <ActivityIndicator color={c.text.primary} />
+          <ActivityIndicator color={getThemeColors().text.primary} />
         ) : (
-          <Text style={[styles.submitText, { color: c.text.primary }]}>Log Entry</Text>
+          <Text style={[styles.submitText, { color: getThemeColors().text.primary }]}>Log Entry</Text>
         )}
       </TouchableOpacity>
     </ModalContainer>
@@ -161,25 +162,25 @@ export function QuickAddModal({ visible, onClose, onSuccess, targetDate }: Quick
 }
 
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   field: {
     marginBottom: spacing[3],
   },
   label: {
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     marginBottom: spacing[1],
     fontWeight: typography.weight.medium,
   },
   input: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
   },
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   submitBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     paddingVertical: spacing[3],
     alignItems: 'center',
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
   submitText: {
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: typography.weight.semibold,
   },
 });

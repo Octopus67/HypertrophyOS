@@ -2,8 +2,8 @@ import React from 'react';
 import { FlatList, TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import { Exercise } from '../../types/exercise';
 import { getMuscleGroupConfig } from '../../config/muscleGroups';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { MuscleGroupIcon } from './MuscleGroupIcon';
 
 interface RecentExercisesProps {
@@ -13,13 +13,14 @@ interface RecentExercisesProps {
 
 export function RecentExercises({ exercises, onPress }: RecentExercisesProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (exercises.length === 0) return null;
 
   const renderItem = ({ item }: { item: Exercise }) => {
     const config = getMuscleGroupConfig(item.muscle_group);
     return (
       <TouchableOpacity
-        style={[styles.card, { backgroundColor: c.bg.surfaceRaised }]}
+        style={[styles.card, { backgroundColor: getThemeColors().bg.surfaceRaised }]}
         onPress={() => onPress(item)}
         activeOpacity={0.7}
         accessibilityLabel={`Recent: ${item.name}`}
@@ -28,14 +29,14 @@ export function RecentExercises({ exercises, onPress }: RecentExercisesProps) {
         <View style={[styles.abbrevCircle, { backgroundColor: config?.color ?? '#2563EB' }]}>
           <MuscleGroupIcon muscleGroup={item.muscle_group} size={18} color="#FFFFFF" />
         </View>
-        <Text style={[styles.name, { color: c.text.primary }]} numberOfLines={2}>{item.name}</Text>
+        <Text style={[styles.name, { color: getThemeColors().text.primary }]} numberOfLines={2}>{item.name}</Text>
       </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.header, { color: c.text.secondary }]}>Recent</Text>
+      <Text style={[styles.header, { color: getThemeColors().text.secondary }]}>Recent</Text>
       <FlatList
         data={exercises}
         renderItem={renderItem}
@@ -48,12 +49,12 @@ export function RecentExercises({ exercises, onPress }: RecentExercisesProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     paddingTop: spacing[2],
   },
   header: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     paddingHorizontal: spacing[4],
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 120,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     padding: spacing[2],
     alignItems: 'center',
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   name: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xs,
     textAlign: 'center',
   },

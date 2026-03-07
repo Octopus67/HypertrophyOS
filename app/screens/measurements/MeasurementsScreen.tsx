@@ -11,8 +11,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { MeasurementInput } from '../../components/measurements/MeasurementInput';
 import { NavyBFCalculator } from '../../components/measurements/NavyBFCalculator';
 import { MeasurementTrendChart } from '../../components/measurements/MeasurementTrendChart';
@@ -26,6 +26,7 @@ const PHOTO_STORAGE_KEY = 'measurement_photo_paths';
 
 export function MeasurementsScreen() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const navigation = useNavigation();
   const [tab, setTab] = useState<Tab>('measurements');
   const [measurements, setMeasurements] = useState<BodyMeasurement[]>([]);
@@ -170,18 +171,18 @@ export function MeasurementsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base },
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: spacing[4], paddingVertical: spacing[3],
-    borderBottomWidth: 1, borderBottomColor: colors.border.subtle,
+    borderBottomWidth: 1, borderBottomColor: getThemeColors().border.subtle,
   },
   backBtn: { width: 60, minHeight: 44, justifyContent: 'center' },
-  backText: { color: colors.accent.primary, fontSize: typography.size.base },
+  backText: { color: getThemeColors().accent.primary, fontSize: typography.size.base },
   title: {
-    color: colors.text.primary, fontSize: typography.size.lg,
+    color: getThemeColors().text.primary, fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
   },
   tabBar: {
@@ -192,16 +193,16 @@ const styles = StyleSheet.create({
     flex: 1, alignItems: 'center', paddingVertical: spacing[2],
     borderBottomWidth: 2, borderBottomColor: 'transparent',
   },
-  tabActive: { borderBottomColor: colors.accent.primary },
+  tabActive: { borderBottomColor: getThemeColors().accent.primary },
   tabText: {
-    color: colors.text.secondary, fontSize: typography.size.sm,
+    color: getThemeColors().text.secondary, fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
-  tabTextActive: { color: colors.accent.primary, fontWeight: typography.weight.semibold },
+  tabTextActive: { color: getThemeColors().accent.primary, fontWeight: typography.weight.semibold },
   content: { flex: 1, paddingHorizontal: spacing[4], paddingTop: spacing[3] },
   formSection: { marginTop: spacing[2] },
   sectionTitle: {
-    color: colors.text.primary, fontSize: typography.size.md,
+    color: getThemeColors().text.primary, fontSize: typography.size.md,
     fontWeight: typography.weight.semibold, lineHeight: typography.lineHeight.md,
     marginBottom: spacing[3],
   },

@@ -7,8 +7,8 @@ import { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 } from 'react-native';
-import { colors, radius, spacing, typography, opacityScale } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, opacityScale } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Button } from '../common/Button';
 import { useStore } from '../../store';
 import { lbsToKg, kgToLbs } from '../../utils/unitConversion';
@@ -42,6 +42,7 @@ function todayISO(): string {
 
 export function MeasurementInput({ onSubmit, loading, onOpenNavyCalc, bodyFatPctFromCalc }: MeasurementInputProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const unitSystem = useStore((s) => s.unitSystem);
   const isImperial = unitSystem === 'imperial';
   const weightUnit = isImperial ? 'lbs' : 'kg';
@@ -102,17 +103,17 @@ export function MeasurementInput({ onSubmit, loading, onOpenNavyCalc, bodyFatPct
     placeholder: string,
   ) => (
     <View style={styles.field} key={key}>
-      <Text style={[styles.label, { color: c.text.muted }]}>{label} ({unit})</Text>
+      <Text style={[styles.label, { color: getThemeColors().text.muted }]}>{label} ({unit})</Text>
       <TextInput
         style={[styles.input, errors[key] ? styles.inputError : undefined]}
         value={form[key]}
         onChangeText={(v) => updateField(key, v)}
         keyboardType="decimal-pad"
         placeholder={placeholder}
-        placeholderTextColor={c.text.muted}
+        placeholderTextColor={getThemeColors().text.muted}
         accessibilityLabel={`${label} in ${unit}`}
       />
-      {errors[key] ? <Text style={[styles.errorText, { color: c.semantic.negative }]}>{errors[key]}</Text> : null}
+      {errors[key] ? <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>{errors[key]}</Text> : null}
     </View>
   );
 
@@ -120,16 +121,16 @@ export function MeasurementInput({ onSubmit, loading, onOpenNavyCalc, bodyFatPct
     <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
       {/* Date */}
       <View style={styles.field}>
-        <Text style={[styles.label, { color: c.text.muted }]}>Date</Text>
+        <Text style={[styles.label, { color: getThemeColors().text.muted }]}>Date</Text>
         <TextInput
           style={[styles.input, errors.measuredAt ? styles.inputError : undefined]}
           value={form.measuredAt}
           onChangeText={(v) => updateField('measuredAt', v)}
           placeholder="YYYY-MM-DD"
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           accessibilityLabel="Measurement date"
         />
-        {errors.measuredAt ? <Text style={[styles.errorText, { color: c.semantic.negative }]}>{errors.measuredAt}</Text> : null}
+        {errors.measuredAt ? <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>{errors.measuredAt}</Text> : null}
       </View>
 
       {/* Weight */}
@@ -138,10 +139,10 @@ export function MeasurementInput({ onSubmit, loading, onOpenNavyCalc, bodyFatPct
       {/* Body Fat */}
       <View style={styles.field}>
         <View style={styles.labelRow}>
-          <Text style={[styles.label, { color: c.text.muted }]}>Body Fat (%)</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.muted }]}>Body Fat (%)</Text>
           {onOpenNavyCalc && (
             <TouchableOpacity onPress={onOpenNavyCalc} accessibilityRole="button" accessibilityLabel="Open Navy BF calculator">
-              <Text style={[styles.calcLink, { color: c.accent.primary }]}>Navy Calculator →</Text>
+              <Text style={[styles.calcLink, { color: getThemeColors().accent.primary }]}>Navy Calculator →</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -151,10 +152,10 @@ export function MeasurementInput({ onSubmit, loading, onOpenNavyCalc, bodyFatPct
           onChangeText={(v) => updateField('bodyFatPct', v)}
           keyboardType="decimal-pad"
           placeholder="e.g. 16"
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           accessibilityLabel="Body fat percentage"
         />
-        {errors.bodyFatPct ? <Text style={[styles.errorText, { color: c.semantic.negative }]}>{errors.bodyFatPct}</Text> : null}
+        {errors.bodyFatPct ? <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>{errors.bodyFatPct}</Text> : null}
       </View>
 
       {/* Circumference fields */}
@@ -164,13 +165,13 @@ export function MeasurementInput({ onSubmit, loading, onOpenNavyCalc, bodyFatPct
 
       {/* Notes */}
       <View style={styles.field}>
-        <Text style={[styles.label, { color: c.text.muted }]}>Notes</Text>
+        <Text style={[styles.label, { color: getThemeColors().text.muted }]}>Notes</Text>
         <TextInput
           style={[styles.input, styles.notesInput]}
           value={form.notes}
           onChangeText={(v) => updateField('notes', v)}
           placeholder="Optional notes..."
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           multiline
           numberOfLines={3}
           accessibilityLabel="Measurement notes"
@@ -189,29 +190,29 @@ export function MeasurementInput({ onSubmit, loading, onOpenNavyCalc, bodyFatPct
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   field: { marginBottom: spacing[3] },
   labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   label: {
-    color: colors.text.muted, fontSize: typography.size.sm,
+    color: getThemeColors().text.muted, fontSize: typography.size.sm,
     fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.sm,
     marginBottom: spacing[1],
   },
   calcLink: {
-    color: colors.accent.primary, fontSize: typography.size.sm,
+    color: getThemeColors().accent.primary, fontSize: typography.size.sm,
     fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.sm,
   },
   input: {
-    color: colors.text.primary, fontSize: typography.size.base,
-    backgroundColor: colors.bg.surfaceRaised, borderRadius: radius.sm,
-    borderWidth: 1, borderColor: colors.border.default,
+    color: getThemeColors().text.primary, fontSize: typography.size.base,
+    backgroundColor: getThemeColors().bg.surfaceRaised, borderRadius: radius.sm,
+    borderWidth: 1, borderColor: getThemeColors().border.default,
     paddingHorizontal: spacing[3], paddingVertical: spacing[2],
   },
-  inputError: { borderColor: colors.semantic.negative },
+  inputError: { borderColor: getThemeColors().semantic.negative },
   notesInput: { minHeight: 72, textAlignVertical: 'top' },
   errorText: {
-    color: colors.semantic.negative, fontSize: typography.size.xs,
+    color: getThemeColors().semantic.negative, fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs, marginTop: spacing[0.5],
   },
   submitBtn: { marginTop: spacing[2], marginBottom: spacing[6] },

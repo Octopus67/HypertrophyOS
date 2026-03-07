@@ -2,8 +2,8 @@ import { ReactNode } from 'react';
 import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { usePressAnimation } from '../../hooks/usePressAnimation';
-import { colors, typography, spacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface FeatureNavItemProps {
   icon: ReactNode;
@@ -15,6 +15,7 @@ interface FeatureNavItemProps {
 
 export function FeatureNavItem({ icon, label, description, onPress, testID }: FeatureNavItemProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const { animatedStyle, onPressIn, onPressOut } = usePressAnimation();
 
   return (
@@ -29,16 +30,16 @@ export function FeatureNavItem({ icon, label, description, onPress, testID }: Fe
       >
         <View style={styles.iconWrap}>{icon}</View>
         <View style={styles.content}>
-          <Text style={[styles.label, { color: c.text.primary }]}>{label}</Text>
-          <Text style={[styles.description, { color: c.text.muted }]}>{description}</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.primary }]}>{label}</Text>
+          <Text style={[styles.description, { color: getThemeColors().text.muted }]}>{description}</Text>
         </View>
-        <Text style={[styles.chevron, { color: c.text.muted }]}>›</Text>
+        <Text style={[styles.chevron, { color: getThemeColors().text.muted }]}>›</Text>
       </TouchableOpacity>
     </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -57,16 +58,16 @@ const styles = StyleSheet.create({
   label: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
   },
   description: {
     fontSize: typography.size.sm,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     marginTop: spacing[1],
   },
   chevron: {
     fontSize: typography.size.md,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     marginLeft: spacing[2],
   },
 });

@@ -6,8 +6,8 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { colors, spacing, typography, motion } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, motion } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { computeBarFill } from '../../utils/progressBarLogic';
 
 interface ProgressBarProps {
@@ -28,6 +28,7 @@ export function ProgressBar({
   height = 6,
 }: ProgressBarProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const fill = computeBarFill(value, target, color);
   const widthProgress = useSharedValue(0);
 
@@ -55,14 +56,14 @@ export function ProgressBar({
           />
         </View>
         {showPercentage && (
-          <Text style={[styles.label, { color: c.text.secondary }]}>{fill.label}</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>{fill.label}</Text>
         )}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     width: '100%',
   },
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     minWidth: 32,

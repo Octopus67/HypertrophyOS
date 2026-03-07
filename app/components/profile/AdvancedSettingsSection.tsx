@@ -9,8 +9,8 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
-import { colors, spacing, typography, radius, opacityScale } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius, opacityScale } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { Icon } from '../common/Icon';
 import { Button } from '../common/Button';
@@ -61,6 +61,7 @@ function extractDraft(prefs: Record<string, unknown> | null | undefined): DraftS
 
 export function AdvancedSettingsSection() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const store = useStore();
   const profile = store.profile;
   const latestMetrics = store.latestMetrics;
@@ -260,7 +261,7 @@ export function AdvancedSettingsSection() {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -273,7 +274,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   headerTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.md,
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[4],
   },
   sectionTitle: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.sm,
@@ -292,17 +293,17 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: colors.border.subtle,
+    backgroundColor: getThemeColors().border.subtle,
     marginVertical: spacing[4],
   },
   error: {
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginBottom: spacing[2],
   },
   success: {
-    color: colors.semantic.positive,
+    color: getThemeColors().semantic.positive,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginBottom: spacing[2],

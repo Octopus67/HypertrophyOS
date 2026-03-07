@@ -11,8 +11,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { OverloadSuggestion, UnitSystem } from '../../types/training';
 import { convertWeight } from '../../utils/unitConversion';
-import { colors, typography, spacing, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 export interface OverloadBadgeProps {
   suggestion: OverloadSuggestion | null;
@@ -21,9 +21,9 @@ export interface OverloadBadgeProps {
 }
 
 const CONFIDENCE_COLORS: Record<string, string> = {
-  high: colors.semantic.positive,
-  medium: colors.semantic.warning,
-  low: colors.text.muted,
+  high: getThemeColors().semantic.positive,
+  medium: getThemeColors().semantic.warning,
+  low: getThemeColors().text.muted,
 };
 
 export const OverloadBadge: React.FC<OverloadBadgeProps> = ({
@@ -32,11 +32,12 @@ export const OverloadBadge: React.FC<OverloadBadgeProps> = ({
   onApply,
 }) => {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (!suggestion) return null;
 
   const displayWeight = convertWeight(suggestion.suggested_weight_kg, unitSystem);
   const unit = unitSystem === 'metric' ? 'kg' : 'lbs';
-  const dotColor = CONFIDENCE_COLORS[suggestion.confidence] ?? c.text.muted;
+  const dotColor = CONFIDENCE_COLORS[suggestion.confidence] ?? getThemeColors().text.muted;
 
   return (
     <TouchableOpacity
@@ -54,11 +55,11 @@ export const OverloadBadge: React.FC<OverloadBadgeProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     paddingVertical: spacing[1],
     paddingHorizontal: spacing[2],
     borderRadius: radius.full,
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
 });
 

@@ -13,8 +13,8 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { documentDirectory, getInfoAsync, makeDirectoryAsync, copyAsync, deleteAsync } from 'expo-file-system/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors, radius, spacing, typography, shadows } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, shadows } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import api from '../../services/api';
 
 const PHOTO_DIR = `${documentDirectory ?? ''}progress_photos/`;
@@ -29,6 +29,7 @@ interface PhotoEntry {
 
 export function ProgressPhotosScreen() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const navigation = useNavigation();
   const [photos, setPhotos] = useState<PhotoEntry[]>([]);
   const [pathMap, setPathMap] = useState<Record<string, string>>({});
@@ -185,24 +186,24 @@ export function ProgressPhotosScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing[4], paddingVertical: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.border.subtle },
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing[4], paddingVertical: spacing[3], borderBottomWidth: 1, borderBottomColor: getThemeColors().border.subtle },
   backBtn: { width: 60, minHeight: 44, justifyContent: 'center' },
-  backText: { color: colors.accent.primary, fontSize: typography.size.base },
-  title: { color: colors.text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold },
-  count: { color: colors.text.muted, fontSize: typography.size.sm, width: 60, textAlign: 'right' },
+  backText: { color: getThemeColors().accent.primary, fontSize: typography.size.base },
+  title: { color: getThemeColors().text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold },
+  count: { color: getThemeColors().text.muted, fontSize: typography.size.sm, width: 60, textAlign: 'right' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing[8] },
-  emptyTitle: { color: colors.text.primary, fontSize: typography.size.xl, fontWeight: typography.weight.semibold, marginBottom: spacing[2] },
-  emptySubtitle: { color: colors.text.secondary, fontSize: typography.size.base, textAlign: 'center', lineHeight: 22 },
+  emptyTitle: { color: getThemeColors().text.primary, fontSize: typography.size.xl, fontWeight: typography.weight.semibold, marginBottom: spacing[2] },
+  emptySubtitle: { color: getThemeColors().text.secondary, fontSize: typography.size.base, textAlign: 'center', lineHeight: 22 },
   grid: { padding: spacing[3] },
   gridRow: { gap: spacing[3] },
-  photoCard: { flex: 1, marginBottom: spacing[3], borderRadius: radius.md, overflow: 'hidden', backgroundColor: colors.bg.surface, borderWidth: 1, borderColor: colors.border.subtle },
-  photoImage: { width: '100%', aspectRatio: 3 / 4, backgroundColor: colors.bg.surfaceRaised },
-  photoPlaceholder: { width: '100%', aspectRatio: 3 / 4, backgroundColor: colors.bg.surfaceRaised, alignItems: 'center', justifyContent: 'center' },
-  placeholderText: { color: colors.text.muted, fontSize: typography.size.xs },
-  photoDate: { color: colors.text.secondary, fontSize: typography.size.xs, textAlign: 'center', paddingVertical: spacing[2] },
-  fab: { position: 'absolute', bottom: spacing[8], right: spacing[4], width: 56, height: 56, borderRadius: radius.full, backgroundColor: colors.accent.primary, alignItems: 'center', justifyContent: 'center', ...shadows.md },
+  photoCard: { flex: 1, marginBottom: spacing[3], borderRadius: radius.md, overflow: 'hidden', backgroundColor: getThemeColors().bg.surface, borderWidth: 1, borderColor: getThemeColors().border.subtle },
+  photoImage: { width: '100%', aspectRatio: 3 / 4, backgroundColor: getThemeColors().bg.surfaceRaised },
+  photoPlaceholder: { width: '100%', aspectRatio: 3 / 4, backgroundColor: getThemeColors().bg.surfaceRaised, alignItems: 'center', justifyContent: 'center' },
+  placeholderText: { color: getThemeColors().text.muted, fontSize: typography.size.xs },
+  photoDate: { color: getThemeColors().text.secondary, fontSize: typography.size.xs, textAlign: 'center', paddingVertical: spacing[2] },
+  fab: { position: 'absolute', bottom: spacing[8], right: spacing[4], width: 56, height: 56, borderRadius: radius.full, backgroundColor: getThemeColors().accent.primary, alignItems: 'center', justifyContent: 'center', ...shadows.md },
   fabDisabled: { opacity: 0.5 },
   fabText: { color: '#fff', fontSize: 28, fontWeight: typography.weight.bold },
 });

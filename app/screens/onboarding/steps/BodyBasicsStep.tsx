@@ -6,8 +6,8 @@ import {
   StyleSheet,
   ScrollView,
 } from 'react-native';
-import { colors, spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors } from '../../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
 import type { Sex } from '../../../store/onboardingSlice';
 import { Button } from '../../../components/common/Button';
@@ -102,10 +102,10 @@ function VerticalPicker({ data, selectedValue, onValueChange }: VerticalPickerPr
 
 const pickerStyles = StyleSheet.create({
   wrapper: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -115,7 +115,7 @@ const pickerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     height: PICKER_ITEM_HEIGHT * 1.5,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     opacity: 0.75,
     zIndex: 5,
   },
@@ -125,7 +125,7 @@ const pickerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     height: PICKER_ITEM_HEIGHT * 1.5,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     opacity: 0.75,
     zIndex: 5,
   },
@@ -140,13 +140,13 @@ const pickerStyles = StyleSheet.create({
   textSelected: {
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     lineHeight: typography.lineHeight.xl,
   },
   textMuted: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     opacity: 0.4,
     lineHeight: typography.lineHeight.md,
   },
@@ -156,6 +156,7 @@ const pickerStyles = StyleSheet.create({
 
 export function BodyBasicsStep({ onNext }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const {
     sex,
     birthYear,
@@ -198,11 +199,11 @@ export function BodyBasicsStep({ onNext }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <Text style={[styles.title, { color: c.text.primary }]}>Body Basics</Text>
-      <Text style={[styles.subtitle, { color: c.text.secondary }]}>We'll use this to calculate your metabolism</Text>
+      <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Body Basics</Text>
+      <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>We'll use this to calculate your metabolism</Text>
 
       {/* ── Sex selector ─────────────────────────────────────────────── */}
-      <Text style={[styles.label, { color: c.text.secondary }]}>Sex</Text>
+      <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Sex</Text>
       <View style={styles.pillRow}>
         {SEX_OPTIONS.map((opt) => (
           <TouchableOpacity
@@ -223,18 +224,18 @@ export function BodyBasicsStep({ onNext }: Props) {
       {/* ── Birth Year & Month — side by side scroll pickers ────────── */}
       <View style={styles.dateRow}>
         <View style={styles.dateCol}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>Birth Year</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Birth Year</Text>
           <VerticalPicker data={yearData} selectedValue={selectedYear} onValueChange={handleYearChange} />
         </View>
         <View style={styles.dateCol}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>Month</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Month</Text>
           <VerticalPicker data={monthData} selectedValue={selectedMonth} onValueChange={handleMonthChange} />
         </View>
       </View>
 
       {/* Age validation error */}
       {birthYear && !ageValid && (
-        <Text style={[styles.errorText, { color: c.semantic.negative }]}>Age must be between 13 and 120 years</Text>
+        <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>Age must be between 13 and 120 years</Text>
       )}
 
       {onNext && (
@@ -244,19 +245,19 @@ export function BodyBasicsStep({ onNext }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   content: { paddingHorizontal: spacing[4], paddingBottom: spacing[10] },
-  title: { color: colors.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[1], lineHeight: typography.lineHeight['2xl'] },
-  subtitle: { color: colors.text.secondary, fontSize: typography.size.base, marginBottom: spacing[6], lineHeight: typography.lineHeight.base },
-  label: { color: colors.text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, marginBottom: spacing[2], marginTop: spacing[4], lineHeight: typography.lineHeight.sm },
+  title: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[1], lineHeight: typography.lineHeight['2xl'] },
+  subtitle: { color: getThemeColors().text.secondary, fontSize: typography.size.base, marginBottom: spacing[6], lineHeight: typography.lineHeight.base },
+  label: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, marginBottom: spacing[2], marginTop: spacing[4], lineHeight: typography.lineHeight.sm },
   pillRow: { flexDirection: 'row', gap: spacing[2] },
-  pill: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, backgroundColor: colors.bg.surfaceRaised, borderWidth: 1, borderColor: colors.border.subtle, alignItems: 'center', minHeight: 44, justifyContent: 'center' },
-  pillActive: { backgroundColor: colors.accent.primaryMuted, borderColor: colors.accent.primary },
-  pillText: { color: colors.text.secondary, fontSize: typography.size.base, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.base },
-  pillTextActive: { color: colors.accent.primary, fontWeight: typography.weight.semibold },
+  pill: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, backgroundColor: getThemeColors().bg.surfaceRaised, borderWidth: 1, borderColor: getThemeColors().border.subtle, alignItems: 'center', minHeight: 44, justifyContent: 'center' },
+  pillActive: { backgroundColor: getThemeColors().accent.primaryMuted, borderColor: getThemeColors().accent.primary },
+  pillText: { color: getThemeColors().text.secondary, fontSize: typography.size.base, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.base },
+  pillTextActive: { color: getThemeColors().accent.primary, fontWeight: typography.weight.semibold },
   dateRow: { flexDirection: 'row', gap: spacing[3], marginTop: spacing[2] },
   dateCol: { flex: 1 },
-  errorText: { color: colors.semantic.negative, fontSize: typography.size.sm, marginTop: spacing[2], textAlign: 'center', lineHeight: typography.lineHeight.sm },
+  errorText: { color: getThemeColors().semantic.negative, fontSize: typography.size.sm, marginTop: spacing[2], textAlign: 'center', lineHeight: typography.lineHeight.sm },
   nextBtn: { marginTop: spacing[6], width: '100%' },
 });

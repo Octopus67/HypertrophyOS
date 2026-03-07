@@ -1,8 +1,8 @@
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 import { Card } from '../common/Card';
-import { colors, typography, spacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface Article {
   id: string;
@@ -19,38 +19,39 @@ interface ArticleCardCompactProps {
 function getCategoryColor(moduleName: string): string {
   switch (moduleName) {
     case 'nutrition':
-      return colors.macro.calories;
+      return getThemeColors().macro.calories;
     case 'training':
-      return colors.macro.protein;
+      return getThemeColors().macro.protein;
     case 'recovery':
-      return colors.macro.carbs;
+      return getThemeColors().macro.carbs;
     default:
-      return colors.accent.primary;
+      return getThemeColors().accent.primary;
   }
 }
 
 export function ArticleCardCompact({ article, onPress }: ArticleCardCompactProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const categoryColor = getCategoryColor(article.module_name);
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <Card style={[styles.card, { borderTopColor: categoryColor }]}>
-        <Text style={[styles.title, { color: c.text.primary }]} numberOfLines={2}>
+        <Text style={[styles.title, { color: getThemeColors().text.primary }]} numberOfLines={2}>
           {article.title}
         </Text>
         <View style={styles.footer}>
-          <Text style={[styles.readTime, { color: c.text.muted }]}>
+          <Text style={[styles.readTime, { color: getThemeColors().text.muted }]}>
             {article.estimated_read_time_min} min read
           </Text>
-          <Text style={[styles.arrow, { color: c.text.muted }]}>→</Text>
+          <Text style={[styles.arrow, { color: getThemeColors().text.muted }]}>→</Text>
         </View>
       </Card>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
     width: 200,
     borderTopWidth: 4,
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginBottom: spacing[2],
   },
   footer: {
@@ -69,10 +70,10 @@ const styles = StyleSheet.create({
   },
   readTime: {
     fontSize: typography.size.xs,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   arrow: {
     fontSize: typography.size.md,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
 });

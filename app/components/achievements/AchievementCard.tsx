@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon, IconName } from '../common/Icon';
 
 /** Map achievement icon strings from the backend to available Icon names and colors */
@@ -13,11 +13,11 @@ function getAchievementIcon(iconStr: string): IconName {
 }
 
 function getAchievementColor(iconStr: string): string {
-  if (iconStr.includes('bench') || iconStr.includes('squat') || iconStr.includes('dl') || iconStr.includes('deadlift')) return colors.macro.protein;
-  if (iconStr.includes('streak')) return colors.semantic.warning;
+  if (iconStr.includes('bench') || iconStr.includes('squat') || iconStr.includes('dl') || iconStr.includes('deadlift')) return getThemeColors().macro.protein;
+  if (iconStr.includes('streak')) return getThemeColors().semantic.warning;
   if (iconStr.includes('vol')) return '#8B5CF6';
-  if (iconStr.includes('nutr')) return colors.macro.calories;
-  return colors.accent.primary;
+  if (iconStr.includes('nutr')) return getThemeColors().macro.calories;
+  return getThemeColors().accent.primary;
 }
 
 interface AchievementCardProps {
@@ -42,6 +42,7 @@ export function AchievementCard({
   onPress,
 }: AchievementCardProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const categoryColor = getAchievementColor(definition.icon);
   const progressPct = Math.min(Math.max((progress ?? 0) * 100, 0), 100);
 
@@ -58,18 +59,18 @@ export function AchievementCard({
         <Icon
           name={getAchievementIcon(definition.icon)}
           size={20}
-          color={unlocked ? categoryColor : c.text.muted}
+          color={unlocked ? categoryColor : getThemeColors().text.muted}
         />
       </View>
       <Text style={[styles.title, !unlocked && styles.titleLocked]} numberOfLines={1}>
         {definition.title}
       </Text>
       {unlocked && unlockedAt ? (
-        <Text style={[styles.date, { color: c.text.muted }]}>
+        <Text style={[styles.date, { color: getThemeColors().text.muted }]}>
           {new Date(unlockedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
         </Text>
       ) : (
-        <View style={[styles.progressTrack, { backgroundColor: c.bg.surfaceRaised }]}>
+        <View style={[styles.progressTrack, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
           <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
         </View>
       )}
@@ -77,18 +78,18 @@ export function AchievementCard({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     padding: spacing[3],
     alignItems: 'center',
     margin: spacing[1],
   },
   cardUnlocked: {
-    borderColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primaryMuted,
   },
   iconCircle: {
     width: 40,
@@ -99,35 +100,35 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   iconUnlocked: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   iconLocked: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
     textAlign: 'center',
     marginBottom: spacing[1],
   },
   titleLocked: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   date: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: 10,
   },
   progressTrack: {
     width: '100%',
     height: 3,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: 2,
   },
 });

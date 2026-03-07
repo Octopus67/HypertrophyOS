@@ -1,4 +1,5 @@
-import { colors } from '../theme/tokens';
+;
+import { getThemeColors } from '../hooks/useThemeColors';
 
 export interface MuscleGroupConfig {
   key: string;
@@ -7,19 +8,19 @@ export interface MuscleGroupConfig {
 }
 
 export const MUSCLE_GROUP_CONFIG: MuscleGroupConfig[] = [
-  { key: 'chest', label: 'Chest', color: colors.semantic.negative },
-  { key: 'back', label: 'Back', color: colors.accent.primary },
-  { key: 'shoulders', label: 'Shoulders', color: colors.accent.primaryHover },
-  { key: 'biceps', label: 'Biceps', color: colors.semantic.warning },
-  { key: 'triceps', label: 'Triceps', color: colors.semantic.caution },
-  { key: 'quads', label: 'Quads', color: colors.semantic.positive },
-  { key: 'hamstrings', label: 'Hamstrings', color: colors.macro.carbs },
-  { key: 'glutes', label: 'Glutes', color: colors.premium.gold },
-  { key: 'calves', label: 'Calves', color: colors.accent.primary },
-  { key: 'abs', label: 'Abs', color: colors.semantic.warning },
-  { key: 'traps', label: 'Traps', color: colors.accent.primaryHover },
-  { key: 'forearms', label: 'Forearms', color: colors.semantic.caution },
-  { key: 'full_body', label: 'Full Body', color: colors.accent.primary },
+  { key: 'chest', label: 'Chest', color: getThemeColors().semantic.negative },
+  { key: 'back', label: 'Back', color: getThemeColors().accent.primary },
+  { key: 'shoulders', label: 'Shoulders', color: getThemeColors().accent.primaryHover },
+  { key: 'biceps', label: 'Biceps', color: getThemeColors().semantic.warning },
+  { key: 'triceps', label: 'Triceps', color: getThemeColors().semantic.caution },
+  { key: 'quads', label: 'Quads', color: getThemeColors().semantic.positive },
+  { key: 'hamstrings', label: 'Hamstrings', color: getThemeColors().macro.carbs },
+  { key: 'glutes', label: 'Glutes', color: getThemeColors().premium.gold },
+  { key: 'calves', label: 'Calves', color: getThemeColors().accent.primary },
+  { key: 'abs', label: 'Abs', color: getThemeColors().semantic.warning },
+  { key: 'traps', label: 'Traps', color: getThemeColors().accent.primaryHover },
+  { key: 'forearms', label: 'Forearms', color: getThemeColors().semantic.caution },
+  { key: 'full_body', label: 'Full Body', color: getThemeColors().accent.primary },
 ];
 
 export function getMuscleGroupConfig(key: string): MuscleGroupConfig | undefined {

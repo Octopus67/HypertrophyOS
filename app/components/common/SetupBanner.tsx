@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from './Icon';
 
 interface SetupBannerProps {
@@ -10,10 +10,11 @@ interface SetupBannerProps {
 
 export function SetupBanner({ onPress }: SetupBannerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
     <TouchableOpacity style={styles.banner} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.content}>
-        <Icon name="lightning" size={18} color={c.accent.primary} />
+        <Icon name="lightning" size={18} color={getThemeColors().accent.primary} />
         <View style={styles.textContainer}>
           <Text style={styles.title}>Complete your profile to get personalized targets</Text>
           <Text style={styles.subtitle}>Tap to set up your goals and body stats</Text>
@@ -24,12 +25,12 @@ export function SetupBanner({ onPress }: SetupBannerProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   banner: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.accent.primary,
+    borderColor: getThemeColors().accent.primary,
     marginBottom: spacing[4],
     overflow: 'hidden',
   },
@@ -44,17 +45,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },
   subtitle: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     marginTop: 2,
   },
   arrow: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.semibold,
   },

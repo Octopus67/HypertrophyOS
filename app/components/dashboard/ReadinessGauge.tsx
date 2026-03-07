@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { clampScore, getReadinessColor, getReadinessLabel, safeNormalized } from '../../utils/readinessScoreLogic';
 
 interface Factor {
@@ -25,13 +25,14 @@ const CENTER = SIZE / 2;
 
 export function ReadinessGauge({ score, factors, onPress }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (score === null || score === undefined || Number.isNaN(score)) {
     return (
-      <TouchableOpacity style={[styles.container, { backgroundColor: c.bg.surface, borderColor: c.border.subtle }]} onPress={onPress} activeOpacity={0.7}>
+      <TouchableOpacity style={[styles.container, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.subtle }]} onPress={onPress} activeOpacity={0.7}>
         <View style={styles.emptyState}>
           <Text style={styles.emptyIcon}>💤</Text>
-          <Text style={[styles.emptyText, { color: c.accent.primary }]}>Tap to check in</Text>
-          <Text style={[styles.emptySubtext, { color: c.text.muted }]}>Log your recovery</Text>
+          <Text style={[styles.emptyText, { color: getThemeColors().accent.primary }]}>Tap to check in</Text>
+          <Text style={[styles.emptySubtext, { color: getThemeColors().text.muted }]}>Log your recovery</Text>
         </View>
       </TouchableOpacity>
     );
@@ -46,13 +47,13 @@ export function ReadinessGauge({ score, factors, onPress }: Props) {
   const presentFactors = (factors ?? []).filter((f) => f.present);
 
   return (
-    <TouchableOpacity style={[styles.container, { backgroundColor: c.bg.surface, borderColor: c.border.subtle }]} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={[styles.container, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.subtle }]} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.gaugeRow}>
         <View style={styles.gaugeWrapper}>
           <Svg width={SIZE} height={SIZE}>
             <Circle
               cx={CENTER} cy={CENTER} r={R}
-              stroke={c.bg.surfaceRaised}
+              stroke={getThemeColors().bg.surfaceRaised}
               strokeWidth={STROKE} fill="none"
             />
             <Circle
@@ -67,7 +68,7 @@ export function ReadinessGauge({ score, factors, onPress }: Props) {
           </Svg>
           <View style={styles.scoreOverlay}>
             <Text style={[styles.scoreText, { color }]}>{clamped}</Text>
-            <Text style={[styles.labelText, { color: c.text.secondary }]}>{label}</Text>
+            <Text style={[styles.labelText, { color: getThemeColors().text.secondary }]}>{label}</Text>
           </View>
         </View>
 
@@ -79,8 +80,8 @@ export function ReadinessGauge({ score, factors, onPress }: Props) {
               const pct = Math.round(norm * 100);
               return (
                 <View key={f.name} style={styles.factorRow}>
-                  <Text style={[styles.factorName, { color: c.text.secondary }]}>{formatFactorName(f.name)}</Text>
-                  <View style={[styles.factorBar, { backgroundColor: c.bg.surfaceRaised }]}>
+                  <Text style={[styles.factorName, { color: getThemeColors().text.secondary }]}>{formatFactorName(f.name)}</Text>
+                  <View style={[styles.factorBar, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
                     <View style={[styles.factorFill, { width: `${pct}%`, backgroundColor: getReadinessColor(pct) }]} />
                   </View>
                 </View>
@@ -97,14 +98,14 @@ function formatFactorName(name: string): string {
   return name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: 12,
     padding: spacing[3],
     marginBottom: spacing[3],
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
   },
   emptyState: {
     alignItems: 'center',
@@ -112,12 +113,12 @@ const styles = StyleSheet.create({
   },
   emptyIcon: { fontSize: 28, marginBottom: spacing[2] },
   emptyText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },
   emptySubtext: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     marginTop: spacing[1],
   },
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.bold,
   },
   labelText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
   },
   factorsColumn: {
@@ -153,12 +154,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   factorName: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: 11,
   },
   factorBar: {
     height: 4,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: 2,
     overflow: 'hidden',
   },

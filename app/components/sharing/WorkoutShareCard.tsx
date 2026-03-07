@@ -8,7 +8,9 @@
 import React, { forwardRef } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import ViewShot from 'react-native-view-shot';
+import QRCode from 'react-native-qrcode-svg';
 import { colors, spacing, typography, radius, letterSpacing as ls } from '../../theme/tokens';
+import { buildShareUrl } from '../../services/sharing';
 import type { TrainingSessionResponse } from '../../types/training';
 import type { UnitSystem } from '../../utils/unitConversion';
 import { convertWeight } from '../../utils/unitConversion';
@@ -32,6 +34,9 @@ interface WorkoutShareCardProps {
   session: TrainingSessionResponse;
   unitSystem: UnitSystem;
   options: ShareCardOptions;
+  sessionId: string;
+  userId?: string;
+  username?: string;
 }
 
 const THEME_COLORS: Record<ShareCardTheme, { bg: string; surface: string; accent: string; text: string; muted: string }> = {
@@ -41,9 +46,10 @@ const THEME_COLORS: Record<ShareCardTheme, { bg: string; surface: string; accent
 };
 
 export const WorkoutShareCard = forwardRef<ViewShot, WorkoutShareCardProps>(
-  function WorkoutShareCard({ session, unitSystem, options }, ref) {
+  function WorkoutShareCard({ session, unitSystem, options, sessionId, userId, username }, ref) {
     const t = THEME_COLORS[options.theme];
     const unitLabel = unitSystem === 'metric' ? 'kg' : 'lbs';
+    const shareUrl = buildShareUrl(sessionId, userId);
 
     const durationSec = calculateDurationSeconds(session.start_time, session.end_time);
     const showDuration = shouldShowDuration(session.start_time, session.end_time);
@@ -115,9 +121,17 @@ export const WorkoutShareCard = forwardRef<ViewShot, WorkoutShareCardProps>(
 
           {/* Footer */}
           <View style={[styles.footer, { borderTopColor: `${t.muted}20` }]}>
-            <Text style={[styles.footerText, { color: t.muted }]}>
-              Built with Repwise · repwise.app
-            </Text>
+            <View style={styles.footerContent}>
+              {username ? (
+                <Text style={[styles.footerAttribution, { color: t.text }]}>
+                  Shared by @{username}
+                </Text>
+              ) : null}
+              <Text style={[styles.footerText, { color: t.muted }]}>
+                Built with Repwise · repwise.app
+              </Text>
+            </View>
+            <QRCode value={shareUrl} size={48} backgroundColor="transparent" color={t.muted} />
           </View>
         </View>
       </ViewShot>
@@ -192,9 +206,19 @@ const styles = StyleSheet.create({
   footer: {
     borderTopWidth: 1,
     paddingTop: spacing[3],
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  footerContent: {
+    flex: 1,
   },
   footerText: {
     fontSize: 10,
+  },
+  footerAttribution: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.medium,
+    marginBottom: 2,
   },
 });

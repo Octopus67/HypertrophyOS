@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { getRpeBadgeColor, RpeBadgeColor } from '../../utils/rpeBadgeColor';
-import { colors, radius, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
 
 interface RPEBadgeProps {
   rpeValue: number;
@@ -9,10 +9,10 @@ interface RPEBadgeProps {
 }
 
 const colorMap: Record<Exclude<RpeBadgeColor, 'none'>, { text: string; bg: string }> = {
-  green: { text: colors.semantic.positive, bg: colors.semantic.positiveSubtle },
-  yellow: { text: colors.semantic.warning, bg: colors.semantic.warningSubtle },
+  green: { text: getThemeColors().semantic.positive, bg: getThemeColors().semantic.positiveSubtle },
+  yellow: { text: getThemeColors().semantic.warning, bg: getThemeColors().semantic.warningSubtle },
   orange: { text: '#F97316', bg: 'rgba(249,115,22,0.12)' },
-  red: { text: colors.semantic.negative, bg: colors.semantic.negativeSubtle },
+  red: { text: getThemeColors().semantic.negative, bg: getThemeColors().semantic.negativeSubtle },
 };
 
 export function RPEBadge({ rpeValue, mode }: RPEBadgeProps) {

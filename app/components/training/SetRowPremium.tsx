@@ -22,8 +22,8 @@ import Animated, {
 import type { ActiveSet } from '../../types/training';
 import type { UnitSystem } from '../../utils/unitConversion';
 import { convertWeight } from '../../utils/unitConversion';
-import { colors, typography, spacing, radius, springs } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing, radius, springs } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { useHaptics } from '../../hooks/useHaptics';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
@@ -58,6 +58,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
   onWeightStep,
 }) => {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const weightRef = useRef<TextInput>(null);
   const rpeRef = useRef<TextInput>(null);
   const rirRef = useRef<TextInput>(null);
@@ -146,7 +147,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
         keyboardType="number-pad"
         returnKeyType="next"
         placeholder="Reps"
-        placeholderTextColor={c.text.muted}
+        placeholderTextColor={getThemeColors().text.muted}
         accessibilityLabel={`Reps for set ${setIndex + 1}`}
         blurOnSubmit={false}
         maxLength={4}
@@ -173,7 +174,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
           keyboardType="decimal-pad"
           returnKeyType={showRpeRir ? 'next' : 'done'}
           placeholder={unitSystem === 'metric' ? 'kg' : 'lbs'}
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           accessibilityLabel={`Weight for set ${setIndex + 1}`}
           blurOnSubmit={false}
           maxLength={6}
@@ -201,7 +202,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
           keyboardType="decimal-pad"
           returnKeyType="next"
           placeholder="RPE"
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           accessibilityLabel={`RPE for set ${setIndex + 1}`}
           blurOnSubmit={false}
           maxLength={4}
@@ -219,7 +220,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
           keyboardType="number-pad"
           returnKeyType="done"
           placeholder="RIR"
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           accessibilityLabel={`RIR for set ${setIndex + 1}`}
           blurOnSubmit={false}
           maxLength={2}
@@ -251,7 +252,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
   rowCompleted: {
     backgroundColor: 'rgba(0, 255, 100, 0.08)',
     borderLeftWidth: 3,
-    borderLeftColor: colors.semantic.positive,
+    borderLeftColor: getThemeColors().semantic.positive,
   },
   rowUncompleted: {
     opacity: 0.7,
@@ -274,7 +275,7 @@ const styles = StyleSheet.create({
     width: 18,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     textAlign: 'center',
   },
 
@@ -283,20 +284,20 @@ const styles = StyleSheet.create({
   },
   previousText: {
     fontSize: typography.size.xs,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   previousPlaceholder: {
     fontSize: typography.size.xs,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     textAlign: 'center',
   },
 
   input: {
     width: 48,
     height: 36,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     textAlign: 'center',
@@ -312,20 +313,20 @@ const styles = StyleSheet.create({
     width: 56,
     fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
   stepperBtn: {
     width: 26,
     height: 26,
     borderRadius: radius.full,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepperText: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
   },
 
   intensityInput: {
@@ -337,21 +338,21 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: radius.full,
     borderWidth: 2,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkBtnCompleted: {
-    backgroundColor: colors.semantic.positive,
-    borderColor: colors.semantic.positive,
+    backgroundColor: getThemeColors().semantic.positive,
+    borderColor: getThemeColors().semantic.positive,
   },
   checkText: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.bold,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   checkTextCompleted: {
-    color: colors.text.inverse,
+    color: getThemeColors().text.inverse,
   },
 });
 

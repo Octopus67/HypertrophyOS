@@ -7,8 +7,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface ExercisePickerSheetProps {
   visible: boolean;
@@ -30,6 +30,7 @@ export function ExercisePickerSheet({
   recentExercises = [],
 }: ExercisePickerSheetProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -84,17 +85,17 @@ export function ExercisePickerSheet({
   const renderItem = useCallback(
     ({ item }: { item: ListItem }) => {
       if (item.type === 'header') {
-        return <Text style={[styles.sectionTitle, { color: c.text.muted }]}>{item.label}</Text>;
+        return <Text style={[styles.sectionTitle, { color: getThemeColors().text.muted }]}>{item.label}</Text>;
       }
       return (
         <TouchableOpacity
-          style={[styles.exerciseItem, { borderBottomColor: c.border.subtle }]}
+          style={[styles.exerciseItem, { borderBottomColor: getThemeColors().border.subtle }]}
           onPress={() => handleSelect(item.name)}
           accessibilityLabel={`Select ${item.name}`}
           accessibilityRole="button"
           activeOpacity={0.7}
         >
-          <Text style={[styles.exerciseName, { color: c.text.primary }]}>{item.name}</Text>
+          <Text style={[styles.exerciseName, { color: getThemeColors().text.primary }]}>{item.name}</Text>
         </TouchableOpacity>
       );
     },
@@ -119,9 +120,9 @@ export function ExercisePickerSheet({
     >
       <View style={styles.searchContainer}>
         <TextInput
-          style={[styles.searchInput, { color: c.text.primary, backgroundColor: c.bg.surface, borderColor: c.border.default }]}
+          style={[styles.searchInput, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.default }]}
           placeholder="Search exercises…"
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           value={searchInput}
           onChangeText={setSearchInput}
           autoCapitalize="none"
@@ -138,7 +139,7 @@ export function ExercisePickerSheet({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <Text style={[styles.emptyText, { color: c.text.muted }]}>
+          <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>
             {query ? 'No exercises found' : 'No exercises available'}
           </Text>
         }
@@ -147,25 +148,25 @@ export function ExercisePickerSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   sheetBackground: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
   },
   handleIndicator: {
-    backgroundColor: colors.text.muted,
+    backgroundColor: getThemeColors().text.muted,
   },
   searchContainer: {
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[2],
   },
   searchInput: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
   },
   listContent: {
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[8],
   },
   sectionTitle: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
     textTransform: 'uppercase',
@@ -185,15 +186,15 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: getThemeColors().border.subtle,
   },
   exerciseName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
   },
   emptyText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     textAlign: 'center',
     marginTop: spacing[8],

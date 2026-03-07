@@ -4,8 +4,8 @@
 
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { ModalContainer } from '../common/ModalContainer';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 export type LandmarkKey = 'mv' | 'mev' | 'mav' | 'mrv';
 
@@ -26,7 +26,7 @@ interface LandmarkInfo {
 const LANDMARK_INFO: Record<LandmarkKey, LandmarkInfo> = {
   mv: {
     title: 'Minimum Volume (MV)',
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     description:
       'The lowest amount of training volume needed to maintain your current muscle mass. Below this, you risk losing gains.',
     advice:
@@ -35,7 +35,7 @@ const LANDMARK_INFO: Record<LandmarkKey, LandmarkInfo> = {
   },
   mev: {
     title: 'Minimum Effective Volume (MEV)',
-    color: colors.semantic.warning,
+    color: getThemeColors().semantic.warning,
     description:
       'The minimum volume needed to stimulate measurable muscle growth. This is where hypertrophy begins.',
     advice:
@@ -44,7 +44,7 @@ const LANDMARK_INFO: Record<LandmarkKey, LandmarkInfo> = {
   },
   mav: {
     title: 'Maximum Adaptive Volume (MAV)',
-    color: colors.semantic.positive,
+    color: getThemeColors().semantic.positive,
     description:
       'The volume range producing the best hypertrophy response relative to fatigue. This is your sweet spot.',
     advice:
@@ -53,7 +53,7 @@ const LANDMARK_INFO: Record<LandmarkKey, LandmarkInfo> = {
   },
   mrv: {
     title: 'Maximum Recoverable Volume (MRV)',
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     description:
       'The highest volume you can recover from. Exceeding MRV leads to overtraining, excessive fatigue, and potential regression.',
     advice:
@@ -64,6 +64,7 @@ const LANDMARK_INFO: Record<LandmarkKey, LandmarkInfo> = {
 
 export function LandmarkExplainer({ landmark, onClose, visible }: LandmarkExplainerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const info = LANDMARK_INFO[landmark];
 
   return (
@@ -78,19 +79,19 @@ export function LandmarkExplainer({ landmark, onClose, visible }: LandmarkExplai
           <Text style={[styles.colorBadgeText, { color: info.color }]}>{info.title}</Text>
         </View>
 
-        <Text style={[styles.sectionTitle, { color: c.text.primary }]}>What is it?</Text>
-        <Text style={[styles.body, { color: c.text.secondary }]}>{info.description}</Text>
+        <Text style={[styles.sectionTitle, { color: getThemeColors().text.primary }]}>What is it?</Text>
+        <Text style={[styles.body, { color: getThemeColors().text.secondary }]}>{info.description}</Text>
 
-        <Text style={[styles.sectionTitle, { color: c.text.primary }]}>Practical Advice</Text>
-        <Text style={[styles.body, { color: c.text.secondary }]}>{info.advice}</Text>
+        <Text style={[styles.sectionTitle, { color: getThemeColors().text.primary }]}>Practical Advice</Text>
+        <Text style={[styles.body, { color: getThemeColors().text.secondary }]}>{info.advice}</Text>
 
-        <Text style={[styles.citation, { color: c.text.muted, borderTopColor: c.border.subtle }]}>{info.citation}</Text>
+        <Text style={[styles.citation, { color: getThemeColors().text.muted, borderTopColor: getThemeColors().border.subtle }]}>{info.citation}</Text>
       </ScrollView>
     </ModalContainer>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   content: {
     maxHeight: 400,
   },
@@ -106,24 +107,24 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.semibold,
   },
   sectionTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     marginBottom: spacing[1],
     marginTop: spacing[3],
   },
   body: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
   citation: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs - 1,
     fontStyle: 'italic',
     marginTop: spacing[4],
     paddingTop: spacing[3],
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
   },
 });

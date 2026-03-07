@@ -2,17 +2,18 @@
  * Pure logic functions for the micronutrient dashboard.
  */
 
-import { colors } from '../theme/tokens';
+;
+import { getThemeColors } from '../hooks/useThemeColors';
 
 export type NutrientStatus = 'deficient' | 'low' | 'adequate' | 'excess' | 'no_data';
 
 export function getStatusColor(status: NutrientStatus): string {
   switch (status) {
-    case 'deficient': return colors.semantic.negative;
-    case 'low': return colors.semantic.warning;
-    case 'adequate': return colors.semantic.positive;
-    case 'excess': return colors.accent.primary;
-    case 'no_data': return colors.text.muted;
+    case 'deficient': return getThemeColors().semantic.negative;
+    case 'low': return getThemeColors().semantic.warning;
+    case 'adequate': return getThemeColors().semantic.positive;
+    case 'excess': return getThemeColors().accent.primary;
+    case 'no_data': return getThemeColors().text.muted;
   }
 }
 
@@ -27,11 +28,11 @@ export function getStatusLabel(status: NutrientStatus): string {
 }
 
 export function getScoreColor(score: number): string {
-  if (score >= 80) return colors.semantic.positive;
-  if (score >= 60) return colors.semantic.positive;
-  if (score >= 40) return colors.semantic.warning;
-  if (score >= 20) return colors.semantic.warning;
-  return colors.semantic.negative;
+  if (score >= 80) return getThemeColors().semantic.positive;
+  if (score >= 60) return getThemeColors().semantic.positive;
+  if (score >= 40) return getThemeColors().semantic.warning;
+  if (score >= 20) return getThemeColors().semantic.warning;
+  return getThemeColors().semantic.negative;
 }
 
 export function getScoreLabel(score: number): string {

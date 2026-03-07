@@ -57,3 +57,17 @@ export function trackCoachingRequested() {
 export function trackFeatureUsed(feature: string) {
   capture('feature.used', { feature });
 }
+
+// ─── Sharing Analytics ───────────────────────────────────────────────────────
+
+export function trackWorkoutShared(sessionId: string, platform?: string) {
+  capture('workout_shared', { session_id: sessionId, platform });
+}
+
+export function trackShareCustomizationOpened(sessionId: string) {
+  capture('share_customization_opened', { session_id: sessionId });
+}
+
+export function trackShareLinkClicked(sessionId: string, referrerId: string) {
+  capture('share_link_clicked', { session_id: sessionId, referrer_id: referrerId });
+}

@@ -4,8 +4,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -40,6 +40,7 @@ const openTelegramLink = () => {
 
 export function CoachingScreen() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const navigation = useNavigation();
   const [requests, setRequests] = useState<CoachingRequest[]>([]);
   const [sessions, setSessions] = useState<CoachingSession[]>([]);
@@ -202,12 +203,12 @@ export function CoachingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base },
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base },
   container: { flex: 1 },
   content: { padding: spacing[4], paddingBottom: spacing[12] },
   backButton: { paddingVertical: spacing[2], marginBottom: spacing[2], minHeight: 44, justifyContent: 'center' as const },
-  backButtonText: { color: colors.accent.primary, fontSize: typography.size.base, fontWeight: typography.weight.medium, lineHeight: typography.size.base * typography.lineHeight.normal },
+  backButtonText: { color: getThemeColors().accent.primary, fontSize: typography.size.base, fontWeight: typography.weight.medium, lineHeight: typography.size.base * typography.lineHeight.normal },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -215,13 +216,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.size.xl * typography.lineHeight.tight,
   },
   sectionTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.size.lg * typography.lineHeight.tight,
@@ -229,17 +230,17 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.size.sm * typography.lineHeight.normal,
     marginBottom: spacing[2],
   },
   textArea: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
-    color: colors.text.primary,
+    borderColor: getThemeColors().border.subtle,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.size.base * typography.lineHeight.normal,
     padding: spacing[3],
@@ -248,11 +249,11 @@ const styles = StyleSheet.create({
   },
   itemCard: { marginBottom: spacing[3] },
   coachingCard: { marginBottom: spacing[2], padding: spacing[4] },
-  coachingTitle: { color: colors.text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, marginBottom: spacing[2] },
-  coachingDesc: { color: colors.text.secondary, fontSize: typography.size.sm, lineHeight: 20, marginBottom: spacing[3] },
-  dmButton: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], backgroundColor: colors.accent.primaryMuted, paddingVertical: spacing[3], paddingHorizontal: spacing[4], borderRadius: radius.md, alignSelf: 'flex-start' },
-  dmButtonText: { color: colors.accent.primary, fontSize: typography.size.sm, fontWeight: typography.weight.semibold },
-  comingSoonNote: { color: colors.text.muted, fontSize: typography.size.xs, marginTop: spacing[2] },
+  coachingTitle: { color: getThemeColors().text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, marginBottom: spacing[2] },
+  coachingDesc: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, lineHeight: 20, marginBottom: spacing[3] },
+  dmButton: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], backgroundColor: getThemeColors().accent.primaryMuted, paddingVertical: spacing[3], paddingHorizontal: spacing[4], borderRadius: radius.md, alignSelf: 'flex-start' },
+  dmButtonText: { color: getThemeColors().accent.primary, fontSize: typography.size.sm, fontWeight: typography.weight.semibold },
+  comingSoonNote: { color: getThemeColors().text.muted, fontSize: typography.size.xs, marginTop: spacing[2] },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -260,11 +261,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   status: { fontSize: typography.size.xs, fontWeight: typography.weight.semibold, lineHeight: typography.size.xs * typography.lineHeight.normal },
-  date: { color: colors.text.muted, fontSize: typography.size.xs, lineHeight: typography.size.xs * typography.lineHeight.normal },
-  goalsText: { color: colors.text.secondary, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.normal },
-  notesText: { color: colors.text.secondary, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.normal },
+  date: { color: getThemeColors().text.muted, fontSize: typography.size.xs, lineHeight: typography.size.xs * typography.lineHeight.normal },
+  goalsText: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.normal },
+  notesText: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.normal },
   empty: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.base,
     lineHeight: typography.size.base * typography.lineHeight.normal,
     textAlign: 'center',

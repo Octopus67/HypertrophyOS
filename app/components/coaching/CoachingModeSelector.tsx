@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 export type CoachingMode = 'coached' | 'collaborative' | 'manual';
 
@@ -34,10 +34,11 @@ const MODES: { key: CoachingMode; label: string; description: string; icon: keyo
 
 export function CoachingModeSelector({ value, onChange }: CoachingModeSelectorProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
     <View style={styles.container}>
-      <Text style={[styles.heading, { color: c.text.primary }]}>Coaching Mode</Text>
-      <Text style={[styles.subheading, { color: c.text.secondary }]}>Choose how the app manages your nutrition targets</Text>
+      <Text style={[styles.heading, { color: getThemeColors().text.primary }]}>Coaching Mode</Text>
+      <Text style={[styles.subheading, { color: getThemeColors().text.secondary }]}>Choose how the app manages your nutrition targets</Text>
       {MODES.map((mode) => {
         const isSelected = value === mode.key;
         return (
@@ -53,17 +54,17 @@ export function CoachingModeSelector({ value, onChange }: CoachingModeSelectorPr
               <Ionicons
                 name={mode.icon}
                 size={22}
-                color={isSelected ? c.accent.primary : c.text.muted}
+                color={isSelected ? getThemeColors().accent.primary : getThemeColors().text.muted}
               />
               <View style={styles.optionText}>
                 <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
                   {mode.label}
                 </Text>
-                <Text style={[styles.optionDescription, { color: c.text.muted }]}>{mode.description}</Text>
+                <Text style={[styles.optionDescription, { color: getThemeColors().text.muted }]}>{mode.description}</Text>
               </View>
             </View>
             <View style={[styles.radio, isSelected && styles.radioSelected]}>
-              {isSelected && <View style={[styles.radioDot, { backgroundColor: c.accent.primary }]} />}
+              {isSelected && <View style={[styles.radioDot, { backgroundColor: getThemeColors().accent.primary }]} />}
             </View>
           </TouchableOpacity>
         );
@@ -72,17 +73,17 @@ export function CoachingModeSelector({ value, onChange }: CoachingModeSelectorPr
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { gap: spacing[2] },
   heading: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.size.lg * typography.lineHeight.tight,
     marginBottom: spacing[1],
   },
   subheading: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.size.sm * typography.lineHeight.normal,
     marginBottom: spacing[2],
@@ -94,25 +95,25 @@ const styles = StyleSheet.create({
     padding: spacing[3],
     minHeight: 44,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     borderRadius: radius.md,
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
   },
   optionSelected: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   optionLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing[3], flex: 1 },
   optionText: { flex: 1 },
   optionLabel: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     lineHeight: typography.size.base * typography.lineHeight.normal,
   },
-  optionLabelSelected: { color: colors.accent.primary },
+  optionLabelSelected: { color: getThemeColors().accent.primary },
   optionDescription: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.size.xs * typography.lineHeight.normal,
     marginTop: spacing[1],
@@ -122,15 +123,15 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioSelected: { borderColor: colors.accent.primary },
+  radioSelected: { borderColor: getThemeColors().accent.primary },
   radioDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
   },
 });

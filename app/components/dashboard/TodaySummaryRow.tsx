@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, typography, spacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 
 interface TodaySummaryRowProps {
@@ -11,8 +11,9 @@ interface TodaySummaryRowProps {
 
 export function TodaySummaryRow({ mealsLogged, workoutsCompleted }: TodaySummaryRowProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
-    <View style={styles.container}>
+    <View style={getStyles().container}>
       <SummaryItem icon={<Icon name="utensils" />} count={mealsLogged} label="meals" />
       <SummaryItem icon={<Icon name="dumbbell" />} count={workoutsCompleted} label="workouts" />
     </View>
@@ -21,17 +22,20 @@ export function TodaySummaryRow({ mealsLogged, workoutsCompleted }: TodaySummary
 
 function SummaryItem({ icon, count, label }: { icon: React.ReactNode; count: number; label: string }) {
   return (
-    <View style={styles.item}>
-      <View style={styles.icon}>{icon}</View>
-      <Text style={[styles.count, { color: count > 0 ? colors.semantic.positive : colors.text.muted }]}>
+    <View style={getStyles().item}>
+      <View style={getStyles().icon}>{icon}</View>
+      <Text style={[getStyles().count, { color: count > 0 ? getThemeColors().semantic.positive : getThemeColors().text.muted }]}>
         {count}
       </Text>
-      <Text style={[styles.label, { color: colors.text.secondary }]}>{label}</Text>
+      <Text style={[getStyles().label, { color: getThemeColors().text.secondary }]}>{label}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     gap: spacing[6],
@@ -51,6 +55,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: typography.size.sm,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
   },
 });

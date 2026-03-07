@@ -7,8 +7,8 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { getWeekDates, formatDayCell } from '../../utils/dateScrollerLogic';
 import { useHaptics } from '../../hooks/useHaptics';
 
@@ -22,6 +22,7 @@ interface DateScrollerProps {
 
 export function DateScroller({ selectedDate, onDateSelect, loggedDates }: DateScrollerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const { impact } = useHaptics();
   const [weekOffset, setWeekOffset] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
@@ -65,10 +66,10 @@ export function DateScroller({ selectedDate, onDateSelect, loggedDates }: DateSc
       {!isToday && (
         <TouchableOpacity
           onPress={() => { impact('light'); setWeekOffset(0); onDateSelect(today); }}
-          style={[styles.todayPill, { backgroundColor: c.accent.primaryMuted }]}
+          style={[styles.todayPill, { backgroundColor: getThemeColors().accent.primaryMuted }]}
           activeOpacity={0.7}
         >
-          <Text style={[styles.todayPillText, { color: c.accent.primary }]}>↩ Today</Text>
+          <Text style={[styles.todayPillText, { color: getThemeColors().accent.primary }]}>↩ Today</Text>
         </TouchableOpacity>
       )}
       <ScrollView
@@ -119,7 +120,7 @@ export function DateScroller({ selectedDate, onDateSelect, loggedDates }: DateSc
 
 const CELL_SIZE = (SCREEN_WIDTH - spacing[4] * 2) / 7;
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     marginBottom: spacing[3],
   },
@@ -138,56 +139,56 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dayCellSelected: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     borderWidth: 1,
-    borderColor: colors.accent.primary,
+    borderColor: getThemeColors().accent.primary,
   },
   dayCellToday: {
     borderWidth: 1,
-    borderColor: colors.border.hover,
+    borderColor: getThemeColors().border.hover,
   },
   dayName: {
     fontSize: typography.size.xs,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[0.5],
     lineHeight: typography.lineHeight.xs,
   },
   dayNameSelected: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
   dayNameToday: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: typography.weight.semibold,
   },
   dayNumber: {
     fontSize: typography.size.md,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.md,
   },
   dayNumberSelected: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
   dayNumberToday: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: typography.weight.bold,
   },
   dot: {
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: colors.text.muted,
+    backgroundColor: getThemeColors().text.muted,
     marginTop: spacing[1],
   },
   dotSelected: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
   },
   todayDot: {
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     marginTop: spacing[1],
   },
   todayPill: {
@@ -195,11 +196,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
     borderRadius: radius.full,
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     marginBottom: spacing[2],
   },
   todayPillText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
   },

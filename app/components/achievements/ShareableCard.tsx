@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { colors, spacing, typography, radius, letterSpacing as ls } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius, letterSpacing as ls } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 import { Button } from '../common/Button';
 
@@ -21,6 +21,7 @@ export function ShareableCard({
   onShare,
 }: ShareableCardProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const cardRef = useRef<View>(null);
 
   const handleShare = async () => {
@@ -33,18 +34,18 @@ export function ShareableCard({
 
   return (
     <View>
-      <View ref={cardRef} style={[styles.card, { backgroundColor: c.bg.surface, borderColor: c.border.default }]}>
-        <View style={[styles.iconCircle, { backgroundColor: c.accent.primaryMuted }]}>
-          <Icon name="trophy" size={28} color={c.accent.primary} />
+      <View ref={cardRef} style={[styles.card, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.default }]}>
+        <View style={[styles.iconCircle, { backgroundColor: getThemeColors().accent.primaryMuted }]}>
+          <Icon name="trophy" size={28} color={getThemeColors().accent.primary} />
         </View>
-        <Text style={[styles.title, { color: c.text.primary }]}>{title}</Text>
-        <Text style={[styles.description, { color: c.text.secondary }]}>{description}</Text>
-        <Text style={[styles.date, { color: c.text.muted }]}>
+        <Text style={[styles.title, { color: getThemeColors().text.primary }]}>{title}</Text>
+        <Text style={[styles.description, { color: getThemeColors().text.secondary }]}>{description}</Text>
+        <Text style={[styles.date, { color: getThemeColors().text.muted }]}>
           Unlocked {new Date(unlockedAt).toLocaleDateString(undefined, {
             month: 'long', day: 'numeric', year: 'numeric',
           })}
         </Text>
-        <Text style={[styles.branding, { color: c.accent.primary }]}>Repwise</Text>
+        <Text style={[styles.branding, { color: getThemeColors().accent.primary }]}>Repwise</Text>
       </View>
       {Platform.OS !== 'web' && onShare && (
         <Button title="Share" onPress={handleShare} style={styles.shareBtn} />
@@ -53,12 +54,12 @@ export function ShareableCard({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     padding: spacing[6],
     alignItems: 'center',
   },
@@ -66,31 +67,31 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing[3],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     textAlign: 'center',
     marginBottom: spacing[1],
   },
   description: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     textAlign: 'center',
     marginBottom: spacing[2],
   },
   date: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     marginBottom: spacing[3],
   },
   branding: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
     letterSpacing: ls.wider,

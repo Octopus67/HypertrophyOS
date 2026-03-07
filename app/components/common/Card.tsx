@@ -1,7 +1,7 @@
 import { View, TouchableOpacity, ViewStyle, StyleProp } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { colors, radius, spacing, shadows } from '../../theme/tokens';
-import { useThemeColors, type ThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, getThemeColors, type ThemeColors } from '../../hooks/useThemeColors';
 import { useThemeStore } from '../../store/useThemeStore';
 import { getThemedShadow } from '../../theme/themedShadows';
 import { usePressAnimation } from '../../hooks/usePressAnimation';
@@ -76,7 +76,7 @@ export function Card({
   const { isHovered, hoverProps } = useHoverState();
   const entranceStyle = useStaggeredEntrance(animationIndex);
 
-  const hoverBorder = isHovered && onPress ? { borderColor: c.border.hover } : undefined;
+  const hoverBorder = isHovered && onPress ? { borderColor: getThemeColors().border.hover } : undefined;
 
   const content = onPress ? (
     <TouchableOpacity

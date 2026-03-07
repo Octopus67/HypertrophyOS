@@ -3,8 +3,8 @@ import { View, Text, Modal, TouchableOpacity, Switch, ScrollView, StyleSheet } f
 import { ActiveExercise } from '../../types/training';
 import { computeWorkoutSummary, formatMiniSummary } from '../../utils/workoutSummaryFormatter';
 import { calculateSetProgress } from '../../utils/setProgressCalculator';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface ConfirmationSheetProps {
   visible: boolean;
@@ -26,6 +26,7 @@ export const ConfirmationSheet = ({
   onCancel,
 }: ConfirmationSheetProps) => {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
 
   // Reset toggle state whenever the sheet is opened
@@ -97,14 +98,14 @@ export const ConfirmationSheet = ({
 };
 
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     padding: spacing[6],
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginBottom: spacing[4],
   },
   exerciseList: {
@@ -126,16 +127,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
   },
   exerciseName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     flex: 1,
   },
   setProgress: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
   },
   skippedText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
   },
   statsRow: {
@@ -146,12 +147,12 @@ const styles = StyleSheet.create({
     gap: spacing[3],
   },
   statText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
   },
   statDivider: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.md,
   },
   templateRow: {
@@ -161,18 +162,18 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[4],
   },
   templateLabel: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
   },
   saveButton: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.md,
     paddingVertical: spacing[4],
     alignItems: 'center',
     marginTop: spacing[3],
   },
   saveButtonText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: typography.weight.bold,
     fontSize: typography.size.md,
   },
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[4],
   },
   cancelText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.md,
   },
 });

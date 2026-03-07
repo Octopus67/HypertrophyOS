@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Platform } from 'react-native';
-import { colors, spacing, typography } from '../../theme/tokens';
+import { spacing, typography } from '../../theme/tokens';
 import { triggerHaptic } from '../../hooks/useHaptics';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 // Conditionally import Swipeable — only available on native
 let Swipeable: any = null;
@@ -20,13 +21,15 @@ interface SwipeableRowProps {
 
 function DeleteAction({ onDelete }: { onDelete: () => void }) {
   return (
-    <TouchableOpacity style={styles.deleteAction} onPress={onDelete} activeOpacity={0.7}>
-      <Text style={styles.deleteText}>Delete</Text>
+    <TouchableOpacity style={getStyles().deleteAction} onPress={onDelete} activeOpacity={0.7}>
+      <Text style={getStyles().deleteText}>Delete</Text>
     </TouchableOpacity>
   );
 }
 
 export function SwipeableRow({ children, onDelete }: SwipeableRowProps) {
+  const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const swipeableRef = useRef<any>(null);
 
   // Web fallback: render children without swipe
@@ -56,16 +59,19 @@ export function SwipeableRow({ children, onDelete }: SwipeableRowProps) {
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   deleteAction: {
-    backgroundColor: colors.semantic.negative,
+    backgroundColor: getThemeColors().semantic.negative,
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
     height: '100%',
   },
   deleteText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },

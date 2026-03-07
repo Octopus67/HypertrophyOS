@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Card } from '../common/Card';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { WeekNavigator } from './WeekNavigator';
 import { BodyHeatMap } from './BodyHeatMap';
 import { DrillDownModal } from './DrillDownModal';
@@ -25,6 +25,7 @@ interface MuscleGroupVolume {
 
 export function HeatMapCard() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [volumes, setVolumes] = useState<MuscleGroupVolume[]>([]);
   const [isWNS, setIsWNS] = useState(false);
@@ -123,14 +124,14 @@ export function HeatMapCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   errorContainer: {
     alignItems: 'center',
     padding: spacing[4],
     gap: spacing[2],
   },
   errorText: {
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     fontSize: typography.size.sm,
     textAlign: 'center',
   },
@@ -138,12 +139,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
     borderRadius: 6,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   retryText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   frequencyItem: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
   },
   loadingContainer: {

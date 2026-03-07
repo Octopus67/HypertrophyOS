@@ -12,8 +12,8 @@ import {
 import * as Notifications from 'expo-notifications';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { SectionHeader } from '../../components/common/SectionHeader';
@@ -51,6 +51,7 @@ const TOGGLE_ITEMS: { key: keyof NotificationPreferences; label: string; descrip
 
 export function NotificationSettingsScreen() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const navigation = useNavigation();
   const [prefs, setPrefs] = useState<NotificationPreferences>(DEFAULT_PREFS);
   const [permissionStatus, setPermissionStatus] = useState<string>('undetermined');
@@ -253,13 +254,13 @@ export function NotificationSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base },
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base },
   container: { flex: 1 },
   content: { padding: spacing[4], paddingBottom: spacing[12], gap: spacing[4] },
   header: { marginBottom: spacing[2] },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
     lineHeight: typography.lineHeight.xl,
@@ -277,25 +278,25 @@ const styles = StyleSheet.create({
   },
   rowText: { flex: 1, marginRight: spacing[3] },
   label: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.base,
   },
   description: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginTop: spacing[0.5],
   },
   statusBadge: {
-    backgroundColor: colors.semantic.positiveSubtle,
+    backgroundColor: getThemeColors().semantic.positiveSubtle,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
     borderRadius: radius.full,
   },
   statusText: {
-    color: colors.semantic.positive,
+    color: getThemeColors().semantic.positive,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },

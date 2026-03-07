@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, typography, spacing, radius, shadows } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing, radius, shadows } from '../../theme/tokens';
+import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
 import type { VolumeStatus } from '../../utils/wnsRecommendations';
 
 export interface HUFloatingPillProps {
@@ -22,10 +22,10 @@ export interface HUFloatingPillProps {
 }
 
 const STATUS_COLORS = {
-  below_mev: { bg: colors.semantic.warningSubtle, text: colors.semantic.warning },
-  optimal: { bg: colors.semantic.positiveSubtle, text: colors.semantic.positive },
-  near_mrv: { bg: colors.semantic.cautionSubtle, text: colors.semantic.caution },
-  above_mrv: { bg: colors.semantic.negativeSubtle, text: colors.semantic.negative },
+  below_mev: { bg: getThemeColors().semantic.warningSubtle, text: getThemeColors().semantic.warning },
+  optimal: { bg: getThemeColors().semantic.positiveSubtle, text: getThemeColors().semantic.positive },
+  near_mrv: { bg: getThemeColors().semantic.cautionSubtle, text: getThemeColors().semantic.caution },
+  above_mrv: { bg: getThemeColors().semantic.negativeSubtle, text: getThemeColors().semantic.negative },
 } as const;
 
 function getBestStatus(statusByMuscle: Record<string, VolumeStatus> | undefined): VolumeStatus {

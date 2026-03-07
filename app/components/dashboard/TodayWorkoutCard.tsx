@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card } from '../common/Card';
 import { Icon } from '../common/Icon';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import type { TrainingSessionResponse } from '../../types/training';
 
 interface TodayWorkoutCardProps {
@@ -26,16 +26,16 @@ function TodayWorkoutCardComponent({
   // Show resume banner if workout is active
   if (isWorkoutActive) {
     return (
-      <Card variant="flat" style={styles.card}>
-        <TouchableOpacity onPress={onResume} activeOpacity={0.7} style={styles.resumeBanner} accessibilityLabel={`Resume workout with ${activeExerciseCount} exercises`} accessibilityRole="button">
-          <View style={styles.resumeContent}>
-            <Icon name="dumbbell" size={20} color={colors.accent.primary} />
-            <View style={styles.resumeText}>
-              <Text style={styles.resumeTitle}>Workout in progress</Text>
-              <Text style={styles.resumeSubtitle}>{activeExerciseCount} exercises</Text>
+      <Card variant="flat" style={getStyles().card}>
+        <TouchableOpacity onPress={onResume} activeOpacity={0.7} style={getStyles().resumeBanner} accessibilityLabel={`Resume workout with ${activeExerciseCount} exercises`} accessibilityRole="button">
+          <View style={getStyles().resumeContent}>
+            <Icon name="dumbbell" size={20} color={getThemeColors().accent.primary} />
+            <View style={getStyles().resumeText}>
+              <Text style={getStyles().resumeTitle}>Workout in progress</Text>
+              <Text style={getStyles().resumeSubtitle}>{activeExerciseCount} exercises</Text>
             </View>
           </View>
-          <Text style={styles.resumeButton}>Resume</Text>
+          <Text style={getStyles().resumeButton}>Resume</Text>
         </TouchableOpacity>
       </Card>
     );
@@ -44,14 +44,15 @@ function TodayWorkoutCardComponent({
   // Show today's completed workouts
   if (sessions.length > 0) {
     return (
-      <Card variant="flat" style={styles.card}>
-        <View style={styles.header}>
-          <Icon name="dumbbell" size={16} color={colors.accent.primary} />
-          <Text style={styles.title}>Today's Training</Text>
+      <Card variant="flat" style={getStyles().card}>
+        <View style={getStyles().header}>
+          <Icon name="dumbbell" size={16} color={getThemeColors().accent.primary} />
+          <Text style={getStyles().title}>Today's Training</Text>
         </View>
         
         {sessions.map((session, index) => {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
           const duration = session.start_time && session.end_time 
             ? Math.round((new Date(session.end_time).getTime() - new Date(session.start_time).getTime()) / (1000 * 60))
             : null;
@@ -69,32 +70,32 @@ function TodayWorkoutCardComponent({
               activeOpacity={0.7}
               accessibilityLabel={`View workout details${duration ? `, ${duration} minutes` : ''}`}
               accessibilityRole="button"
-              style={[styles.sessionContainer, index > 0 && styles.sessionBorder]}
+              style={[getStyles().sessionContainer, index > 0 && getStyles().sessionBorder]}
             >
-              <View style={styles.sessionHeader}>
-                <Text style={styles.sessionName} numberOfLines={1} ellipsizeMode="tail">
+              <View style={getStyles().sessionHeader}>
+                <Text style={getStyles().sessionName} numberOfLines={1} ellipsizeMode="tail">
                   Workout {duration ? `· ${duration} min` : ''}
                 </Text>
               </View>
               
-              <View style={styles.exerciseList}>
+              <View style={getStyles().exerciseList}>
                 {exercises.slice(0, 4).map((exercise, i) => {
                   const firstSet = exercise.sets?.[0];
                   return (
-                    <Text key={i} style={styles.exerciseText} numberOfLines={1} ellipsizeMode="tail">
+                    <Text key={i} style={getStyles().exerciseText} numberOfLines={1} ellipsizeMode="tail">
                       {exercise.exercise_name} · {exercise.sets?.length || 0}×
                       {firstSet ? `${firstSet.weight_kg}kg × ${firstSet.reps}` : ''}
                     </Text>
                   );
                 })}
                 {exercises.length > 4 && (
-                  <Text style={styles.moreText}>+{exercises.length - 4} more</Text>
+                  <Text style={getStyles().moreText}>+{exercises.length - 4} more</Text>
                 )}
               </View>
               
-              <View style={styles.sessionStats}>
-                <Text style={styles.statText}>{totalSets} sets</Text>
-                <Text style={styles.statText}>{Math.round(totalVolume)}kg volume</Text>
+              <View style={getStyles().sessionStats}>
+                <Text style={getStyles().statText}>{totalSets} sets</Text>
+                <Text style={getStyles().statText}>{Math.round(totalVolume)}kg volume</Text>
               </View>
             </TouchableOpacity>
           );
@@ -105,20 +106,23 @@ function TodayWorkoutCardComponent({
 
   // Empty state - no workouts today
   return (
-    <Card variant="flat" style={styles.card}>
-      <View style={styles.header}>
-        <Icon name="dumbbell" size={16} color={colors.text.muted} />
-        <Text style={styles.title}>Today's Training</Text>
+    <Card variant="flat" style={getStyles().card}>
+      <View style={getStyles().header}>
+        <Icon name="dumbbell" size={16} color={getThemeColors().text.muted} />
+        <Text style={getStyles().title}>Today's Training</Text>
       </View>
-      <Text style={styles.emptyText}>No workout yet today</Text>
-      <TouchableOpacity onPress={onStartWorkout} style={styles.startButton} activeOpacity={0.7} accessibilityLabel="Start a new workout" accessibilityRole="button">
-        <Text style={styles.startButtonText}>Start Workout</Text>
+      <Text style={getStyles().emptyText}>No workout yet today</Text>
+      <TouchableOpacity onPress={onStartWorkout} style={getStyles().startButton} activeOpacity={0.7} accessibilityLabel="Start a new workout" accessibilityRole="button">
+        <Text style={getStyles().startButtonText}>Start Workout</Text>
       </TouchableOpacity>
     </Card>
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
     marginBottom: spacing[3],
   },
@@ -129,13 +133,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.md,
   },
   resumeBanner: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     borderRadius: radius.sm,
     padding: spacing[3],
     flexDirection: 'row',
@@ -152,18 +156,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   resumeTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.base,
   },
   resumeSubtitle: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
   resumeButton: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.base,
@@ -173,7 +177,7 @@ const styles = StyleSheet.create({
   },
   sessionBorder: {
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
     marginTop: spacing[2],
     paddingTop: spacing[3],
   },
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   sessionName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.base,
@@ -191,12 +195,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   exerciseText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
   moreText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
@@ -205,26 +209,26 @@ const styles = StyleSheet.create({
     gap: spacing[4],
   },
   statText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
   },
   emptyText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     marginBottom: spacing[3],
   },
   startButton: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     borderRadius: radius.sm,
     paddingVertical: spacing[2],
     paddingHorizontal: spacing[3],
     alignSelf: 'flex-start',
   },
   startButtonText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.sm,

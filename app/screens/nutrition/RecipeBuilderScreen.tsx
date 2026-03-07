@@ -23,8 +23,8 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import api from '../../services/api';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -102,6 +102,7 @@ function nextTempId(): string {
 
 export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [step, setStep] = useState<Step>('NAMING');
 
   // NAMING state
@@ -268,15 +269,15 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: c.bg.base }]}
+      style={[styles.container, { backgroundColor: getThemeColors().bg.base }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: c.bg.surfaceRaised }]}>
+      <View style={[styles.header, { borderBottomColor: getThemeColors().bg.surfaceRaised }]}>
         <TouchableOpacity onPress={handleClose} activeOpacity={0.7}>
-          <Ionicons name="close" size={24} color={c.text.primary} />
+          <Ionicons name="close" size={24} color={getThemeColors().text.primary} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: c.text.primary }]}>
+        <Text style={[styles.headerTitle, { color: getThemeColors().text.primary }]}>
           {step === 'NAMING' && 'New Recipe'}
           {step === 'ADDING_INGREDIENTS' && 'Add Ingredients'}
           {step === 'REVIEW' && 'Review Recipe'}
@@ -288,35 +289,35 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
       {/* Step: NAMING */}
       {step === 'NAMING' && (
         <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
-          <Text style={[styles.label, { color: c.text.secondary }]}>Recipe Name</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Recipe Name</Text>
           <TextInput
-            style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised }]}
+            style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised }]}
             value={recipeName}
             onChangeText={setRecipeName}
             placeholder="e.g. Chicken Fried Rice"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
             maxLength={255}
           />
 
-          <Text style={[styles.label, { color: c.text.secondary }]}>Description (optional)</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Description (optional)</Text>
           <TextInput
             style={[styles.input, styles.multiline]}
             value={description}
             onChangeText={setDescription}
             placeholder="Notes about this recipe"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
             multiline
             numberOfLines={3}
           />
 
-          <Text style={[styles.label, { color: c.text.secondary }]}>Total Servings</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Total Servings</Text>
           <TextInput
-            style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised }]}
+            style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised }]}
             value={totalServings}
             onChangeText={setTotalServings}
             keyboardType="numeric"
             placeholder="1"
-            placeholderTextColor={c.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
           />
 
           <TouchableOpacity
@@ -325,7 +326,7 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
             disabled={!recipeName.trim()}
             activeOpacity={0.7}
           >
-            <Text style={[styles.primaryBtnText, { color: c.text.primary }]}>Next: Add Ingredients</Text>
+            <Text style={[styles.primaryBtnText, { color: getThemeColors().text.primary }]}>Next: Add Ingredients</Text>
           </TouchableOpacity>
         </ScrollView>
       )}
@@ -334,9 +335,9 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
       {step === 'ADDING_INGREDIENTS' && (
         <View style={styles.content}>
           {/* Running totals bar */}
-          <View style={[styles.totalsBar, { backgroundColor: c.bg.surfaceRaised }]}>
-            <Text style={[styles.totalsLabel, { color: c.text.secondary }]}>Per Serving:</Text>
-            <Text style={[styles.totalsValue, { color: c.text.primary }]}>
+          <View style={[styles.totalsBar, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
+            <Text style={[styles.totalsLabel, { color: getThemeColors().text.secondary }]}>Per Serving:</Text>
+            <Text style={[styles.totalsValue, { color: getThemeColors().text.primary }]}>
               {Math.round(perServing.calories)} kcal · {Math.round(perServing.protein_g)}g P ·{' '}
               {Math.round(perServing.carbs_g)}g C · {Math.round(perServing.fat_g)}g F
             </Text>
@@ -349,44 +350,44 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
               value={searchQuery}
               onChangeText={handleSearchChange}
               placeholder="Search foods..."
-              placeholderTextColor={c.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
             />
             <View style={styles.qtyInputRow}>
               <TextInput
-                style={[styles.qtyInput, { color: c.text.primary, backgroundColor: c.bg.base }]}
+                style={[styles.qtyInput, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.base }]}
                 value={quantityInput}
                 onChangeText={setQuantityInput}
                 keyboardType="numeric"
                 placeholder="100"
-                placeholderTextColor={c.text.muted}
+                placeholderTextColor={getThemeColors().text.muted}
               />
-              <Text style={[styles.qtyUnit, { color: c.text.muted }]}>g</Text>
+              <Text style={[styles.qtyUnit, { color: getThemeColors().text.muted }]}>g</Text>
             </View>
           </View>
 
           {/* Search results */}
           {searchLoading && (
-            <ActivityIndicator color={c.accent.primary} style={{ marginVertical: spacing[2] }} />
+            <ActivityIndicator color={getThemeColors().accent.primary} style={{ marginVertical: spacing[2] }} />
           )}
           {searchResults.length > 0 && (
             <View style={styles.searchResultsContainer}>
               <FlatList
                 data={searchResults.slice(0, 10)}
                 keyExtractor={(item) => item.id}
-                style={[styles.searchResults, { backgroundColor: c.bg.surfaceRaised }]}
+                style={[styles.searchResults, { backgroundColor: getThemeColors().bg.surfaceRaised }]}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    style={[styles.searchResultRow, { borderBottomColor: c.bg.base }]}
+                    style={[styles.searchResultRow, { borderBottomColor: getThemeColors().bg.base }]}
                     onPress={() => handleAddIngredient(item)}
                     activeOpacity={0.7}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.foodName, { color: c.text.primary }]} numberOfLines={1}>{item.name}</Text>
-                      <Text style={[styles.foodMacros, { color: c.text.muted }]}>
+                      <Text style={[styles.foodName, { color: getThemeColors().text.primary }]} numberOfLines={1}>{item.name}</Text>
+                      <Text style={[styles.foodMacros, { color: getThemeColors().text.muted }]}>
                         {Math.round(item.calories)} kcal · {item.serving_size}{item.serving_unit}
                       </Text>
                     </View>
-                    <Ionicons name="add-circle" size={24} color={c.accent.primary} />
+                    <Ionicons name="add-circle" size={24} color={getThemeColors().accent.primary} />
                   </TouchableOpacity>
                 )}
               />
@@ -394,7 +395,7 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
           )}
 
           {/* Current ingredients list */}
-          <Text style={[styles.sectionTitle, { color: c.text.primary }]}>
+          <Text style={[styles.sectionTitle, { color: getThemeColors().text.primary }]}>
             Ingredients ({ingredients.length})
           </Text>
           <FlatList
@@ -402,38 +403,38 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
             keyExtractor={(item) => item.tempId}
             style={{ flex: 1 }}
             renderItem={({ item }) => (
-              <View style={[styles.ingredientRow, { borderBottomColor: c.bg.surfaceRaised }]}>
+              <View style={[styles.ingredientRow, { borderBottomColor: getThemeColors().bg.surfaceRaised }]}>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.foodName, { color: c.text.primary }]} numberOfLines={1}>{item.foodItem.name}</Text>
-                  <Text style={[styles.foodMacros, { color: c.text.muted }]}>
+                  <Text style={[styles.foodName, { color: getThemeColors().text.primary }]} numberOfLines={1}>{item.foodItem.name}</Text>
+                  <Text style={[styles.foodMacros, { color: getThemeColors().text.muted }]}>
                     {Math.round(item.foodItem.calories * (item.quantity / item.foodItem.serving_size))} kcal
                   </Text>
                 </View>
                 <TextInput
-                  style={[styles.qtyInputSmall, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised }]}
+                  style={[styles.qtyInputSmall, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised }]}
                   defaultValue={String(item.quantity)}
                   onEndEditing={(e) => handleUpdateQuantity(item.tempId, e.nativeEvent.text)}
                   keyboardType="numeric"
                 />
-                <Text style={[styles.qtyUnit, { color: c.text.muted }]}>g</Text>
+                <Text style={[styles.qtyUnit, { color: getThemeColors().text.muted }]}>g</Text>
                 <TouchableOpacity onPress={() => handleRemoveIngredient(item.tempId)}>
-                  <Ionicons name="trash-outline" size={20} color={c.semantic.negative} />
+                  <Ionicons name="trash-outline" size={20} color={getThemeColors().semantic.negative} />
                 </TouchableOpacity>
               </View>
             )}
             ListEmptyComponent={
-              <Text style={[styles.emptyText, { color: c.text.muted }]}>Search and add ingredients above.</Text>
+              <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>Search and add ingredients above.</Text>
             }
           />
 
           {/* Navigation buttons */}
           <View style={styles.navRow}>
             <TouchableOpacity
-              style={[styles.secondaryBtn, { backgroundColor: c.bg.surfaceRaised }]}
+              style={[styles.secondaryBtn, { backgroundColor: getThemeColors().bg.surfaceRaised }]}
               onPress={() => setStep('NAMING')}
               activeOpacity={0.7}
             >
-              <Text style={[styles.secondaryBtnText, { color: c.text.secondary }]}>Back</Text>
+              <Text style={[styles.secondaryBtnText, { color: getThemeColors().text.secondary }]}>Back</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.primaryBtn, ingredients.length === 0 && styles.btnDisabled]}
@@ -441,7 +442,7 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
               disabled={ingredients.length === 0}
               activeOpacity={0.7}
             >
-              <Text style={[styles.primaryBtnText, { color: c.text.primary }]}>Review</Text>
+              <Text style={[styles.primaryBtnText, { color: getThemeColors().text.primary }]}>Review</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -450,63 +451,63 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
       {/* Step: REVIEW */}
       {step === 'REVIEW' && (
         <ScrollView style={styles.content}>
-          <Text style={[styles.recipeTitlePreview, { color: c.text.primary }]}>{recipeName}</Text>
+          <Text style={[styles.recipeTitlePreview, { color: getThemeColors().text.primary }]}>{recipeName}</Text>
           {description ? (
-            <Text style={[styles.recipeDescPreview, { color: c.text.secondary }]}>{description}</Text>
+            <Text style={[styles.recipeDescPreview, { color: getThemeColors().text.secondary }]}>{description}</Text>
           ) : null}
-          <Text style={[styles.servingsPreview, { color: c.text.muted }]}>
+          <Text style={[styles.servingsPreview, { color: getThemeColors().text.muted }]}>
             {servingsNum} serving{servingsNum !== 1 ? 's' : ''}
           </Text>
 
           {/* Nutrition summary */}
-          <View style={[styles.nutritionCard, { backgroundColor: c.bg.surfaceRaised }]}>
-            <Text style={[styles.nutritionTitle, { color: c.text.primary }]}>Total Nutrition</Text>
-            <Text style={[styles.nutritionRow, { color: c.text.secondary }]}>
+          <View style={[styles.nutritionCard, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
+            <Text style={[styles.nutritionTitle, { color: getThemeColors().text.primary }]}>Total Nutrition</Text>
+            <Text style={[styles.nutritionRow, { color: getThemeColors().text.secondary }]}>
               Calories: {Math.round(total.calories)} kcal
             </Text>
-            <Text style={[styles.nutritionRow, { color: c.text.secondary }]}>
+            <Text style={[styles.nutritionRow, { color: getThemeColors().text.secondary }]}>
               Protein: {Math.round(total.protein_g * 10) / 10}g
             </Text>
-            <Text style={[styles.nutritionRow, { color: c.text.secondary }]}>
+            <Text style={[styles.nutritionRow, { color: getThemeColors().text.secondary }]}>
               Carbs: {Math.round(total.carbs_g * 10) / 10}g
             </Text>
-            <Text style={[styles.nutritionRow, { color: c.text.secondary }]}>
+            <Text style={[styles.nutritionRow, { color: getThemeColors().text.secondary }]}>
               Fat: {Math.round(total.fat_g * 10) / 10}g
             </Text>
 
-            <View style={[styles.divider, { backgroundColor: c.bg.base }]} />
-            <Text style={[styles.nutritionTitle, { color: c.text.primary }]}>Per Serving</Text>
-            <Text style={[styles.nutritionRow, { color: c.text.secondary }]}>
+            <View style={[styles.divider, { backgroundColor: getThemeColors().bg.base }]} />
+            <Text style={[styles.nutritionTitle, { color: getThemeColors().text.primary }]}>Per Serving</Text>
+            <Text style={[styles.nutritionRow, { color: getThemeColors().text.secondary }]}>
               Calories: {Math.round(perServing.calories)} kcal
             </Text>
-            <Text style={[styles.nutritionRow, { color: c.text.secondary }]}>
+            <Text style={[styles.nutritionRow, { color: getThemeColors().text.secondary }]}>
               Protein: {Math.round(perServing.protein_g * 10) / 10}g
             </Text>
-            <Text style={[styles.nutritionRow, { color: c.text.secondary }]}>
+            <Text style={[styles.nutritionRow, { color: getThemeColors().text.secondary }]}>
               Carbs: {Math.round(perServing.carbs_g * 10) / 10}g
             </Text>
-            <Text style={[styles.nutritionRow, { color: c.text.secondary }]}>
+            <Text style={[styles.nutritionRow, { color: getThemeColors().text.secondary }]}>
               Fat: {Math.round(perServing.fat_g * 10) / 10}g
             </Text>
           </View>
 
           {/* Ingredients list */}
-          <Text style={[styles.sectionTitle, { color: c.text.primary }]}>Ingredients ({ingredients.length})</Text>
+          <Text style={[styles.sectionTitle, { color: getThemeColors().text.primary }]}>Ingredients ({ingredients.length})</Text>
           {ingredients.map((ing) => (
-            <View key={ing.tempId} style={[styles.reviewIngRow, { borderBottomColor: c.bg.surfaceRaised }]}>
-              <Text style={[styles.foodName, { color: c.text.primary }]} numberOfLines={1}>{ing.foodItem.name}</Text>
-              <Text style={[styles.foodMacros, { color: c.text.muted }]}>{ing.quantity}g</Text>
+            <View key={ing.tempId} style={[styles.reviewIngRow, { borderBottomColor: getThemeColors().bg.surfaceRaised }]}>
+              <Text style={[styles.foodName, { color: getThemeColors().text.primary }]} numberOfLines={1}>{ing.foodItem.name}</Text>
+              <Text style={[styles.foodMacros, { color: getThemeColors().text.muted }]}>{ing.quantity}g</Text>
             </View>
           ))}
 
           {/* Actions */}
           <View style={styles.navRow}>
             <TouchableOpacity
-              style={[styles.secondaryBtn, { backgroundColor: c.bg.surfaceRaised }]}
+              style={[styles.secondaryBtn, { backgroundColor: getThemeColors().bg.surfaceRaised }]}
               onPress={() => setStep('ADDING_INGREDIENTS')}
               activeOpacity={0.7}
             >
-              <Text style={[styles.secondaryBtnText, { color: c.text.secondary }]}>Edit</Text>
+              <Text style={[styles.secondaryBtnText, { color: getThemeColors().text.secondary }]}>Edit</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.primaryBtn, saving && styles.btnDisabled]}
@@ -515,9 +516,9 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
               activeOpacity={0.7}
             >
               {saving ? (
-                <ActivityIndicator color={c.text.primary} />
+                <ActivityIndicator color={getThemeColors().text.primary} />
               ) : (
-                <Text style={[styles.primaryBtnText, { color: c.text.primary }]}>Save Recipe</Text>
+                <Text style={[styles.primaryBtnText, { color: getThemeColors().text.primary }]}>Save Recipe</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -527,17 +528,17 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
       {/* Step: SAVED */}
       {step === 'SAVED' && (
         <View style={[styles.content, styles.centeredContent]}>
-          <Ionicons name="checkmark-circle" size={64} color={c.semantic.positive} />
-          <Text style={[styles.savedTitle, { color: c.text.primary }]}>Recipe Saved!</Text>
-          <Text style={[styles.savedSubtitle, { color: c.text.secondary }]}>
+          <Ionicons name="checkmark-circle" size={64} color={getThemeColors().semantic.positive} />
+          <Text style={[styles.savedTitle, { color: getThemeColors().text.primary }]}>Recipe Saved!</Text>
+          <Text style={[styles.savedSubtitle, { color: getThemeColors().text.secondary }]}>
             "{recipeName}" is now available in food search.
           </Text>
           <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: c.accent.primary }]}
+            style={[styles.primaryBtn, { backgroundColor: getThemeColors().accent.primary }]}
             onPress={handleDone}
             activeOpacity={0.7}
           >
-            <Text style={[styles.primaryBtnText, { color: c.text.primary }]}>Done</Text>
+            <Text style={[styles.primaryBtnText, { color: getThemeColors().text.primary }]}>Done</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -547,10 +548,10 @@ export function RecipeBuilderScreen({ visible, onClose, onSaved }: Props) {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg.base,
+    backgroundColor: getThemeColors().bg.base,
   },
   header: {
     flexDirection: 'row',
@@ -559,11 +560,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.bg.surfaceRaised,
+    borderBottomColor: getThemeColors().bg.surfaceRaised,
   },
   headerTitle: {
     fontSize: typography.size.xl, fontWeight: typography.weight.bold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
   },
   content: {
     flex: 1,
@@ -575,13 +576,13 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: typography.size.xs, fontWeight: typography.weight.regular,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     marginBottom: spacing[1],
     marginTop: spacing[3],
   },
   input: {
-    backgroundColor: colors.bg.surfaceRaised,
-    color: colors.text.primary,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
+    color: getThemeColors().text.primary,
     borderRadius: radius.md,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
@@ -592,7 +593,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   primaryBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.md,
     paddingVertical: spacing[3],
     alignItems: 'center',
@@ -602,11 +603,11 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     fontSize: typography.size.base,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: '600',
   },
   secondaryBtn: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     paddingVertical: spacing[3],
     alignItems: 'center',
@@ -616,25 +617,25 @@ const styles = StyleSheet.create({
   },
   secondaryBtnText: {
     fontSize: typography.size.base, fontWeight: typography.weight.regular,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
   },
   btnDisabled: {
     opacity: 0.5,
   },
   totalsBar: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[3],
     marginBottom: spacing[3],
   },
   totalsLabel: {
     fontSize: typography.size.xs, fontWeight: typography.weight.regular,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     marginBottom: spacing[1],
   },
   totalsValue: {
     fontSize: typography.size.base,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontWeight: '600',
   },
   searchRow: {
@@ -646,7 +647,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   searchResults: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
   },
   searchResultRow: {
@@ -654,16 +655,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.bg.base,
+    borderBottomColor: getThemeColors().bg.base,
     gap: spacing[2],
   },
   foodName: {
     fontSize: typography.size.base, fontWeight: typography.weight.regular,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
   },
   foodMacros: {
     fontSize: typography.size.xs, fontWeight: typography.weight.regular,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   qtyInputRow: {
     flexDirection: 'row',
@@ -671,8 +672,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   qtyInput: {
-    backgroundColor: colors.bg.base,
-    color: colors.text.primary,
+    backgroundColor: getThemeColors().bg.base,
+    color: getThemeColors().text.primary,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
@@ -681,8 +682,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   qtyInputSmall: {
-    backgroundColor: colors.bg.surfaceRaised,
-    color: colors.text.primary,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
+    color: getThemeColors().text.primary,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
@@ -692,11 +693,11 @@ const styles = StyleSheet.create({
   },
   qtyUnit: {
     fontSize: typography.size.xs, fontWeight: typography.weight.regular,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   sectionTitle: {
     fontSize: typography.size.lg, fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginTop: spacing[3],
     marginBottom: spacing[2],
   },
@@ -705,12 +706,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing[2],
     borderBottomWidth: 1,
-    borderBottomColor: colors.bg.surfaceRaised,
+    borderBottomColor: getThemeColors().bg.surfaceRaised,
     gap: spacing[2],
   },
   emptyText: {
     fontSize: typography.size.base, fontWeight: typography.weight.regular,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     textAlign: 'center',
     paddingVertical: spacing[4],
   },
@@ -721,38 +722,38 @@ const styles = StyleSheet.create({
   },
   recipeTitlePreview: {
     fontSize: typography.size['2xl'], fontWeight: typography.weight.bold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginBottom: spacing[1],
   },
   recipeDescPreview: {
     fontSize: typography.size.base, fontWeight: typography.weight.regular,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     marginBottom: spacing[2],
   },
   servingsPreview: {
     fontSize: typography.size.xs, fontWeight: typography.weight.regular,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     marginBottom: spacing[3],
   },
   nutritionCard: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[4],
     marginBottom: spacing[3],
   },
   nutritionTitle: {
     fontSize: typography.size.lg, fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginBottom: spacing[2],
   },
   nutritionRow: {
     fontSize: typography.size.base, fontWeight: typography.weight.regular,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     marginBottom: spacing[1],
   },
   divider: {
     height: 1,
-    backgroundColor: colors.bg.base,
+    backgroundColor: getThemeColors().bg.base,
     marginVertical: spacing[3],
   },
   reviewIngRow: {
@@ -761,17 +762,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing[2],
     borderBottomWidth: 1,
-    borderBottomColor: colors.bg.surfaceRaised,
+    borderBottomColor: getThemeColors().bg.surfaceRaised,
   },
   savedTitle: {
     fontSize: typography.size['2xl'], fontWeight: typography.weight.bold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginTop: spacing[4],
     marginBottom: spacing[2],
   },
   savedSubtitle: {
     fontSize: typography.size.base, fontWeight: typography.weight.regular,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     textAlign: 'center',
     marginBottom: spacing[4],
   },

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import Svg, { Line, Polyline, Circle, Text as SvgText } from 'react-native-svg';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 const CHART_WIDTH = Dimensions.get('window').width - spacing[4] * 2 - spacing[4] * 2; // screen padding + card padding
 const CHART_HEIGHT = 160;
@@ -38,6 +38,7 @@ export function TrendLineChart({
   primaryAsDots,
 }: TrendLineChartProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const { points, yMin, yMax, xLabels, yLabels, plotWidth, plotHeight } = useMemo(() => {
@@ -110,7 +111,7 @@ export function TrendLineChart({
   if (data.length === 0) {
     return (
       <View style={[styles.emptyContainer]}>
-        <Text style={[styles.emptyText, { color: c.text.muted }]}>{emptyMessage || 'No data for this period'}</Text>
+        <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>{emptyMessage || 'No data for this period'}</Text>
       </View>
     );
   }
@@ -150,7 +151,7 @@ export function TrendLineChart({
               x={PADDING.left - 6}
               y={tick.y + 4}
               textAnchor="end"
-              fill={c.text.muted}
+              fill={getThemeColors().text.muted}
               fontSize={10}
             >
               {tick.label}
@@ -165,7 +166,7 @@ export function TrendLineChart({
               y1={tick.y}
               x2={PADDING.left + plotWidth}
               y2={tick.y}
-              stroke={c.border.subtle}
+              stroke={getThemeColors().border.subtle}
               strokeWidth={1}
             />
           ))}
@@ -177,7 +178,7 @@ export function TrendLineChart({
               y1={targetY}
               x2={PADDING.left + plotWidth}
               y2={targetY}
-              stroke={c.semantic.warning}
+              stroke={getThemeColors().semantic.warning}
               strokeWidth={1.5}
               strokeDasharray="6,4"
             />
@@ -236,7 +237,7 @@ export function TrendLineChart({
           {selectedIndex != null && (
             <>
               <Circle cx={selectedX} cy={selectedY} r={5} fill={color} />
-              <Circle cx={selectedX} cy={selectedY} r={3} fill={c.bg.surface} />
+              <Circle cx={selectedX} cy={selectedY} r={3} fill={getThemeColors().bg.surface} />
             </>
           )}
 
@@ -247,7 +248,7 @@ export function TrendLineChart({
               x={tick.x}
               y={CHART_HEIGHT - 4}
               textAnchor="middle"
-              fill={c.text.muted}
+              fill={getThemeColors().text.muted}
               fontSize={10}
             >
               {tick.label}
@@ -259,7 +260,7 @@ export function TrendLineChart({
       {/* Tooltip */}
       {selectedPoint && (
         <View style={styles.tooltip}>
-          <Text style={[styles.tooltipDate, { color: c.text.secondary }]}>
+          <Text style={[styles.tooltipDate, { color: getThemeColors().text.secondary }]}>
             {new Date(selectedPoint.date + 'T00:00:00').toLocaleDateString()}
           </Text>
           <Text style={[styles.tooltipValue, { color }]}>
@@ -271,14 +272,14 @@ export function TrendLineChart({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   emptyContainer: {
     height: CHART_HEIGHT,
     justifyContent: 'center',
     alignItems: 'center',
   },
   emptyText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.base,
     textAlign: 'center',
     lineHeight: typography.lineHeight.base,
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing[2],
   },
   tooltipDate: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },

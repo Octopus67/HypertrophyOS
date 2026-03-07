@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { getFatigueColor, getFatigueLabel } from '../../utils/fatigueColorMapping';
 
 interface FatigueScore {
@@ -22,18 +22,19 @@ interface Props {
 function BarRow({ label, value }: { label: string; value: number }) {
   const pct = Math.min(value * 100, 100);
   return (
-    <View style={styles.barRow}>
-      <Text style={[styles.barLabel, { color: colors.text.secondary }]}>{label}</Text>
-      <View style={[styles.barTrack, { backgroundColor: colors.bg.surfaceRaised }]}>
-        <View style={[styles.barFill, { width: `${pct}%` }]} />
+    <View style={getStyles().barRow}>
+      <Text style={[getStyles().barLabel, { color: getThemeColors().text.secondary }]}>{label}</Text>
+      <View style={[getStyles().barTrack, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
+        <View style={[getStyles().barFill, { width: `${pct}%` }]} />
       </View>
-      <Text style={[styles.barValue, { color: colors.text.secondary }]}>{(value * 100).toFixed(0)}%</Text>
+      <Text style={[getStyles().barValue, { color: getThemeColors().text.secondary }]}>{(value * 100).toFixed(0)}%</Text>
     </View>
   );
 }
 
 export function FatigueBreakdownModal({ visible, score, onClose }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (!score) return null;
 
   const color = getFatigueColor(score.score);
@@ -41,17 +42,17 @@ export function FatigueBreakdownModal({ visible, score, onClose }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={[styles.sheet, { backgroundColor: c.bg.surface }]}>
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: c.text.primary }]}>{score.muscle_group}</Text>
+      <View style={getStyles().overlay}>
+        <View style={[getStyles().sheet, { backgroundColor: getThemeColors().bg.surface }]}>
+          <View style={getStyles().header}>
+            <Text style={[getStyles().title, { color: getThemeColors().text.primary }]}>{score.muscle_group}</Text>
             <TouchableOpacity onPress={onClose}>
-              <Text style={[styles.close, { color: c.text.muted }]}>✕</Text>
+              <Text style={[getStyles().close, { color: getThemeColors().text.muted }]}>✕</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.scoreRow}>
-            <Text style={[styles.scoreValue, { color }]}>{score.score.toFixed(0)}</Text>
-            <Text style={[styles.scoreLabel, { color }]}>{label} Fatigue</Text>
+          <View style={getStyles().scoreRow}>
+            <Text style={[getStyles().scoreValue, { color }]}>{score.score.toFixed(0)}</Text>
+            <Text style={[getStyles().scoreLabel, { color }]}>{label} Fatigue</Text>
           </View>
           <BarRow label="Regression" value={score.regression_component} />
           <BarRow label="Volume" value={score.volume_component} />
@@ -63,14 +64,17 @@ export function FatigueBreakdownModal({ visible, score, onClose }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   sheet: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     padding: spacing[4],
@@ -83,12 +87,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     textTransform: 'capitalize',
   },
-  close: { color: colors.text.muted, fontSize: 20 },
+  close: { color: getThemeColors().text.muted, fontSize: 20 },
   scoreRow: {
     alignItems: 'center',
     marginBottom: spacing[4],
@@ -108,24 +112,24 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   barLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     width: 80,
   },
   barTrack: {
     flex: 1,
     height: 8,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.full,
     overflow: 'hidden',
   },
   barFill: {
     height: '100%',
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.full,
   },
   barValue: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     width: 40,
     textAlign: 'right',

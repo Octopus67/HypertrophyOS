@@ -4,7 +4,8 @@
  * Pure functions — no React Native imports.
  */
 
-import { colors } from '../theme/tokens';
+;
+import { getThemeColors } from '../hooks/useThemeColors';
 
 export interface MacroValues {
   calories: number;
@@ -41,6 +42,6 @@ export function getOverTargetColor(
   target: number,
   standardColor: string,
 ): string {
-  if (value > target) return colors.semantic.overTarget;
+  if (value > target) return getThemeColors().semantic.overTarget;
   return standardColor;
 }

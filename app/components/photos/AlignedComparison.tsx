@@ -16,8 +16,8 @@ import {
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { AlignmentData, ImageTransform, PhotoMeta, PhotoPathMap } from '../../utils/progressPhotoTypes';
 import { alignForComparison, computeAlignment } from '../../utils/autoAlignLogic';
 import { formatPhotoInfo } from '../../utils/timelineLogic';
@@ -43,6 +43,7 @@ export function AlignedComparison({
   onDismiss,
 }: AlignedComparisonProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [leftTransform, setLeftTransform] = useState<ImageTransform>(IDENTITY_TRANSFORM);
   const [rightTransform, setRightTransform] = useState<ImageTransform>(IDENTITY_TRANSFORM);
   const [loading, setLoading] = useState(true);
@@ -96,21 +97,21 @@ export function AlignedComparison({
   const rightInfo = formatPhotoInfo(rightPhoto);
 
   return (
-    <View style={[styles.container, { backgroundColor: c.bg.base }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: c.text.primary }]}>Compare</Text>
+    <View style={[getStyles().container, { backgroundColor: getThemeColors().bg.base }]}>
+      <View style={getStyles().header}>
+        <Text style={[getStyles().title, { color: getThemeColors().text.primary }]}>Compare</Text>
         <TouchableOpacity onPress={onDismiss}>
-          <Text style={[styles.dismissText, { color: c.text.secondary }]}>✕</Text>
+          <Text style={[getStyles().dismissText, { color: getThemeColors().text.secondary }]}>✕</Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color={c.accent.primary} size="large" />
-          <Text style={[styles.loadingText, { color: c.text.secondary }]}>Aligning photos...</Text>
+        <View style={getStyles().loadingContainer}>
+          <ActivityIndicator color={getThemeColors().accent.primary} size="large" />
+          <Text style={[getStyles().loadingText, { color: getThemeColors().text.secondary }]}>Aligning photos...</Text>
         </View>
       ) : (
-        <View style={styles.row}>
+        <View style={getStyles().row}>
           <ComparisonSide uri={leftUri} info={leftInfo} transform={leftTransform} />
           <ComparisonSide uri={rightUri} info={rightInfo} transform={rightTransform} />
         </View>
@@ -137,28 +138,31 @@ function ComparisonSide({ uri, info, transform }: ComparisonSideProps) {
   };
 
   return (
-    <View style={[styles.side, { backgroundColor: colors.bg.surface }]}>
-      <View style={styles.photoClip}>
+    <View style={[getStyles().side, { backgroundColor: getThemeColors().bg.surface }]}>
+      <View style={getStyles().photoClip}>
         {uri ? (
           <Image source={{ uri }} style={imageStyle} resizeMode="cover" />
         ) : (
-          <View style={[styles.photoPlaceholder, { width: SIDE_WIDTH, height: PHOTO_HEIGHT }]}>
-            <Text style={[styles.placeholderText, { color: colors.text.muted }]}>No photo</Text>
+          <View style={[getStyles().photoPlaceholder, { width: SIDE_WIDTH, height: PHOTO_HEIGHT }]}>
+            <Text style={[getStyles().placeholderText, { color: getThemeColors().text.muted }]}>No photo</Text>
           </View>
         )}
       </View>
-      <View style={styles.infoRow}>
-        <Text style={[styles.dateText, { color: colors.text.primary }]}>{info.dateLabel}</Text>
-        {info.weightLabel && <Text style={[styles.weightText, { color: colors.accent.primary }]}>{info.weightLabel}</Text>}
+      <View style={getStyles().infoRow}>
+        <Text style={[getStyles().dateText, { color: getThemeColors().text.primary }]}>{info.dateLabel}</Text>
+        {info.weightLabel && <Text style={[getStyles().weightText, { color: getThemeColors().accent.primary }]}>{info.weightLabel}</Text>}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg.base,
+    backgroundColor: getThemeColors().bg.base,
     paddingTop: spacing[4],
   },
   header: {
@@ -169,12 +173,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
   },
   dismissText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xl,
   },
   loadingContainer: {
@@ -183,7 +187,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     marginTop: spacing[2],
   },
@@ -196,7 +200,7 @@ const styles = StyleSheet.create({
     width: SIDE_WIDTH,
     borderRadius: radius.md,
     overflow: 'hidden',
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
   },
   photoClip: {
     width: SIDE_WIDTH,
@@ -204,12 +208,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   photoPlaceholder: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     alignItems: 'center',
     justifyContent: 'center',
   },
   placeholderText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
   },
   infoRow: {
@@ -217,12 +221,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dateText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
   },
   weightText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
     marginTop: 2,

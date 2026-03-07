@@ -10,11 +10,11 @@ import {
   View,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { colors, radius, spacing, typography, letterSpacing, shadows, opacityScale } from '../../theme/tokens';
+import { radius, spacing, typography, letterSpacing, shadows, opacityScale } from '../../theme/tokens';
 import { usePressAnimation } from '../../hooks/usePressAnimation';
 import { useHoverState } from '../../hooks/useHoverState';
 import { useHaptics } from '../../hooks/useHaptics';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -37,7 +37,7 @@ interface ButtonProps {
 export function getButtonStyles(
   variant: ButtonVariant,
   disabled: boolean,
-  themeColors: typeof import('../../theme/tokens').colors = colors,
+  themeColors: typeof import('../../theme/tokens').colors = getThemeColors(),
 ): { container: ViewStyle; text: TextStyle } {
   const container: ViewStyle = {
     ...baseStyle,
@@ -89,7 +89,7 @@ const baseStyle: ViewStyle = {
 };
 
 const baseTextStyle: TextStyle = {
-  color: colors.text.primary,
+  color: getThemeColors().text.primary,
   fontSize: typography.size.base,
   fontWeight: typography.weight.semibold,
   letterSpacing: letterSpacing.wide,

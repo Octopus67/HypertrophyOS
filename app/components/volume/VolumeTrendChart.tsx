@@ -8,8 +8,8 @@
 
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { G, Line as SvgLine, Circle, Text as SvgText, Polyline } from 'react-native-svg';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import type { WNSLandmarks } from '../../types/volume';
 
 export interface TrendPoint {
@@ -29,9 +29,9 @@ const PLOT_W = CHART_W - PAD.left - PAD.right;
 const PLOT_H = CHART_H - PAD.top - PAD.bottom;
 
 const LANDMARK_STYLES: { key: keyof WNSLandmarks; label: string; color: string; dash?: string }[] = [
-  { key: 'mev', label: 'MEV', color: colors.semantic.warning, dash: '4,3' },
-  { key: 'mav_high', label: 'MAV', color: colors.semantic.positive, dash: '4,3' },
-  { key: 'mrv', label: 'MRV', color: colors.semantic.negative, dash: '4,3' },
+  { key: 'mev', label: 'MEV', color: getThemeColors().semantic.warning, dash: '4,3' },
+  { key: 'mav_high', label: 'MAV', color: getThemeColors().semantic.positive, dash: '4,3' },
+  { key: 'mrv', label: 'MRV', color: getThemeColors().semantic.negative, dash: '4,3' },
 ];
 
 function formatWeekLabel(week: string): string {
@@ -41,10 +41,11 @@ function formatWeekLabel(week: string): string {
 
 export function VolumeTrendChart({ trend, landmarks }: VolumeTrendChartProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (!trend.length) {
     return (
       <View style={styles.empty} accessibilityLabel="Not enough data for trend chart">
-        <Text style={[styles.emptyText, { color: c.text.muted }]}>Not enough data yet</Text>
+        <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>Not enough data yet</Text>
       </View>
     );
   }
@@ -98,7 +99,7 @@ export function VolumeTrendChart({ trend, landmarks }: VolumeTrendChartProps) {
         <Polyline
           points={points}
           fill="none"
-          stroke={c.accent.primary}
+          stroke={getThemeColors().accent.primary}
           strokeWidth={2}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -111,7 +112,7 @@ export function VolumeTrendChart({ trend, landmarks }: VolumeTrendChartProps) {
             cx={xScale(i)}
             cy={yScale(t.volume)}
             r={3}
-            fill={c.accent.primary}
+            fill={getThemeColors().accent.primary}
           />
         ))}
 
@@ -122,7 +123,7 @@ export function VolumeTrendChart({ trend, landmarks }: VolumeTrendChartProps) {
             x={xScale(i)}
             y={CHART_H - 4}
             textAnchor="middle"
-            fill={c.text.muted}
+            fill={getThemeColors().text.muted}
             fontSize={8}
           >
             {formatWeekLabel(t.week)}
@@ -136,7 +137,7 @@ export function VolumeTrendChart({ trend, landmarks }: VolumeTrendChartProps) {
             x={PAD.left - 4}
             y={yScale(v) + 3}
             textAnchor="end"
-            fill={c.text.muted}
+            fill={getThemeColors().text.muted}
             fontSize={8}
           >
             {v}
@@ -147,7 +148,7 @@ export function VolumeTrendChart({ trend, landmarks }: VolumeTrendChartProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     marginTop: spacing[2],
   },
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
   },
 });

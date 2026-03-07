@@ -24,8 +24,9 @@ import {
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
+import { radius, spacing, typography } from '../../theme/tokens';
 import api from '../../services/api';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import {
   isValidBarcode,
   shouldProcessScan,
@@ -66,6 +67,8 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCAN_AREA_SIZE = SCREEN_WIDTH * 0.7;
 
 export function BarcodeScanner({ onFoodSelected, onClose }: Props) {
+  const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [state, setState] = useState<ScanState>('permission');
   const [scannedFood, setScannedFood] = useState<FoodItem | null>(null);
   const [multiplier, setMultiplier] = useState('1');
@@ -179,7 +182,7 @@ export function BarcodeScanner({ onFoodSelected, onClose }: Props) {
     return (
       <View style={styles.container}>
         <View style={styles.messageCard}>
-          <ActivityIndicator size="large" color={colors.accent.primary} />
+          <ActivityIndicator size="large" color={getThemeColors().accent.primary} />
           <Text style={[styles.messageText, { marginTop: spacing[3] }]}>
             Looking up barcode…
           </Text>
@@ -315,10 +318,10 @@ export function BarcodeScanner({ onFoodSelected, onClose }: Props) {
 // Styles
 // ---------------------------------------------------------------------------
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg.base,
+    backgroundColor: getThemeColors().bg.base,
   },
   // ── Overlay ──────────────────────────────────────────────────────────
   overlay: {
@@ -356,7 +359,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 24,
     height: 24,
-    borderColor: colors.accent.primary,
+    borderColor: getThemeColors().accent.primary,
   },
   cornerTL: {
     top: 0,
@@ -397,7 +400,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
   },
   cancelScanBtnText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.base,
     fontWeight: '600',
   },
@@ -406,20 +409,20 @@ const styles = StyleSheet.create({
     margin: spacing[4],
     marginTop: 'auto',
     marginBottom: 'auto',
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.lg,
     padding: spacing[5],
     alignItems: 'center',
   },
   messageTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xl,
     fontWeight: '700',
     marginBottom: spacing[2],
     textAlign: 'center',
   },
   messageText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     textAlign: 'center',
     marginBottom: spacing[3],
@@ -430,18 +433,18 @@ const styles = StyleSheet.create({
     margin: spacing[4],
     marginTop: 'auto',
     marginBottom: 'auto',
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.lg,
     padding: spacing[5],
   },
   confirmTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xl,
     fontWeight: '700',
     marginBottom: spacing[1],
   },
   confirmServing: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     marginBottom: spacing[3],
   },
@@ -455,12 +458,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   macroValue: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xl,
     fontWeight: '700',
   },
   macroLabel: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     marginTop: 2,
   },
@@ -470,13 +473,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   servingLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     marginRight: spacing[2],
   },
   servingInput: {
-    backgroundColor: colors.bg.surfaceRaised,
-    color: colors.text.primary,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
+    color: getThemeColors().text.primary,
     borderRadius: radius.md,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
@@ -492,25 +495,25 @@ const styles = StyleSheet.create({
   // ── Buttons ──────────────────────────────────────────────────────────
   primaryBtn: {
     flex: 1,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.md,
     paddingVertical: spacing[3],
     alignItems: 'center',
   },
   primaryBtnText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: '600',
   },
   closeBtn: {
     flex: 1,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     paddingVertical: spacing[3],
     alignItems: 'center',
   },
   closeBtnText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     fontWeight: '600',
   },

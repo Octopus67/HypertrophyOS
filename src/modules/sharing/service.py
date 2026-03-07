@@ -77,6 +77,48 @@ class SharingService:
                 if st != "warm-up":
                     total_volume += s.get("weight_kg", 0) * s.get("reps", 0)
 
+        # Calculate PR count: compare each exercise's max weight against
+        # all previous sessions for the same user.
+        pr_count = 0
+        current_maxes: dict[str, float] = {}
+        for ex in exercises:
+            name = ex.get("exercise_name", "")
+            if not name:
+                continue
+            for s in ex.get("sets", []):
+                if s.get("set_type") == "warm-up":
+                    continue
+                w = s.get("weight_kg", 0)
+                if w > current_maxes.get(name, 0):
+                    current_maxes[name] = w
+
+        if current_maxes:
+            prev_result = await self._db.execute(
+                TrainingSession.not_deleted(
+                    select(TrainingSession).where(
+                        TrainingSession.user_id == session.user_id,
+                        TrainingSession.session_date < session.session_date,
+                    )
+                )
+            )
+            prev_sessions = prev_result.scalars().all()
+
+            # Build historical max per exercise name
+            historical_maxes: dict[str, float] = {}
+            for ps in prev_sessions:
+                for ex in (ps.exercises or []):
+                    pname = ex.get("exercise_name", "")
+                    for s in ex.get("sets", []):
+                        if s.get("set_type") == "warm-up":
+                            continue
+                        w = s.get("weight_kg", 0)
+                        if w > historical_maxes.get(pname, 0):
+                            historical_maxes[pname] = w
+
+            for name, cur_max in current_maxes.items():
+                if cur_max > 0 and cur_max > historical_maxes.get(name, 0):
+                    pr_count += 1
+
         return {
             "session_id": str(session.id),
             "user_display_name": display_name,
@@ -91,5 +133,5 @@ class SharingService:
                 }
                 for ex in exercises[:10]
             ],
-            "pr_count": 0,
+            "pr_count": pr_count,
         }

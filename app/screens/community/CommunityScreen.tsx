@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Linking, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../../components/common/Card';
 import { Icon } from '../../components/common/Icon';
 
@@ -19,6 +19,7 @@ const openTelegramLink = () => {
 
 export function CommunityScreen() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const navigation = useNavigation();
 
   return (
@@ -55,21 +56,21 @@ export function CommunityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base },
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base },
   container: { flex: 1 },
   content: { padding: spacing[4], paddingBottom: spacing[12] },
   backBtn: { paddingVertical: spacing[2], marginBottom: spacing[2] },
-  backText: { color: colors.accent.primary, fontSize: typography.size.base },
-  title: { color: colors.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[4] },
-  comingSoonBox: { backgroundColor: colors.bg.surface, borderRadius: radius.lg, padding: spacing[6], alignItems: 'center', marginBottom: spacing[6], borderWidth: 1, borderColor: colors.border.subtle },
-  comingSoonBadge: { color: colors.accent.primary, fontSize: typography.size.xs, fontWeight: typography.weight.semibold, backgroundColor: colors.accent.primaryMuted, paddingHorizontal: spacing[3], paddingVertical: spacing[1], borderRadius: radius.full, overflow: 'hidden', marginBottom: spacing[3] },
-  comingSoonTitle: { color: colors.text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, textAlign: 'center', marginBottom: spacing[2] },
-  comingSoonDesc: { color: colors.text.secondary, fontSize: typography.size.sm, textAlign: 'center', lineHeight: 20 },
-  sectionTitle: { color: colors.text.primary, fontSize: typography.size.sm, fontWeight: typography.weight.semibold, marginBottom: spacing[2] },
+  backText: { color: getThemeColors().accent.primary, fontSize: typography.size.base },
+  title: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[4] },
+  comingSoonBox: { backgroundColor: getThemeColors().bg.surface, borderRadius: radius.lg, padding: spacing[6], alignItems: 'center', marginBottom: spacing[6], borderWidth: 1, borderColor: getThemeColors().border.subtle },
+  comingSoonBadge: { color: getThemeColors().accent.primary, fontSize: typography.size.xs, fontWeight: typography.weight.semibold, backgroundColor: getThemeColors().accent.primaryMuted, paddingHorizontal: spacing[3], paddingVertical: spacing[1], borderRadius: radius.full, overflow: 'hidden', marginBottom: spacing[3] },
+  comingSoonTitle: { color: getThemeColors().text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, textAlign: 'center', marginBottom: spacing[2] },
+  comingSoonDesc: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, textAlign: 'center', lineHeight: 20 },
+  sectionTitle: { color: getThemeColors().text.primary, fontSize: typography.size.sm, fontWeight: typography.weight.semibold, marginBottom: spacing[2] },
   linkCard: { flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[4] },
   linkContent: { flex: 1 },
-  linkTitle: { color: colors.text.primary, fontSize: typography.size.base, fontWeight: typography.weight.medium },
-  linkDesc: { color: colors.text.muted, fontSize: typography.size.sm },
-  arrow: { color: colors.text.muted, fontSize: typography.size.lg },
+  linkTitle: { color: getThemeColors().text.primary, fontSize: typography.size.base, fontWeight: typography.weight.medium },
+  linkDesc: { color: getThemeColors().text.muted, fontSize: typography.size.sm },
+  arrow: { color: getThemeColors().text.muted, fontSize: typography.size.lg },
 });

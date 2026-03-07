@@ -8,8 +8,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../common/Card';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -57,6 +57,7 @@ export function WeeklyCheckinCard({
   onDismissSuggestion,
 }: WeeklyCheckinCardProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [isEditing, setIsEditing] = useState(false);
   const [editTargets, setEditTargets] = useState<MacroTargets>({
     calories: checkin.new_targets?.calories ?? 2000,
@@ -82,30 +83,30 @@ export function WeeklyCheckinCard({
   // Recomp mode: show recomp-specific check-in
   if (checkin.coaching_mode === 'recomp' && checkin.recomp_recommendation) {
     const scoreColor = (checkin.recomp_score ?? 0) > 10
-      ? c.semantic.positive
+      ? getThemeColors().semantic.positive
       : (checkin.recomp_score ?? 0) < -10
-        ? c.semantic.negative
-        : c.text.secondary;
+        ? getThemeColors().semantic.negative
+        : getThemeColors().text.secondary;
 
     return (
-      <Card variant="flat" style={styles.card}>
-        <View style={styles.header}>
-          <Ionicons name="body-outline" size={20} color={c.accent.primary} />
-          <Text style={[styles.title, { color: c.text.primary }]}>Recomp Check-in</Text>
+      <Card variant="flat" style={getStyles().card}>
+        <View style={getStyles().header}>
+          <Ionicons name="body-outline" size={20} color={getThemeColors().accent.primary} />
+          <Text style={[getStyles().title, { color: getThemeColors().text.primary }]}>Recomp Check-in</Text>
         </View>
-        <Text style={[styles.explanation, { color: c.text.secondary }]}>{checkin.recomp_recommendation}</Text>
+        <Text style={[getStyles().explanation, { color: getThemeColors().text.secondary }]}>{checkin.recomp_recommendation}</Text>
         {checkin.recomp_score != null && (
-          <Text style={[styles.trendText, { color: scoreColor }]}>
+          <Text style={[getStyles().trendText, { color: scoreColor }]}>
             Recomp Score: {checkin.recomp_score > 0 ? '+' : ''}{checkin.recomp_score.toFixed(0)}
           </Text>
         )}
         <TouchableOpacity
-          style={[styles.primaryButton, { backgroundColor: c.accent.primary }]}
+          style={[getStyles().primaryButton, { backgroundColor: getThemeColors().accent.primary }]}
           onPress={onDismiss}
           accessibilityRole="button"
           accessibilityLabel="Dismiss recomp check-in"
         >
-          <Text style={[styles.primaryButtonText, { color: c.text.inverse }]}>Got it</Text>
+          <Text style={[getStyles().primaryButtonText, { color: getThemeColors().text.inverse }]}>Got it</Text>
         </TouchableOpacity>
       </Card>
     );
@@ -118,18 +119,18 @@ export function WeeklyCheckinCard({
     const progress = logged / 7;
 
     return (
-      <Card variant="flat" style={styles.card}>
-        <View style={styles.header}>
-          <Ionicons name="analytics-outline" size={20} color={c.accent.primary} />
-          <Text style={[styles.title, { color: c.text.primary }]}>Weekly Check-in</Text>
+      <Card variant="flat" style={getStyles().card}>
+        <View style={getStyles().header}>
+          <Ionicons name="analytics-outline" size={20} color={getThemeColors().accent.primary} />
+          <Text style={[getStyles().title, { color: getThemeColors().text.primary }]}>Weekly Check-in</Text>
         </View>
-        <Text style={[styles.explanation, { color: c.text.secondary }]}>
+        <Text style={[getStyles().explanation, { color: getThemeColors().text.secondary }]}>
           Log {remaining} more day{remaining !== 1 ? 's' : ''} for personalized recommendations
         </Text>
-        <View style={[styles.progressBarBg, { backgroundColor: c.bg.surfaceRaised }]}>
-          <View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
+        <View style={[getStyles().progressBarBg, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
+          <View style={[getStyles().progressBarFill, { width: `${progress * 100}%` }]} />
         </View>
-        <Text style={[styles.progressText, { color: c.text.muted }]}>{logged}/7 days logged</Text>
+        <Text style={[getStyles().progressText, { color: getThemeColors().text.muted }]}>{logged}/7 days logged</Text>
       </Card>
     );
   }
@@ -137,30 +138,30 @@ export function WeeklyCheckinCard({
   // Coached mode: informational card
   if (checkin.coaching_mode === 'coached') {
     return (
-      <Card variant="flat" style={styles.card}>
-        <View style={styles.header}>
-          <Ionicons name="checkmark-circle" size={20} color={c.semantic.positive} />
-          <Text style={[styles.title, { color: c.text.primary }]}>Weekly Check-in</Text>
+      <Card variant="flat" style={getStyles().card}>
+        <View style={getStyles().header}>
+          <Ionicons name="checkmark-circle" size={20} color={getThemeColors().semantic.positive} />
+          <Text style={[getStyles().title, { color: getThemeColors().text.primary }]}>Weekly Check-in</Text>
         </View>
         {checkin.weight_trend != null && (
-          <Text style={[styles.trendText, { color: c.text.primary }]}>
+          <Text style={[getStyles().trendText, { color: getThemeColors().text.primary }]}>
             Trend: {checkin.weight_trend.toFixed(1)}kg
             {checkin.weekly_weight_change != null && (
-              <Text style={[styles.changeText, { color: c.text.secondary }]}>
+              <Text style={[getStyles().changeText, { color: getThemeColors().text.secondary }]}>
                 {' '}({checkin.weekly_weight_change > 0 ? '+' : ''}{checkin.weekly_weight_change.toFixed(1)}kg)
               </Text>
             )}
           </Text>
         )}
         {checkin.new_targets && <TargetRow targets={checkin.new_targets} />}
-        <Text style={[styles.explanation, { color: c.text.secondary }]}>{checkin.explanation}</Text>
+        <Text style={[getStyles().explanation, { color: getThemeColors().text.secondary }]}>{checkin.explanation}</Text>
         <TouchableOpacity
-          style={[styles.primaryButton, { backgroundColor: c.accent.primary }]}
+          style={[getStyles().primaryButton, { backgroundColor: getThemeColors().accent.primary }]}
           onPress={onDismiss}
           accessibilityRole="button"
           accessibilityLabel="Dismiss check-in"
         >
-          <Text style={[styles.primaryButtonText, { color: c.text.inverse }]}>Got it</Text>
+          <Text style={[getStyles().primaryButtonText, { color: getThemeColors().text.inverse }]}>Got it</Text>
         </TouchableOpacity>
       </Card>
     );
@@ -169,25 +170,25 @@ export function WeeklyCheckinCard({
   // Collaborative mode: accept/modify/dismiss
   if (checkin.coaching_mode === 'collaborative' && checkin.suggestion_id) {
     return (
-      <Card variant="flat" style={styles.card}>
-        <View style={styles.header}>
-          <Ionicons name="bulb-outline" size={20} color={c.accent.primary} />
-          <Text style={[styles.title, { color: c.text.primary }]}>Suggested Update</Text>
+      <Card variant="flat" style={getStyles().card}>
+        <View style={getStyles().header}>
+          <Ionicons name="bulb-outline" size={20} color={getThemeColors().accent.primary} />
+          <Text style={[getStyles().title, { color: getThemeColors().text.primary }]}>Suggested Update</Text>
         </View>
         {checkin.weight_trend != null && (
-          <Text style={[styles.trendText, { color: c.text.primary }]}>
+          <Text style={[getStyles().trendText, { color: getThemeColors().text.primary }]}>
             Trend: {checkin.weight_trend.toFixed(1)}kg
             {checkin.weekly_weight_change != null && (
-              <Text style={[styles.changeText, { color: c.text.secondary }]}>
+              <Text style={[getStyles().changeText, { color: getThemeColors().text.secondary }]}>
                 {' '}({checkin.weekly_weight_change > 0 ? '+' : ''}{checkin.weekly_weight_change.toFixed(1)}kg)
               </Text>
             )}
           </Text>
         )}
-        <Text style={[styles.explanation, { color: c.text.secondary }]}>{checkin.explanation}</Text>
+        <Text style={[getStyles().explanation, { color: getThemeColors().text.secondary }]}>{checkin.explanation}</Text>
 
         {isEditing ? (
-          <View style={styles.editContainer}>
+          <View style={getStyles().editContainer}>
             <MacroInput label="Calories" value={editTargets.calories} min={1200}
               onChange={(v) => setEditTargets({ ...editTargets, calories: v })} />
             <MacroInput label="Protein (g)" value={editTargets.protein_g} min={0}
@@ -197,7 +198,7 @@ export function WeeklyCheckinCard({
             <MacroInput label="Fat (g)" value={editTargets.fat_g} min={0}
               onChange={(v) => setEditTargets({ ...editTargets, fat_g: v })} />
             <TouchableOpacity
-              style={[styles.primaryButton, { backgroundColor: c.accent.primary }]}
+              style={[getStyles().primaryButton, { backgroundColor: getThemeColors().accent.primary }]}
               onPress={() => {
                 onModify?.(checkin.suggestion_id!, editTargets);
                 setIsEditing(false);
@@ -205,7 +206,7 @@ export function WeeklyCheckinCard({
               accessibilityRole="button"
               accessibilityLabel="Save modified targets"
             >
-              <Text style={[styles.primaryButtonText, { color: c.text.inverse }]}>Save Changes</Text>
+              <Text style={[getStyles().primaryButtonText, { color: getThemeColors().text.inverse }]}>Save Changes</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -219,30 +220,30 @@ export function WeeklyCheckinCard({
             {checkin.new_targets && !checkin.previous_targets && (
               <TargetRow targets={checkin.new_targets} />
             )}
-            <View style={styles.buttonRow}>
+            <View style={getStyles().buttonRow}>
               <TouchableOpacity
-                style={[styles.primaryButton, { backgroundColor: c.accent.primary }]}
+                style={[getStyles().primaryButton, { backgroundColor: getThemeColors().accent.primary }]}
                 onPress={() => onAccept?.(checkin.suggestion_id!)}
                 accessibilityRole="button"
                 accessibilityLabel="Accept suggestion"
               >
-                <Text style={[styles.primaryButtonText, { color: c.text.inverse }]}>Accept</Text>
+                <Text style={[getStyles().primaryButtonText, { color: getThemeColors().text.inverse }]}>Accept</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.secondaryButton, { borderColor: c.border.default }]}
+                style={[getStyles().secondaryButton, { borderColor: getThemeColors().border.default }]}
                 onPress={() => setIsEditing(true)}
                 accessibilityRole="button"
                 accessibilityLabel="Modify suggestion"
               >
-                <Text style={[styles.secondaryButtonText, { color: c.text.secondary }]}>Modify</Text>
+                <Text style={[getStyles().secondaryButtonText, { color: getThemeColors().text.secondary }]}>Modify</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.secondaryButton, { borderColor: c.border.default }]}
+                style={[getStyles().secondaryButton, { borderColor: getThemeColors().border.default }]}
                 onPress={() => onDismissSuggestion?.(checkin.suggestion_id!)}
                 accessibilityRole="button"
                 accessibilityLabel="Dismiss suggestion"
               >
-                <Text style={[styles.secondaryButtonText, { color: c.text.secondary }]}>Dismiss</Text>
+                <Text style={[getStyles().secondaryButtonText, { color: getThemeColors().text.secondary }]}>Dismiss</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -260,11 +261,11 @@ export function WeeklyCheckinCard({
 
 function TargetRow({ targets }: { targets: MacroTargets }) {
   return (
-    <View style={styles.targetRow}>
-      <TargetPill label="Cal" value={Math.round(targets.calories)} color={colors.macro.calories} />
-      <TargetPill label="P" value={Math.round(targets.protein_g)} color={colors.macro.protein} />
-      <TargetPill label="C" value={Math.round(targets.carbs_g)} color={colors.macro.carbs} />
-      <TargetPill label="F" value={Math.round(targets.fat_g)} color={colors.macro.fat} />
+    <View style={getStyles().targetRow}>
+      <TargetPill label="Cal" value={Math.round(targets.calories)} color={getThemeColors().macro.calories} />
+      <TargetPill label="P" value={Math.round(targets.protein_g)} color={getThemeColors().macro.protein} />
+      <TargetPill label="C" value={Math.round(targets.carbs_g)} color={getThemeColors().macro.carbs} />
+      <TargetPill label="F" value={Math.round(targets.fat_g)} color={getThemeColors().macro.fat} />
     </View>
   );
 }
@@ -274,23 +275,23 @@ function ComparisonTargetRow({ previousTargets, newTargets }: {
   newTargets: MacroTargets; 
 }) {
   return (
-    <View style={styles.comparisonContainer}>
-      <View style={styles.comparisonRow}>
-        <Text style={[styles.comparisonLabel, { color: colors.text.secondary }]}>Current</Text>
-        <View style={styles.comparisonTargets}>
-          <ComparisonPill label="Cal" value={Math.round(previousTargets.calories)} color={colors.macro.calories} />
-          <ComparisonPill label="P" value={Math.round(previousTargets.protein_g)} color={colors.macro.protein} />
-          <ComparisonPill label="C" value={Math.round(previousTargets.carbs_g)} color={colors.macro.carbs} />
-          <ComparisonPill label="F" value={Math.round(previousTargets.fat_g)} color={colors.macro.fat} />
+    <View style={getStyles().comparisonContainer}>
+      <View style={getStyles().comparisonRow}>
+        <Text style={[getStyles().comparisonLabel, { color: getThemeColors().text.secondary }]}>Current</Text>
+        <View style={getStyles().comparisonTargets}>
+          <ComparisonPill label="Cal" value={Math.round(previousTargets.calories)} color={getThemeColors().macro.calories} />
+          <ComparisonPill label="P" value={Math.round(previousTargets.protein_g)} color={getThemeColors().macro.protein} />
+          <ComparisonPill label="C" value={Math.round(previousTargets.carbs_g)} color={getThemeColors().macro.carbs} />
+          <ComparisonPill label="F" value={Math.round(previousTargets.fat_g)} color={getThemeColors().macro.fat} />
         </View>
       </View>
-      <View style={styles.comparisonRow}>
-        <Text style={[styles.comparisonLabel, { color: colors.text.secondary }]}>Suggested</Text>
-        <View style={styles.comparisonTargets}>
-          <ComparisonPill label="Cal" value={Math.round(newTargets.calories)} color={colors.macro.calories} />
-          <ComparisonPill label="P" value={Math.round(newTargets.protein_g)} color={colors.macro.protein} />
-          <ComparisonPill label="C" value={Math.round(newTargets.carbs_g)} color={colors.macro.carbs} />
-          <ComparisonPill label="F" value={Math.round(newTargets.fat_g)} color={colors.macro.fat} />
+      <View style={getStyles().comparisonRow}>
+        <Text style={[getStyles().comparisonLabel, { color: getThemeColors().text.secondary }]}>Suggested</Text>
+        <View style={getStyles().comparisonTargets}>
+          <ComparisonPill label="Cal" value={Math.round(newTargets.calories)} color={getThemeColors().macro.calories} />
+          <ComparisonPill label="P" value={Math.round(newTargets.protein_g)} color={getThemeColors().macro.protein} />
+          <ComparisonPill label="C" value={Math.round(newTargets.carbs_g)} color={getThemeColors().macro.carbs} />
+          <ComparisonPill label="F" value={Math.round(newTargets.fat_g)} color={getThemeColors().macro.fat} />
         </View>
       </View>
     </View>
@@ -299,18 +300,18 @@ function ComparisonTargetRow({ previousTargets, newTargets }: {
 
 function TargetPill({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <View style={[styles.pill, { borderColor: color }]}>
-      <Text style={[styles.pillLabel, { color }]}>{label}</Text>
-      <Text style={[styles.pillValue, { color: colors.text.primary }]}>{value}</Text>
+    <View style={[getStyles().pill, { borderColor: color }]}>
+      <Text style={[getStyles().pillLabel, { color }]}>{label}</Text>
+      <Text style={[getStyles().pillValue, { color: getThemeColors().text.primary }]}>{value}</Text>
     </View>
   );
 }
 
 function ComparisonPill({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <View style={[styles.comparisonPill, { borderColor: color }]}>
-      <Text style={[styles.comparisonPillLabel, { color }]}>{label}</Text>
-      <Text style={[styles.comparisonPillValue, { color: colors.text.primary }]}>{value}</Text>
+    <View style={[getStyles().comparisonPill, { borderColor: color }]}>
+      <Text style={[getStyles().comparisonPillLabel, { color }]}>{label}</Text>
+      <Text style={[getStyles().comparisonPillValue, { color: getThemeColors().text.primary }]}>{value}</Text>
     </View>
   );
 }
@@ -321,10 +322,10 @@ function MacroInput({
   label: string; value: number; min: number; onChange: (v: number) => void;
 }) {
   return (
-    <View style={styles.inputRow}>
-      <Text style={[styles.inputLabel, { color: colors.text.secondary }]}>{label}</Text>
+    <View style={getStyles().inputRow}>
+      <Text style={[getStyles().inputLabel, { color: getThemeColors().text.secondary }]}>{label}</Text>
       <TextInput
-        style={[styles.input, { color: colors.text.primary, backgroundColor: colors.bg.surfaceRaised }]}
+        style={[getStyles().input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised }]}
         keyboardType="numeric"
         value={String(Math.round(value))}
         onChangeText={(text) => {
@@ -341,43 +342,46 @@ function MacroInput({
 // Styles
 // ---------------------------------------------------------------------------
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: { marginBottom: spacing[3] },
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], marginBottom: spacing[2] },
-  title: { color: colors.text.primary, fontSize: typography.size.md, fontWeight: typography.weight.semibold, lineHeight: typography.size.md * typography.lineHeight.tight },
-  trendText: { color: colors.text.primary, fontSize: typography.size.base, lineHeight: typography.size.base * typography.lineHeight.normal, marginBottom: spacing[1] },
-  changeText: { color: colors.text.secondary },
-  explanation: { color: colors.text.secondary, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.normal, marginBottom: spacing[3] },
+  title: { color: getThemeColors().text.primary, fontSize: typography.size.md, fontWeight: typography.weight.semibold, lineHeight: typography.size.md * typography.lineHeight.tight },
+  trendText: { color: getThemeColors().text.primary, fontSize: typography.size.base, lineHeight: typography.size.base * typography.lineHeight.normal, marginBottom: spacing[1] },
+  changeText: { color: getThemeColors().text.secondary },
+  explanation: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.normal, marginBottom: spacing[3] },
   progressBarBg: {
-    height: 6, backgroundColor: colors.bg.surfaceRaised, borderRadius: radius.full, marginBottom: spacing[1],
+    height: 6, backgroundColor: getThemeColors().bg.surfaceRaised, borderRadius: radius.full, marginBottom: spacing[1],
   },
   progressBarFill: {
-    height: 6, backgroundColor: colors.accent.primary, borderRadius: radius.full,
+    height: 6, backgroundColor: getThemeColors().accent.primary, borderRadius: radius.full,
   },
-  progressText: { color: colors.text.muted, fontSize: typography.size.xs, lineHeight: typography.size.xs * typography.lineHeight.normal },
+  progressText: { color: getThemeColors().text.muted, fontSize: typography.size.xs, lineHeight: typography.size.xs * typography.lineHeight.normal },
   targetRow: { flexDirection: 'row', gap: spacing[2], marginBottom: spacing[3] },
   pill: {
     flex: 1, alignItems: 'center', paddingVertical: spacing[1],
     borderWidth: 1, borderRadius: radius.sm,
   },
   pillLabel: { fontSize: typography.size.xs, fontWeight: typography.weight.medium, lineHeight: typography.size.xs * typography.lineHeight.normal },
-  pillValue: { color: colors.text.primary, fontSize: typography.size.md, fontWeight: typography.weight.bold, lineHeight: typography.size.md * typography.lineHeight.tight },
+  pillValue: { color: getThemeColors().text.primary, fontSize: typography.size.md, fontWeight: typography.weight.bold, lineHeight: typography.size.md * typography.lineHeight.tight },
   buttonRow: { flexDirection: 'row', gap: spacing[2] },
   primaryButton: {
-    flex: 1, backgroundColor: colors.accent.primary, paddingVertical: spacing[2],
+    flex: 1, backgroundColor: getThemeColors().accent.primary, paddingVertical: spacing[2],
     borderRadius: radius.sm, alignItems: 'center', minHeight: 44, justifyContent: 'center' as const,
   },
-  primaryButtonText: { color: colors.text.inverse, fontWeight: typography.weight.semibold, fontSize: typography.size.base, lineHeight: typography.size.base * typography.lineHeight.normal },
+  primaryButtonText: { color: getThemeColors().text.inverse, fontWeight: typography.weight.semibold, fontSize: typography.size.base, lineHeight: typography.size.base * typography.lineHeight.normal },
   secondaryButton: {
-    flex: 1, borderWidth: 1, borderColor: colors.border.default, paddingVertical: spacing[2],
+    flex: 1, borderWidth: 1, borderColor: getThemeColors().border.default, paddingVertical: spacing[2],
     borderRadius: radius.sm, alignItems: 'center', minHeight: 44, justifyContent: 'center' as const,
   },
-  secondaryButtonText: { color: colors.text.secondary, fontWeight: typography.weight.medium, fontSize: typography.size.base, lineHeight: typography.size.base * typography.lineHeight.normal },
+  secondaryButtonText: { color: getThemeColors().text.secondary, fontWeight: typography.weight.medium, fontSize: typography.size.base, lineHeight: typography.size.base * typography.lineHeight.normal },
   editContainer: { gap: spacing[2] },
   inputRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  inputLabel: { color: colors.text.secondary, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.normal },
+  inputLabel: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.lineHeight.normal },
   input: {
-    color: colors.text.primary, backgroundColor: colors.bg.surfaceRaised,
+    color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm, paddingHorizontal: spacing[3], paddingVertical: spacing[1],
     fontSize: typography.size.base, width: 80, textAlign: 'right',
   },
@@ -389,7 +393,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1] 
   },
   comparisonLabel: { 
-    color: colors.text.secondary, 
+    color: getThemeColors().text.secondary, 
     fontSize: typography.size.sm, 
     fontWeight: typography.weight.medium,
     lineHeight: typography.size.sm * typography.lineHeight.normal,
@@ -413,7 +417,7 @@ const styles = StyleSheet.create({
     lineHeight: typography.size.xs * typography.lineHeight.normal 
   },
   comparisonPillValue: { 
-    color: colors.text.primary, 
+    color: getThemeColors().text.primary, 
     fontSize: typography.size.sm, 
     fontWeight: typography.weight.semibold, 
     lineHeight: typography.size.sm * typography.lineHeight.tight 

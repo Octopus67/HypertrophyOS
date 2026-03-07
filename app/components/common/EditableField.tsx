@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from './Icon';
 
 interface EditableFieldProps {
@@ -26,6 +26,7 @@ export function EditableField({
   editable = true,
 }: EditableFieldProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [saving, setSaving] = useState(false);
@@ -65,11 +66,11 @@ export function EditableField({
           value={draft}
           onChangeText={setDraft}
           autoFocus
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
         />
         <View style={styles.actions}>
           {saving ? (
-            <ActivityIndicator color={c.accent.primary} size="small" />
+            <ActivityIndicator color={getThemeColors().accent.primary} size="small" />
           ) : (
             <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.7}>
               <Text style={styles.saveBtnText}>Save</Text>
@@ -92,7 +93,7 @@ export function EditableField({
         <Text style={styles.label}>{label}</Text>
         <View style={styles.viewRow}>
           <Text style={styles.value} numberOfLines={1}>{value || '—'}</Text>
-          <Icon name="lock" size={14} color={c.text.muted} />
+          <Icon name="lock" size={14} color={getThemeColors().text.muted} />
         </View>
       </View>
     );
@@ -104,20 +105,20 @@ export function EditableField({
       <Text style={styles.label}>{label}</Text>
       <View style={styles.viewRow}>
         <Text style={styles.value} numberOfLines={1}>{value || '—'}</Text>
-        <Icon name="edit" size={14} color={c.text.muted} />
+        <Icon name="edit" size={14} color={getThemeColors().text.muted} />
       </View>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: getThemeColors().border.subtle,
   },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[1],
@@ -128,20 +129,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   value: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     flex: 1,
   },
   icon: {},
   input: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.focus,
+    borderColor: getThemeColors().border.focus,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
   },
@@ -151,13 +152,13 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   saveBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[1],
   },
   saveBtnText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[1],
   },
   cancelBtnText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },

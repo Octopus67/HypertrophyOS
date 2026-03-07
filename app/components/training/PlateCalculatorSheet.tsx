@@ -1,8 +1,8 @@
 import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { calculatePlates } from '../../utils/plateCalculator';
 import { convertWeight } from '../../utils/unitConversion';
 import type { UnitSystem } from '../../utils/unitConversion';
@@ -39,6 +39,7 @@ export function PlateCalculatorSheet({
   onClose,
 }: PlateCalculatorSheetProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -78,26 +79,26 @@ export function PlateCalculatorSheet({
       handleIndicatorStyle={styles.handleIndicator}
     >
       <BottomSheetView style={styles.content}>
-        <Text style={[styles.title, { color: c.text.primary }]}>Plate Calculator</Text>
-        <Text style={[styles.subtitle, { color: c.text.secondary }]}>
+        <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Plate Calculator</Text>
+        <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>
           {displayWeight} {suffix} — Bar: {displayBar} {suffix}
         </Text>
 
         {!breakdown.isExact && (
-          <Text style={[styles.inexactNote, { color: c.semantic.warning }]}>
+          <Text style={[styles.inexactNote, { color: getThemeColors().semantic.warning }]}>
             Nearest achievable: {displayWeight} {suffix}
           </Text>
         )}
 
         {breakdown.platesPerSide.length === 0 ? (
-          <Text style={[styles.barOnly, { color: c.text.muted }]} accessibilityRole="text" accessibilityLabel="Bar only, no plates needed">Bar only — no plates needed</Text>
+          <Text style={[styles.barOnly, { color: getThemeColors().text.muted }]} accessibilityRole="text" accessibilityLabel="Bar only, no plates needed">Bar only — no plates needed</Text>
         ) : (
           <View style={styles.plateRow} accessibilityLabel={`Plates per side for ${displayWeight} ${suffix}`}>
-            <Text style={[styles.perSideLabel, { color: c.text.muted }]}>Per side:</Text>
+            <Text style={[styles.perSideLabel, { color: getThemeColors().text.muted }]}>Per side:</Text>
             <View style={styles.plates}>
               {breakdown.platesPerSide.map((plate, i) => {
                 const plateInfo = PLATE_COLORS[plate.weightKg];
-                const plateColor = plateInfo?.bg || c.text.muted;
+                const plateColor = plateInfo?.bg || getThemeColors().text.muted;
                 const needsBorder = plateInfo?.needsBorder ?? false;
                 const plateDisplay = convertWeight(plate.weightKg, unitSystem);
                 return (
@@ -108,12 +109,12 @@ export function PlateCalculatorSheet({
                         style={[
                           styles.plate,
                           { backgroundColor: plateColor },
-                          needsBorder && { borderWidth: 1, borderColor: c.border.default },
+                          needsBorder && { borderWidth: 1, borderColor: getThemeColors().border.default },
                         ]}
                         accessibilityLabel={`${plateDisplay} ${suffix} plate`}
                         accessibilityRole="text"
                       >
-                        <Text style={[styles.plateText, { color: needsBorder ? c.text.primary : c.bg.base }]}>
+                        <Text style={[styles.plateText, { color: needsBorder ? getThemeColors().text.primary : getThemeColors().bg.base }]}>
                           {plateDisplay}
                         </Text>
                       </View>
@@ -130,12 +131,12 @@ export function PlateCalculatorSheet({
 }
 
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   sheetBackground: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
   },
   handleIndicator: {
-    backgroundColor: colors.text.muted,
+    backgroundColor: getThemeColors().text.muted,
   },
   content: {
     flex: 1,

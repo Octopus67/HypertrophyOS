@@ -11,8 +11,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { RestTimerRing } from './RestTimerRing';
 import { formatRestTimer } from '../../utils/durationFormat';
-import { colors, spacing, typography, shadows, radius, springs } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, shadows, radius, springs } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
 // ─── Props ───────────────────────────────────────────────────────────────────
@@ -37,6 +37,7 @@ export function RestTimerBar({
   onExpand,
 }: RestTimerBarProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const slideAnim = useSharedValue(56); // start off-screen (bar height)
   const reduceMotion = useReduceMotion();
 
@@ -57,8 +58,8 @@ export function RestTimerBar({
     : formatRestTimer(remainingSeconds);
 
   const timeLabelColor = completed
-    ? c.semantic.positive
-    : c.text.primary;
+    ? getThemeColors().semantic.positive
+    : getThemeColors().text.primary;
 
   return (
     <Animated.View style={[styles.bar, animatedBarStyle]}>
@@ -87,7 +88,7 @@ export function RestTimerBar({
         accessibilityRole="button"
         accessibilityLabel="Skip rest timer"
       >
-        <Text style={[styles.skipText, { color: c.text.muted }]}>Skip</Text>
+        <Text style={[styles.skipText, { color: getThemeColors().text.muted }]}>Skip</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -95,15 +96,15 @@ export function RestTimerBar({
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   bar: {
     height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
     ...shadows.md,
   },
   content: {
@@ -119,6 +120,6 @@ const styles = StyleSheet.create({
   skipText: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
 });

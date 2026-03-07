@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { Icon } from '../common/Icon';
 
@@ -33,6 +33,7 @@ function formatExerciseName(name: string): string {
 
 export function StrengthLeaderboard({ classifications }: StrengthLeaderboardProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   // Separate lifts with data from those without
   const withData = [...classifications].sort((a, b) => b.bodyweight_ratio - a.bodyweight_ratio);
   const withDataNames = new Set(withData.map((c) => c.exercise_name.toLowerCase()));
@@ -42,8 +43,8 @@ export function StrengthLeaderboard({ classifications }: StrengthLeaderboardProp
     return (
       <Card>
         <View style={styles.emptyContainer}>
-          <Icon name="chart" size={24} color={c.text.muted} />
-          <Text style={[styles.emptyText, { color: c.text.muted }]}>No strength data yet</Text>
+          <Icon name="chart" size={24} color={getThemeColors().text.muted} />
+          <Text style={[styles.emptyText, { color: getThemeColors().text.muted }]}>No strength data yet</Text>
         </View>
       </Card>
     );
@@ -55,9 +56,9 @@ export function StrengthLeaderboard({ classifications }: StrengthLeaderboardProp
         const isStrongest = idx === 0 && withData.length >= 2;
         const isWeakest = idx === withData.length - 1 && withData.length >= 2;
         const highlightColor = isStrongest
-          ? colors.accent.primary
+          ? getThemeColors().accent.primary
           : isWeakest
-            ? colors.semantic.warning
+            ? getThemeColors().semantic.warning
             : undefined;
 
         return (
@@ -71,13 +72,13 @@ export function StrengthLeaderboard({ classifications }: StrengthLeaderboardProp
               <Text style={[styles.exerciseName, highlightColor ? { color: highlightColor } : undefined]}>
                 {formatExerciseName(c.exercise_name)}
               </Text>
-              <Text style={[styles.level, { color: colors.text.secondary }]}>
+              <Text style={[styles.level, { color: getThemeColors().text.secondary }]}>
                 {c.level.charAt(0).toUpperCase() + c.level.slice(1)}
               </Text>
             </View>
             <View style={styles.statsCol}>
-              <Text style={[styles.e1rm, { color: colors.text.primary }]}>{Math.round(c.e1rm_kg)} kg</Text>
-              <Text style={[styles.ratio, { color: colors.text.secondary }]}>{c.bodyweight_ratio.toFixed(2)}×</Text>
+              <Text style={[styles.e1rm, { color: getThemeColors().text.primary }]}>{Math.round(c.e1rm_kg)} kg</Text>
+              <Text style={[styles.ratio, { color: getThemeColors().text.secondary }]}>{c.bodyweight_ratio.toFixed(2)}×</Text>
             </View>
           </View>
         );
@@ -87,13 +88,13 @@ export function StrengthLeaderboard({ classifications }: StrengthLeaderboardProp
       {noData.map((lift) => (
         <View key={lift} style={[styles.row, styles.rowBorder]}>
           <View style={styles.rankCol}>
-            <Text style={[styles.rankMuted, { color: c.text.muted }]}>—</Text>
+            <Text style={[styles.rankMuted, { color: getThemeColors().text.muted }]}>—</Text>
           </View>
           <View style={styles.nameCol}>
-            <Text style={[styles.exerciseNameMuted, { color: c.text.muted }]}>{formatExerciseName(lift)}</Text>
+            <Text style={[styles.exerciseNameMuted, { color: getThemeColors().text.muted }]}>{formatExerciseName(lift)}</Text>
           </View>
           <View style={styles.statsCol}>
-            <Text style={[styles.noData, { color: c.text.muted }]}>No data</Text>
+            <Text style={[styles.noData, { color: getThemeColors().text.muted }]}>No data</Text>
           </View>
         </View>
       ))}
@@ -101,14 +102,14 @@ export function StrengthLeaderboard({ classifications }: StrengthLeaderboardProp
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   emptyContainer: {
     alignItems: 'center',
     gap: spacing[2],
     paddingVertical: spacing[4],
   },
   emptyText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     textAlign: 'center',
   },
@@ -119,46 +120,46 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
   },
   rankCol: { width: 32 },
   rank: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.bold,
   },
   rankMuted: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
   },
   nameCol: { flex: 1 },
   exerciseName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
   exerciseNameMuted: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
   },
   level: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
     marginTop: 1,
   },
   statsCol: { alignItems: 'flex-end' },
   e1rm: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
   ratio: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
     marginTop: 1,
   },
   noData: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     fontStyle: 'italic',
   },

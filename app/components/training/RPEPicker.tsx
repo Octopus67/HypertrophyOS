@@ -14,8 +14,8 @@
  */
 
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import {
   RPE_VALUES,
   RIR_VALUES,
@@ -44,6 +44,7 @@ interface RPEPickerProps {
 
 export function RPEPicker({ visible, mode, onSelect, onDismiss }: RPEPickerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const values = mode === 'rpe' ? RPE_VALUES : RIR_VALUES;
 
   const handleSelect = (value: number) => {
@@ -60,16 +61,16 @@ export function RPEPicker({ visible, mode, onSelect, onDismiss }: RPEPickerProps
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onDismiss}>
-        <View style={[styles.pickerContainer, { backgroundColor: c.bg.surface }]}>
-          <Text style={[styles.modeLabel, { color: c.text.secondary }]}>{mode === 'rpe' ? 'RPE' : 'RIR'}</Text>
+        <View style={[styles.pickerContainer, { backgroundColor: getThemeColors().bg.surface }]}>
+          <Text style={[styles.modeLabel, { color: getThemeColors().text.secondary }]}>{mode === 'rpe' ? 'RPE' : 'RIR'}</Text>
           <View style={styles.buttonRow}>
             {values.map((value) => (
               <TouchableOpacity
                 key={value}
-                style={[styles.valueButton, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+                style={[styles.valueButton, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
                 onPress={() => handleSelect(value)}
               >
-                <Text style={[styles.valueText, { color: c.text.primary }]}>{getLabel(value)}</Text>
+                <Text style={[styles.valueText, { color: getThemeColors().text.primary }]}>{getLabel(value)}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -81,7 +82,7 @@ export function RPEPicker({ visible, mode, onSelect, onDismiss }: RPEPickerProps
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'center',
@@ -89,14 +90,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   pickerContainer: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.md,
     padding: spacing[4],
     minWidth: 280,
     alignItems: 'center',
   },
   modeLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[3],
@@ -109,14 +110,14 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   valueText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
   },

@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Skeleton } from '../common/Skeleton';
-import { colors, spacing, radius, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, radius, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import type { QuickRelogItem } from '../../utils/quickRelogLogic';
 
 interface QuickRelogRowProps {
@@ -13,6 +13,7 @@ interface QuickRelogRowProps {
 
 export function QuickRelogRow({ items, onTapItem, loading }: QuickRelogRowProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   // AC7: Hidden entirely for brand-new users with no logging history
   if (items.length === 0 && !loading) {
     return null;
@@ -20,7 +21,7 @@ export function QuickRelogRow({ items, onTapItem, loading }: QuickRelogRowProps)
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.sectionLabel, { color: c.text.primary }]}>⚡ Quick Re-log</Text>
+      <Text style={[styles.sectionLabel, { color: getThemeColors().text.primary }]}>⚡ Quick Re-log</Text>
 
       {loading ? (
         <View style={styles.skeletonRow}>
@@ -37,14 +38,14 @@ export function QuickRelogRow({ items, onTapItem, loading }: QuickRelogRowProps)
           {items.map((item, index) => (
             <TouchableOpacity
               key={`${item.name}-${index}`}
-              style={[styles.chip, { backgroundColor: c.bg.surfaceRaised }]}
+              style={[styles.chip, { backgroundColor: getThemeColors().bg.surfaceRaised }]}
               onPress={() => onTapItem(item)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.chipName, { color: c.text.primary }]} numberOfLines={1}>
+              <Text style={[styles.chipName, { color: getThemeColors().text.primary }]} numberOfLines={1}>
                 {item.name.slice(0, 12)}
               </Text>
-              <Text style={[styles.chipCalories, { color: c.text.secondary }]}>
+              <Text style={[styles.chipCalories, { color: getThemeColors().text.secondary }]}>
                 {Math.round(item.calories) + ' cal'}
               </Text>
             </TouchableOpacity>
@@ -55,14 +56,14 @@ export function QuickRelogRow({ items, onTapItem, loading }: QuickRelogRowProps)
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     marginBottom: spacing[3],
   },
   sectionLabel: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginBottom: spacing[2],
     paddingHorizontal: spacing[4],
   },
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   chip: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
@@ -85,11 +86,11 @@ const styles = StyleSheet.create({
   chipName: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     marginBottom: 2,
   },
   chipCalories: {
     fontSize: typography.size.xs,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
   },
 });

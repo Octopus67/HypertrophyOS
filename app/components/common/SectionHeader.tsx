@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, typography, spacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface SectionHeaderProps {
   title: string;
@@ -13,19 +13,20 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ title, action }: SectionHeaderProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { color: c.text.primary }]}>{title}</Text>
+      <Text style={[styles.title, { color: getThemeColors().text.primary }]}>{title}</Text>
       {action ? (
         <TouchableOpacity onPress={action.onPress} activeOpacity={0.7}>
-          <Text style={[styles.actionLabel, { color: c.accent.primary }]}>{action.label}</Text>
+          <Text style={[styles.actionLabel, { color: getThemeColors().accent.primary }]}>{action.label}</Text>
         </TouchableOpacity>
       ) : null}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -36,10 +37,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
   },
   actionLabel: {
     fontSize: typography.size.base,
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
 });

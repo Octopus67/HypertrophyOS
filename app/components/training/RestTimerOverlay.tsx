@@ -9,8 +9,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import { RestTimerRing } from './RestTimerRing';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 type TimerState = 'RUNNING' | 'PAUSED' | 'COMPLETED';
 
@@ -32,6 +32,7 @@ export function RestTimerOverlay({
   onComplete,
 }: RestTimerOverlayProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [state, setState] = useState<TimerState>('RUNNING');
   const [remaining, setRemaining] = useState(durationSeconds);
   const [totalDuration, setTotalDuration] = useState(durationSeconds);
@@ -98,9 +99,9 @@ export function RestTimerOverlay({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
-      <View style={[styles.overlay, { backgroundColor: c.bg.overlay }]}>
-        <View style={[styles.container, { backgroundColor: c.bg.surfaceRaised }]}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>Rest Timer</Text>
+      <View style={[styles.overlay, { backgroundColor: getThemeColors().bg.overlay }]}>
+        <View style={[styles.container, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Rest Timer</Text>
 
           {/* SVG Progress Ring */}
           <RestTimerRing
@@ -111,24 +112,24 @@ export function RestTimerOverlay({
 
           {/* Rest Complete indicator */}
           {state === 'COMPLETED' && (
-            <Text style={[styles.completeText, { color: c.semantic.positive }]}>Rest Complete</Text>
+            <Text style={[styles.completeText, { color: getThemeColors().semantic.positive }]}>Rest Complete</Text>
           )}
 
           {/* Adjust buttons */}
           <View style={styles.adjustRow}>
             <TouchableOpacity
-              style={[styles.adjustBtn, { backgroundColor: c.bg.surface, borderColor: c.border.default }]}
+              style={[styles.adjustBtn, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.default }]}
               onPress={() => handleAdjust(-15)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.adjustText, { color: c.text.secondary }]}>-15s</Text>
+              <Text style={[styles.adjustText, { color: getThemeColors().text.secondary }]}>-15s</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.adjustBtn, { backgroundColor: c.bg.surface, borderColor: c.border.default }]}
+              style={[styles.adjustBtn, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.default }]}
               onPress={() => handleAdjust(15)}
               activeOpacity={0.7}
             >
-              <Text style={[styles.adjustText, { color: c.text.secondary }]}>+15s</Text>
+              <Text style={[styles.adjustText, { color: getThemeColors().text.secondary }]}>+15s</Text>
             </TouchableOpacity>
           </View>
 
@@ -136,21 +137,21 @@ export function RestTimerOverlay({
           <View style={styles.actionRow}>
             {state !== 'COMPLETED' && (
               <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: c.accent.primary }]}
+                style={[styles.actionBtn, { backgroundColor: getThemeColors().accent.primary }]}
                 onPress={handlePauseResume}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.actionText, { color: c.text.primary }]}>
+                <Text style={[styles.actionText, { color: getThemeColors().text.primary }]}>
                   {state === 'PAUSED' ? 'Resume' : 'Pause'}
                 </Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
-              style={[styles.skipBtn, { backgroundColor: c.bg.surface, borderColor: c.border.default }]}
+              style={[styles.skipBtn, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.default }]}
               onPress={handleSkip}
               activeOpacity={0.7}
             >
-              <Text style={[styles.skipText, { color: c.text.secondary }]}>Skip</Text>
+              <Text style={[styles.skipText, { color: getThemeColors().text.secondary }]}>Skip</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -172,28 +173,28 @@ function playCompletionSound() {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: colors.bg.overlay,
+    backgroundColor: getThemeColors().bg.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
     alignItems: 'center',
     padding: spacing[8],
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.lg,
     minWidth: 280,
   },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[4],
   },
   completeText: {
-    color: colors.semantic.positive,
+    color: getThemeColors().semantic.positive,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     marginTop: spacing[2],
@@ -206,15 +207,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   adjustBtn: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   adjustText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
@@ -223,26 +224,26 @@ const styles = StyleSheet.create({
     gap: spacing[3],
   },
   actionBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[3],
   },
   actionText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
   },
   skipBtn: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[3],
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   skipText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
   },

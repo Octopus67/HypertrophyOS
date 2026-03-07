@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface GoalProgressPillProps {
   goalType: string;
@@ -10,6 +10,7 @@ interface GoalProgressPillProps {
 
 export default function GoalProgressPill({ goalType, targetCalories }: GoalProgressPillProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const getGoalLabel = (type: string) => {
     switch (type) {
       case 'cutting': return 'Cutting';
@@ -21,28 +22,28 @@ export default function GoalProgressPill({ goalType, targetCalories }: GoalProgr
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: c.bg.surface, borderColor: c.border.subtle }]}>
-      <Text style={[styles.text, { color: c.text.secondary }]}>
+    <View style={[styles.container, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.subtle }]}>
+      <Text style={[styles.text, { color: getThemeColors().text.secondary }]}>
         {getGoalLabel(goalType)} · {targetCalories} cal
       </Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.full,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
     alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
   },
   text: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     lineHeight: typography.lineHeight.sm,
   },
 });

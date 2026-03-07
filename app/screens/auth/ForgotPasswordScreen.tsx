@@ -8,8 +8,8 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Button } from '../../components/common/Button';
 import api from '../../services/api';
 import { isValidEmail, trimEmail } from '../../utils/validation';
@@ -22,6 +22,7 @@ interface ForgotPasswordScreenProps {
 
 export function ForgotPasswordScreen({ onNavigateBack }: ForgotPasswordScreenProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -56,21 +57,21 @@ export function ForgotPasswordScreen({ onNavigateBack }: ForgotPasswordScreenPro
   if (submitted) {
     return (
       <KeyboardAvoidingView
-        style={[styles.container, { backgroundColor: c.bg.base }]}
+        style={[styles.container, { backgroundColor: getThemeColors().bg.base }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <Animated.View style={titleAnim}>
-            <Text style={[styles.title, { color: c.text.primary }]}>Check Your Email</Text>
+            <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Check Your Email</Text>
           </Animated.View>
           <Animated.View style={subtitleAnim}>
-            <Text style={[styles.successMessage, { color: c.text.secondary }]}>
+            <Text style={[styles.successMessage, { color: getThemeColors().text.secondary }]}>
               If an account with that email exists, we've sent a reset link.
             </Text>
           </Animated.View>
           <Animated.View style={formAnim}>
             <TouchableOpacity onPress={onNavigateBack} style={styles.backLink}>
-              <Text style={[styles.backLinkText, { color: c.accent.primary }]}>← Back to Sign In</Text>
+              <Text style={[styles.backLinkText, { color: getThemeColors().accent.primary }]}>← Back to Sign In</Text>
             </TouchableOpacity>
           </Animated.View>
         </ScrollView>
@@ -80,25 +81,25 @@ export function ForgotPasswordScreen({ onNavigateBack }: ForgotPasswordScreenPro
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: c.bg.base }]}
+      style={[styles.container, { backgroundColor: getThemeColors().bg.base }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <Animated.View style={titleAnim}>
-          <Text style={[styles.title, { color: c.text.primary }]}>Reset Password</Text>
+          <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Reset Password</Text>
         </Animated.View>
         <Animated.View style={subtitleAnim}>
-          <Text style={[styles.subtitle, { color: c.text.secondary }]}>Enter your email and we'll send a reset link.</Text>
+          <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>Enter your email and we'll send a reset link.</Text>
         </Animated.View>
 
         <Animated.View style={formAnim}>
-        {error ? <Text style={[styles.error, { color: c.semantic.negative }]}>{error}</Text> : null}
+        {error ? <Text style={[styles.error, { color: getThemeColors().semantic.negative }]}>{error}</Text> : null}
 
         <TextInput
           testID="forgot-email-input"
-          style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.subtle }]}
+          style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.subtle }]}
           placeholder="Email"
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
@@ -116,7 +117,7 @@ export function ForgotPasswordScreen({ onNavigateBack }: ForgotPasswordScreenPro
         />
 
         <TouchableOpacity onPress={onNavigateBack} style={styles.backLink}>
-          <Text style={[styles.backLinkText, { color: c.accent.primary }]}>← Back to Sign In</Text>
+          <Text style={[styles.backLinkText, { color: getThemeColors().accent.primary }]}>← Back to Sign In</Text>
         </TouchableOpacity>
         </Animated.View>
       </ScrollView>
@@ -124,45 +125,45 @@ export function ForgotPasswordScreen({ onNavigateBack }: ForgotPasswordScreenPro
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg.base },
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: getThemeColors().bg.base },
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',
     padding: spacing[6],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.semibold,
     textAlign: 'center',
   },
   subtitle: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     textAlign: 'center',
     marginTop: spacing[2],
     marginBottom: spacing[8],
   },
   error: {
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     fontSize: typography.size.sm,
     textAlign: 'center',
     marginBottom: spacing[4],
   },
   input: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
-    color: colors.text.primary,
+    borderColor: getThemeColors().border.subtle,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     padding: spacing[4],
     marginBottom: spacing[3],
   },
   btn: { marginTop: spacing[2] },
   successMessage: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     textAlign: 'center',
     marginTop: spacing[4],
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[6],
   },
   backLinkText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },

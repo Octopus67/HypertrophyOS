@@ -1,17 +1,18 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 const LEGEND_ITEMS = [
-  { color: colors.heatmap.untrained, label: 'Untrained' },
-  { color: colors.heatmap.belowMev, label: 'Below MEV' },
-  { color: colors.heatmap.optimal, label: 'Optimal' },
-  { color: colors.heatmap.nearMrv, label: 'Near MRV' },
-  { color: colors.heatmap.aboveMrv, label: 'Above MRV' },
+  { color: getThemeColors().heatmap.untrained, label: 'Untrained' },
+  { color: getThemeColors().heatmap.belowMev, label: 'Below MEV' },
+  { color: getThemeColors().heatmap.optimal, label: 'Optimal' },
+  { color: getThemeColors().heatmap.nearMrv, label: 'Near MRV' },
+  { color: getThemeColors().heatmap.aboveMrv, label: 'Above MRV' },
 ];
 
 export function HeatMapLegend() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
     <View style={styles.container}>
       {LEGEND_ITEMS.map((item) => (
@@ -24,7 +25,7 @@ export function HeatMapLegend() {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
   },
 });

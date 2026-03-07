@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import Animated, { Layout } from 'react-native-reanimated';
 import Constants from 'expo-constants';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { Button } from '../common/Button';
 import { useStore } from '../../store';
@@ -23,6 +23,7 @@ interface AccountSectionProps {
 
 export function AccountSection({ onLogout }: AccountSectionProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const store = useStore();
   const setNeedsOnboarding = useStore((s) => s.setNeedsOnboarding);
   const reduceMotion = useReduceMotion();
@@ -80,7 +81,7 @@ export function AccountSection({ onLogout }: AccountSectionProps) {
 
   return (
     <Card>
-      <Text style={[styles.sectionTitle, { color: c.text.primary }]}>Account</Text>
+      <Text style={[styles.sectionTitle, { color: getThemeColors().text.primary }]}>Account</Text>
 
       {/* Log Out */}
       <View style={styles.logoutRow}>
@@ -93,33 +94,33 @@ export function AccountSection({ onLogout }: AccountSectionProps) {
       </View>
 
       {/* Legal Links */}
-      <View style={[styles.legalSection, { borderBottomColor: c.border.subtle }]}>
+      <View style={[styles.legalSection, { borderBottomColor: getThemeColors().border.subtle }]}>
         <TouchableOpacity
           style={styles.legalLink}
           onPress={() => Linking.openURL('https://repwise.app/privacy')}
           accessibilityRole="link"
         >
-          <Text style={[styles.legalText, { color: c.accent.primary }]}>Privacy Policy</Text>
+          <Text style={[styles.legalText, { color: getThemeColors().accent.primary }]}>Privacy Policy</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.legalLink}
           onPress={() => Linking.openURL('https://repwise.app/terms')}
           accessibilityRole="link"
         >
-          <Text style={[styles.legalText, { color: c.accent.primary }]}>Terms of Service</Text>
+          <Text style={[styles.legalText, { color: getThemeColors().accent.primary }]}>Terms of Service</Text>
         </TouchableOpacity>
       </View>
 
       {/* Danger Zone */}
       <TouchableOpacity
-        style={[styles.dangerZoneHeader, { borderTopColor: c.border.subtle }]}
+        style={[styles.dangerZoneHeader, { borderTopColor: getThemeColors().border.subtle }]}
         onPress={toggleDangerZone}
         activeOpacity={0.7}
         accessibilityRole="button"
         accessibilityState={{ expanded: dangerZoneExpanded }}
         accessibilityLabel="Danger Zone"
       >
-        <Text style={[styles.dangerZoneText, { color: c.semantic.negative }]}>
+        <Text style={[styles.dangerZoneText, { color: getThemeColors().semantic.negative }]}>
           {dangerZoneExpanded ? '▾' : '▸'} Danger Zone
         </Text>
       </TouchableOpacity>
@@ -135,14 +136,14 @@ export function AccountSection({ onLogout }: AccountSectionProps) {
       )}
 
       {/* App Version */}
-      <Text style={[styles.version, { color: c.text.muted }]}>App version: {appVersion}</Text>
+      <Text style={[styles.version, { color: getThemeColors().text.muted }]}>App version: {appVersion}</Text>
     </Card>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   sectionTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.md,
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
     paddingBottom: spacing[4],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: getThemeColors().border.subtle,
   },
   legalLink: {
     paddingVertical: spacing[2],
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   legalText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     textAlign: 'center',
@@ -174,12 +175,12 @@ const styles = StyleSheet.create({
   dangerZoneHeader: {
     paddingVertical: spacing[3],
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
     minHeight: 44,
     justifyContent: 'center',
   },
   dangerZoneText: {
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.base,
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[4],
   },
   version: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     marginTop: spacing[4],

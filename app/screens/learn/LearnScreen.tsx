@@ -13,8 +13,8 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../../components/common/Card';
 import { FilterPill } from '../../components/common/FilterPill';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -48,12 +48,12 @@ const CATEGORY_TO_MODULE: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Hypertrophy: colors.accent.primary,
-  Nutrition: colors.macro.calories,
-  Programming: colors.macro.protein,
-  Recovery: colors.macro.carbs,
-  Recomp: colors.macro.fat,
-  Supplements: colors.semantic.caution,
+  Hypertrophy: getThemeColors().accent.primary,
+  Nutrition: getThemeColors().macro.calories,
+  Programming: getThemeColors().macro.protein,
+  Recovery: getThemeColors().macro.carbs,
+  Recomp: getThemeColors().macro.fat,
+  Supplements: getThemeColors().semantic.caution,
 };
 
 const CATEGORY_ICONS: Record<string, IconName> = {
@@ -117,59 +117,59 @@ function AnimatedArticleCard({
     Object.entries(CATEGORY_TO_MODULE).map(([k, v]) => [v, k]),
   );
   const categoryKey = MODULE_TO_CATEGORY[item.module_name ?? ''] ?? (item.module_name ?? '');
-  const categoryColor = CATEGORY_COLORS[categoryKey] ?? colors.accent.primary;
+  const categoryColor = CATEGORY_COLORS[categoryKey] ?? getThemeColors().accent.primary;
   const categoryIcon = CATEGORY_ICONS[categoryKey];
   const preview = getArticlePreview(item.content_markdown);
 
   return (
     <Animated.View style={animatedStyle}>
       <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
-        <Card style={styles.articleCard}>
+        <Card style={getStyles().articleCard}>
           {/* Colored header strip */}
-          <View style={[styles.gradientStrip, { backgroundColor: categoryColor }]} />
+          <View style={[getStyles().gradientStrip, { backgroundColor: categoryColor }]} />
 
-          <View style={styles.articleHeader}>
-            <View style={styles.articleMeta}>
+          <View style={getStyles().articleHeader}>
+            <View style={getStyles().articleMeta}>
               {item.module_name && (
-                <View style={[styles.categoryPillContainer, { backgroundColor: categoryColor + '18' }]}>
+                <View style={[getStyles().categoryPillContainer, { backgroundColor: categoryColor + '18' }]}>
                   {categoryIcon && (
                     <Icon name={categoryIcon} size={12} color={categoryColor} />
                   )}
-                  <Text style={[styles.categoryPillText, { color: categoryColor }]}>
+                  <Text style={[getStyles().categoryPillText, { color: categoryColor }]}>
                     {item.module_name}
                   </Text>
                 </View>
               )}
-              <View style={[styles.readTimePill, { backgroundColor: colors.bg.surfaceRaised, borderColor: colors.border.subtle }]}>
-                <Text style={[styles.readTimeIcon, { color: colors.text.muted }]}>◷</Text>
-                <Text style={[styles.readTimeText, { color: colors.text.secondary }]}>{item.estimated_read_time_min} min</Text>
+              <View style={[getStyles().readTimePill, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.subtle }]}>
+                <Text style={[getStyles().readTimeIcon, { color: getThemeColors().text.muted }]}>◷</Text>
+                <Text style={[getStyles().readTimeText, { color: getThemeColors().text.secondary }]}>{item.estimated_read_time_min} min</Text>
               </View>
             </View>
             {item.is_premium && (
-              <View style={[styles.lockBadge, { backgroundColor: colors.premium.goldSubtle }]}>
+              <View style={[getStyles().lockBadge, { backgroundColor: getThemeColors().premium.goldSubtle }]}>
                 <Icon name="lock" size={14} />
               </View>
             )}
           </View>
 
-          <Text style={[styles.articleTitle, { color: colors.text.primary }]}>{item.title}</Text>
+          <Text style={[getStyles().articleTitle, { color: getThemeColors().text.primary }]}>{item.title}</Text>
 
           {preview ? (
-            <Text style={[styles.articlePreview, { color: colors.text.secondary }]} numberOfLines={2}>
+            <Text style={[getStyles().articlePreview, { color: getThemeColors().text.secondary }]} numberOfLines={2}>
               {preview}
             </Text>
           ) : null}
 
-          <View style={styles.articleFooter}>
-            <View style={styles.tags}>
+          <View style={getStyles().articleFooter}>
+            <View style={getStyles().tags}>
               {item.tags?.slice(0, 3).map((tag) => (
-                <Text key={tag} style={[styles.tag, { color: colors.text.muted, backgroundColor: colors.bg.surfaceRaised, borderColor: colors.border.subtle }]}>{tag}</Text>
+                <Text key={tag} style={[getStyles().tag, { color: getThemeColors().text.muted, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.subtle }]}>{tag}</Text>
               ))}
             </View>
-            <View style={styles.footerRight}>
-              <Text style={[styles.readIndicator, { color: colors.accent.primary }]}>Read →</Text>
+            <View style={getStyles().footerRight}>
+              <Text style={[getStyles().readIndicator, { color: getThemeColors().accent.primary }]}>Read →</Text>
               <TouchableOpacity onPress={onToggleFavorite} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={[styles.favIcon, isFavorite && styles.favActive]}>
+                <Text style={[getStyles().favIcon, isFavorite && getStyles().favActive]}>
                   {isFavorite ? <Icon name="star" /> : <Icon name="star-outline" />}
                 </Text>
               </TouchableOpacity>
@@ -183,6 +183,7 @@ function AnimatedArticleCard({
 
 export function LearnScreen() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const navigation = useNavigation<StackNavigationProp<ProfileStackParamList>>();
   const [articles, setArticles] = useState<Article[]>([]);
   const [category, setCategory] = useState('All');
@@ -351,10 +352,13 @@ export function LearnScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base, paddingTop: Platform.OS === 'web' ? spacing[4] : 0 },
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base, paddingTop: Platform.OS === 'web' ? spacing[4] : 0 },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.size.xl * typography.lineHeight.tight,
@@ -363,11 +367,11 @@ const styles = StyleSheet.create({
   },
   filterRow: { paddingHorizontal: spacing[4], gap: spacing[2], marginBottom: spacing[3], height: 40 },
   searchInput: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.default,
-    color: colors.text.primary,
+    borderColor: getThemeColors().border.default,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
@@ -413,9 +417,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     borderRadius: radius.full,
@@ -423,16 +427,16 @@ const styles = StyleSheet.create({
   readTimeIcon: {
     fontSize: 10,
     lineHeight: 10 * typography.lineHeight.normal,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   readTimeText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
     lineHeight: typography.size.xs * typography.lineHeight.normal,
   },
   lockBadge: {
-    backgroundColor: colors.premium.goldSubtle,
+    backgroundColor: getThemeColors().premium.goldSubtle,
     borderRadius: radius.full,
     width: 24,
     height: 24,
@@ -440,13 +444,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   articleTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     lineHeight: typography.size.lg * typography.lineHeight.tight,
   },
   articlePreview: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     marginTop: spacing[1],
     lineHeight: typography.size.sm * typography.lineHeight.normal,
@@ -459,15 +463,15 @@ const styles = StyleSheet.create({
   },
   tags: { flexDirection: 'row', gap: spacing[1], flexShrink: 1 },
   tag: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.size.xs * typography.lineHeight.normal,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     paddingHorizontal: spacing[2],
     paddingVertical: spacing[1],
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     overflow: 'hidden',
   },
   footerRight: {
@@ -476,14 +480,14 @@ const styles = StyleSheet.create({
     gap: spacing[3],
   },
   readIndicator: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.size.xs * typography.lineHeight.normal,
     opacity: 0.7,
   },
-  favIcon: { fontSize: typography.size.xl, color: colors.text.muted },
-  favActive: { color: colors.semantic.warning },
+  favIcon: { fontSize: typography.size.xl, color: getThemeColors().text.muted },
+  favActive: { color: getThemeColors().semantic.warning },
   emptyPills: {
     flexDirection: 'row',
     flexWrap: 'wrap',

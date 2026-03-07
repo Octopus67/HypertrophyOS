@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Text, StyleSheet, Platform } from 'react-native';
 import { formatDuration } from '../../utils/durationFormat';
-import { colors, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface DurationTimerProps {
   startedAt: string; // ISO timestamp
@@ -14,6 +14,7 @@ interface DurationTimerProps {
  */
 export function DurationTimer({ startedAt }: DurationTimerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [elapsed, setElapsed] = useState(() => calcElapsed(startedAt));
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -33,16 +34,16 @@ export function DurationTimer({ startedAt }: DurationTimerProps) {
     };
   }, [startedAt]);
 
-  return <Text style={[styles.timer, { color: c.text.primary }]}>{formatDuration(elapsed)}</Text>;
+  return <Text style={[styles.timer, { color: getThemeColors().text.primary }]}>{formatDuration(elapsed)}</Text>;
 }
 
 function calcElapsed(startedAt: string): number {
   return Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   timer: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',

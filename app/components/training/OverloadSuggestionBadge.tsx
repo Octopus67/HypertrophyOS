@@ -14,8 +14,8 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import api from '../../services/api';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { formatSuggestionText, OverloadSuggestionData } from '../../utils/intelligenceLayerLogic';
 
 interface OverloadSuggestionBadgeProps {
@@ -25,6 +25,7 @@ interface OverloadSuggestionBadgeProps {
 
 export function OverloadSuggestionBadge({ exerciseName, unitSystem }: OverloadSuggestionBadgeProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [suggestion, setSuggestion] = useState<OverloadSuggestionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [dismissed, setDismissed] = useState(false);
@@ -57,7 +58,7 @@ export function OverloadSuggestionBadge({ exerciseName, unitSystem }: OverloadSu
   if (loading) {
     return (
       <View style={styles.skeleton}>
-        <View style={[styles.skeletonBar, { backgroundColor: c.bg.surfaceRaised }]} />
+        <View style={[styles.skeletonBar, { backgroundColor: getThemeColors().bg.surfaceRaised }]} />
       </View>
     );
   }
@@ -68,24 +69,24 @@ export function OverloadSuggestionBadge({ exerciseName, unitSystem }: OverloadSu
   const text = formatSuggestionText(suggestion, unitSystem);
 
   return (
-    <View style={[styles.container, { backgroundColor: c.accent.primaryMuted }]}>
-      <Text style={[styles.text, { color: c.accent.primary }]} numberOfLines={1}>{text}</Text>
+    <View style={[styles.container, { backgroundColor: getThemeColors().accent.primaryMuted }]}>
+      <Text style={[styles.text, { color: getThemeColors().accent.primary }]} numberOfLines={1}>{text}</Text>
       <TouchableOpacity
         style={styles.dismissBtn}
         onPress={() => setDismissed(true)}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Text style={[styles.dismissText, { color: c.text.muted }]}>✕</Text>
+        <Text style={[styles.dismissText, { color: getThemeColors().text.muted }]}>✕</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[1],
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
   text: {
     flex: 1,
     fontSize: typography.size.sm,
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontWeight: typography.weight.medium,
   },
   dismissBtn: {
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
   },
   dismissText: {
     fontSize: typography.size.xs,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
   skeleton: {
     marginTop: spacing[1],
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   },
   skeletonBar: {
     flex: 1,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
   },
 });

@@ -11,9 +11,9 @@ import * as SecureStore from 'expo-secure-store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
+import { spacing, typography, radius } from '../../theme/tokens';
 import { useThemeStore } from '../../store/useThemeStore';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../../components/common/Icon';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -47,6 +47,7 @@ async function secureClear() {
 
 export function ProfileScreen() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const store = useStore();
   const premium = isPremium(store);
   const navigation = useNavigation<any>();
@@ -261,18 +262,18 @@ export function ProfileScreen() {
 }
 
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base },
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base },
   container: { flex: 1 },
   content: { padding: spacing[4], paddingBottom: spacing[12], gap: spacing[4] },
   profileCard: { alignItems: 'center', paddingVertical: spacing[6] },
   avatarCircle: {
     width: 64, height: 64, borderRadius: radius.full,
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     alignItems: 'center', justifyContent: 'center', marginBottom: spacing[3],
   },
   avatarText: {
-    color: colors.accent.primary, fontSize: typography.size['2xl'],
+    color: getThemeColors().accent.primary, fontSize: typography.size['2xl'],
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight['2xl'],
   },
@@ -280,19 +281,19 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch', paddingHorizontal: spacing[4], marginTop: spacing[3],
   },
   memberSince: {
-    color: colors.text.muted, fontSize: typography.size.sm,
+    color: getThemeColors().text.muted, fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginTop: spacing[3], textAlign: 'center',
   },
   subRow: {
     flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing[2],
   },
-  subLabel: { color: colors.text.secondary, fontSize: typography.size.base, lineHeight: typography.lineHeight.base },
+  subLabel: { color: getThemeColors().text.secondary, fontSize: typography.size.base, lineHeight: typography.lineHeight.base },
   subValue: {
-    color: colors.text.primary, fontSize: typography.size.base,
+    color: getThemeColors().text.primary, fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.base,
   },
-  subActive: { color: colors.semantic.positive },
+  subActive: { color: getThemeColors().semantic.positive },
   upgradeBtn: { marginTop: spacing[4] },
 });

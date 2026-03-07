@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 const OPTIONS = [
   { value: 'dairy', label: 'Dairy' },
@@ -17,6 +18,8 @@ interface Props {
 }
 
 export function AllergiesPicker({ value, onChange }: Props) {
+  const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const toggle = (item: string) => {
     onChange(
       value.includes(item) ? value.filter((v) => v !== item) : [...value, item],
@@ -49,10 +52,10 @@ export function AllergiesPicker({ value, onChange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { marginBottom: spacing[3] },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
@@ -64,20 +67,20 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[2],
     borderRadius: radius.full,
     borderWidth: 1,
-    borderColor: colors.border.default,
-    backgroundColor: colors.bg.surfaceRaised,
+    borderColor: getThemeColors().border.default,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
   },
   chipActive: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   chipText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
   chipTextActive: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontWeight: typography.weight.medium,
   },
 });

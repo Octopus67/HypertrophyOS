@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { getFatigueColor, getFatigueLabel } from '../../utils/fatigueColorMapping';
 
 interface FatigueScore {
@@ -20,6 +20,7 @@ interface Props {
 
 export function FatigueHeatMapOverlay({ scores, onMuscleGroupPress }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (!scores || scores.length === 0) return null;
 
   const sorted = [...scores].sort((a, b) => b.score - a.score);
@@ -38,9 +39,9 @@ export function FatigueHeatMapOverlay({ scores, onMuscleGroupPress }: Props) {
               activeOpacity={0.7}
             >
               <View style={[styles.dot, { backgroundColor: bg }]} />
-              <Text style={[styles.name, { color: c.text.primary }]}>{s.muscle_group}</Text>
+              <Text style={[styles.name, { color: getThemeColors().text.primary }]}>{s.muscle_group}</Text>
               <Text style={[styles.score, { color: bg }]}>{s.score.toFixed(0)}</Text>
-              <Text style={[styles.label, { color: c.text.muted }]}>{label}</Text>
+              <Text style={[styles.label, { color: getThemeColors().text.muted }]}>{label}</Text>
             </TouchableOpacity>
           );
         })}
@@ -49,7 +50,7 @@ export function FatigueHeatMapOverlay({ scores, onMuscleGroupPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { marginTop: spacing[2] },
   grid: {
     flexDirection: 'row',
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   cell: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.sm,
     padding: spacing[2],
     borderWidth: 1,
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   name: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
     textTransform: 'capitalize',
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.weight.bold,
   },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: 10,
   },
 });

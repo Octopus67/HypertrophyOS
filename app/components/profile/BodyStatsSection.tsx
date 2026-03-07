@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { colors, radius, spacing, typography, opacityScale } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, opacityScale } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../common/Card';
 import { EditableField } from '../common/EditableField';
 import { EmptyState } from '../common/EmptyState';
@@ -95,6 +95,7 @@ function ActivityLevelPicker({
 
 export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const navigation = useNavigation<any>();
   const store = useStore();
 
@@ -350,7 +351,7 @@ export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps)
     return (
       <Card>
         <EmptyState
-          icon={<Icon name="chart" size={28} color={c.accent.primary} />}
+          icon={<Icon name="chart" size={28} color={getThemeColors().accent.primary} />}
           title="Body Stats"
           description="Add your body stats to get personalized targets"
           actionLabel="Add Stats"
@@ -509,7 +510,7 @@ function EditAllMode({
           onChangeText={setDraftWeight}
           keyboardType="decimal-pad"
           placeholder={unitSystem === 'imperial' ? 'e.g. 176' : 'e.g. 80'}
-          placeholderTextColor={colors.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
         />
       </View>
 
@@ -524,7 +525,7 @@ function EditAllMode({
               onChangeText={setDraftFeet}
               keyboardType="number-pad"
               placeholder="ft"
-              placeholderTextColor={colors.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
             />
             <Text style={editStyles.heightSep}>′</Text>
             <TextInput
@@ -533,7 +534,7 @@ function EditAllMode({
               onChangeText={setDraftInches}
               keyboardType="number-pad"
               placeholder="in"
-              placeholderTextColor={colors.text.muted}
+              placeholderTextColor={getThemeColors().text.muted}
             />
             <Text style={editStyles.heightSep}>″</Text>
           </View>
@@ -547,7 +548,7 @@ function EditAllMode({
             onChangeText={setDraftHeightCm}
             keyboardType="number-pad"
             placeholder="e.g. 180"
-            placeholderTextColor={colors.text.muted}
+            placeholderTextColor={getThemeColors().text.muted}
           />
         </View>
       )}
@@ -561,7 +562,7 @@ function EditAllMode({
           onChangeText={setDraftBodyFat}
           keyboardType="decimal-pad"
           placeholder="e.g. 16"
-          placeholderTextColor={colors.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
         />
       </View>
 
@@ -580,7 +581,7 @@ function EditAllMode({
           activeOpacity={0.7}
         >
           {saving ? (
-            <ActivityIndicator color={colors.text.primary} size="small" />
+            <ActivityIndicator color={getThemeColors().text.primary} size="small" />
           ) : (
             <Text style={editStyles.saveBtnText}>Save</Text>
           )}
@@ -597,9 +598,9 @@ function EditAllMode({
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   sectionTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.md,
@@ -612,15 +613,15 @@ const styles = StyleSheet.create({
     marginTop: spacing[3],
     paddingTop: spacing[3],
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
   },
   lastUpdated: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
   viewHistory: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
@@ -635,20 +636,20 @@ const editStyles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
     marginBottom: spacing[1],
   },
   input: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     paddingHorizontal: spacing[3],
     paddingVertical: spacing[2],
   },
@@ -661,13 +662,13 @@ const editStyles = StyleSheet.create({
     flex: 1,
   },
   heightSep: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.md,
   },
   error: {
-    color: colors.semantic.negative,
+    color: getThemeColors().semantic.negative,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginTop: spacing[2],
@@ -678,7 +679,7 @@ const editStyles = StyleSheet.create({
     marginTop: spacing[4],
   },
   saveBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[2],
@@ -690,7 +691,7 @@ const editStyles = StyleSheet.create({
     opacity: opacityScale.disabled,
   },
   saveBtnText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.base,
@@ -703,7 +704,7 @@ const editStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelBtnText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.base,
@@ -715,7 +716,7 @@ const pickerStyles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
@@ -731,22 +732,22 @@ const pickerStyles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
-    backgroundColor: colors.bg.surface,
+    borderColor: getThemeColors().border.default,
+    backgroundColor: getThemeColors().bg.surface,
     minHeight: 44,
     justifyContent: 'center',
   },
   optionActive: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   optionText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
   },
   optionTextActive: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
 });

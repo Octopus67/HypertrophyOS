@@ -13,8 +13,8 @@ import Animated, {
   withDelay,
   runOnJS,
 } from 'react-native-reanimated';
-import { colors, radius, spacing, typography, motion } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, motion } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import type { PersonalRecordResponse } from '../../types/training';
 import { useHaptics } from '../../hooks/useHaptics';
 
@@ -32,6 +32,7 @@ export function PRCelebration({
   onDismiss,
 }: PRCelebrationProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.8);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -97,11 +98,11 @@ export function PRCelebration({
       <Animated.View style={[styles.overlay, animatedOverlay]}>
         <Animated.View style={[styles.banner, animatedBanner]} accessibilityRole="alert" accessibilityLabel={`${prs.length === 1 ? 'New personal record' : `${prs.length} new personal records`}`}>
           <Text style={styles.trophy}>🏆</Text>
-          <Text style={[styles.title, { color: c.premium.gold }]}>
+          <Text style={[styles.title, { color: getThemeColors().premium.gold }]}>
             {prs.length === 1 ? 'New PR!' : `${prs.length} New PRs!`}
           </Text>
           {prs.map((pr, i) => (
-            <Text key={`${pr.exercise_name}-${i}`} style={[styles.prText, { color: c.text.primary }]}>
+            <Text key={`${pr.exercise_name}-${i}`} style={[styles.prText, { color: getThemeColors().text.primary }]}>
               {pr.exercise_name} — {pr.new_weight_kg}kg × {pr.reps}
             </Text>
           ))}
@@ -111,7 +112,7 @@ export function PRCelebration({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -120,10 +121,10 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   banner: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.premium.gold,
+    borderColor: getThemeColors().premium.gold,
     paddingHorizontal: spacing[8],
     paddingVertical: spacing[6],
     alignItems: 'center',
@@ -134,14 +135,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   title: {
-    color: colors.premium.gold,
+    color: getThemeColors().premium.gold,
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.bold,
     lineHeight: typography.lineHeight['2xl'],
     marginBottom: spacing[3],
   },
   prText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     marginBottom: spacing[1],

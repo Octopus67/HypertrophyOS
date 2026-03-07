@@ -7,8 +7,8 @@
 
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Switch } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import {
   shouldShowReminder,
   setLightingReminderDismissed,
@@ -22,6 +22,7 @@ interface LightingReminderProps {
 
 export function LightingReminder({ visible, onDismiss, onDontShowAgain }: LightingReminderProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [dontShow, setDontShow] = useState(false);
   const [shouldRender, setShouldRender] = useState(true);
 
@@ -51,27 +52,27 @@ export function LightingReminder({ visible, onDismiss, onDontShowAgain }: Lighti
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleDismiss}>
-      <View style={[styles.backdrop, { backgroundColor: c.bg.overlay }]}>
-        <View style={[styles.card, { backgroundColor: c.bg.surface }]}>
+      <View style={[styles.backdrop, { backgroundColor: getThemeColors().bg.overlay }]}>
+        <View style={[styles.card, { backgroundColor: getThemeColors().bg.surface }]}>
           <Text style={styles.icon}>💡</Text>
-          <Text style={[styles.title, { color: c.text.primary }]}>Lighting Tip</Text>
-          <Text style={[styles.body, { color: c.text.secondary }]}>
+          <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Lighting Tip</Text>
+          <Text style={[styles.body, { color: getThemeColors().text.secondary }]}>
             For the best comparison results, try to use the same room, same time of day, and prefer
             natural light for each photo session.
           </Text>
 
           <View style={styles.toggleRow}>
-            <Text style={[styles.toggleLabel, { color: c.text.secondary }]}>Don't show again</Text>
+            <Text style={[styles.toggleLabel, { color: getThemeColors().text.secondary }]}>Don't show again</Text>
             <Switch
               value={dontShow}
               onValueChange={setDontShow}
-              trackColor={{ false: c.bg.surfaceRaised, true: c.accent.primary }}
-              thumbColor={c.text.primary}
+              trackColor={{ false: getThemeColors().bg.surfaceRaised, true: getThemeColors().accent.primary }}
+              thumbColor={getThemeColors().text.primary}
             />
           </View>
 
-          <TouchableOpacity style={[styles.button, { backgroundColor: c.accent.primary }]} onPress={handleDismiss} activeOpacity={0.8}>
-            <Text style={[styles.buttonText, { color: c.text.inverse }]}>Got it</Text>
+          <TouchableOpacity style={[styles.button, { backgroundColor: getThemeColors().accent.primary }]} onPress={handleDismiss} activeOpacity={0.8}>
+            <Text style={[styles.buttonText, { color: getThemeColors().text.inverse }]}>Got it</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -79,16 +80,16 @@ export function LightingReminder({ visible, onDismiss, onDontShowAgain }: Lighti
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: colors.bg.overlay,
+    backgroundColor: getThemeColors().bg.overlay,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing[4],
   },
   card: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.lg,
     padding: spacing[6],
     width: '100%',
@@ -100,13 +101,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     marginBottom: spacing[2],
   },
   body: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     textAlign: 'center',
     lineHeight: typography.size.base * typography.lineHeight.relaxed,
@@ -121,17 +122,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[2],
   },
   toggleLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
   },
   button: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[8],
   },
   buttonText: {
-    color: colors.text.inverse,
+    color: getThemeColors().text.inverse,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
   },

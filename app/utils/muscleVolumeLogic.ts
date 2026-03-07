@@ -1,4 +1,4 @@
-import { colors } from '../theme/tokens';
+;
 
 /**
  * Pure utility functions for muscle volume heat map feature.
@@ -70,27 +70,28 @@ export function getStatusLabel(status: string): string {
 /** 5-tier heat-map color based on effective sets relative to MEV / MRV. */
 export function getHeatMapColor(effectiveSets: number, mev: number, mrv: number): string {
   // Guard: invalid landmarks
-  if (mev <= 0 || mrv <= 0 || mev > mrv) return colors.heatmap.untrained;
+  if (mev <= 0 || mrv <= 0 || mev > mrv) return getThemeColors().heatmap.untrained;
 
   const clamped = Math.max(0, effectiveSets);
 
-  if (clamped === 0) return colors.heatmap.untrained;
-  if (clamped < mev) return colors.heatmap.belowMev;
-  if (clamped <= mrv * 0.8) return colors.heatmap.optimal;
-  if (clamped <= mrv) return colors.heatmap.nearMrv;
-  return colors.heatmap.aboveMrv;
+  if (clamped === 0) return getThemeColors().heatmap.untrained;
+  if (clamped < mev) return getThemeColors().heatmap.belowMev;
+  if (clamped <= mrv * 0.8) return getThemeColors().heatmap.optimal;
+  if (clamped <= mrv) return getThemeColors().heatmap.nearMrv;
+  return getThemeColors().heatmap.aboveMrv;
 }
 
 // ─── WNS Heat Map Color ──────────────────────────────────────────────────────
 
 import type { WNSLandmarks } from '../types/volume';
+import { getThemeColors } from '../hooks/useThemeColors';
 
 /** 5-tier heat-map color based on HU relative to WNS landmarks. */
 export function getWNSHeatMapColor(hu: number, landmarks: WNSLandmarks): string {
-  if (landmarks.mev <= 0 || landmarks.mrv <= 0) return colors.heatmap.untrained;
-  if (hu === 0) return colors.heatmap.untrained;
-  if (hu < landmarks.mev) return colors.heatmap.belowMev;
-  if (hu <= landmarks.mav_high) return colors.heatmap.optimal;
-  if (hu <= landmarks.mrv) return colors.heatmap.nearMrv;
-  return colors.heatmap.aboveMrv;
+  if (landmarks.mev <= 0 || landmarks.mrv <= 0) return getThemeColors().heatmap.untrained;
+  if (hu === 0) return getThemeColors().heatmap.untrained;
+  if (hu < landmarks.mev) return getThemeColors().heatmap.belowMev;
+  if (hu <= landmarks.mav_high) return getThemeColors().heatmap.optimal;
+  if (hu <= landmarks.mrv) return getThemeColors().heatmap.nearMrv;
+  return getThemeColors().heatmap.aboveMrv;
 }

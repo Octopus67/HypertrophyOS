@@ -8,8 +8,8 @@ import { Card } from '../common/Card';
 import { VolumeBar } from './VolumeBar';
 import { VolumeTrendChart, type TrendPoint } from './VolumeTrendChart';
 import { LandmarkExplainer, type LandmarkKey } from './LandmarkExplainer';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import type { WNSLandmarks } from '../../types/volume';
 
 export interface VolumeLandmarksCardProps {
@@ -21,10 +21,10 @@ export interface VolumeLandmarksCardProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  below_mev: { label: 'Below MEV', color: colors.text.muted, bg: colors.bg.surfaceRaised },
-  optimal: { label: 'Optimal', color: colors.semantic.positive, bg: colors.semantic.positiveSubtle },
-  approaching_mrv: { label: 'Near MRV', color: colors.semantic.caution, bg: colors.semantic.cautionSubtle },
-  above_mrv: { label: 'Above MRV', color: colors.semantic.negative, bg: colors.semantic.negativeSubtle },
+  below_mev: { label: 'Below MEV', color: getThemeColors().text.muted, bg: getThemeColors().bg.surfaceRaised },
+  optimal: { label: 'Optimal', color: getThemeColors().semantic.positive, bg: getThemeColors().semantic.positiveSubtle },
+  approaching_mrv: { label: 'Near MRV', color: getThemeColors().semantic.caution, bg: getThemeColors().semantic.cautionSubtle },
+  above_mrv: { label: 'Above MRV', color: getThemeColors().semantic.negative, bg: getThemeColors().semantic.negativeSubtle },
 };
 
 const LANDMARK_KEYS: LandmarkKey[] = ['mev', 'mav', 'mrv'];
@@ -37,6 +37,7 @@ export function VolumeLandmarksCard({
   status,
 }: VolumeLandmarksCardProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [expanded, setExpanded] = useState(false);
   const [explainerLandmark, setExplainerLandmark] = useState<LandmarkKey | null>(null);
 
@@ -47,7 +48,7 @@ export function VolumeLandmarksCard({
     <Card variant="flat" style={styles.card}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.title, { color: c.text.primary }]}>{displayName}</Text>
+        <Text style={[styles.title, { color: getThemeColors().text.primary }]}>{displayName}</Text>
         <View
           style={[styles.badge, { backgroundColor: statusCfg.bg }]}
           accessibilityLabel={`Status: ${statusCfg.label}`}
@@ -61,7 +62,7 @@ export function VolumeLandmarksCard({
 
       {/* Current volume + info icons */}
       <View style={styles.infoRow}>
-        <Text style={[styles.volumeText, { color: c.text.secondary }]}>
+        <Text style={[styles.volumeText, { color: getThemeColors().text.secondary }]}>
           {currentVolume} HU this week
         </Text>
         <View style={styles.infoIcons}>
@@ -73,7 +74,7 @@ export function VolumeLandmarksCard({
               accessibilityLabel={`Learn about ${key.toUpperCase()}`}
               accessibilityRole="button"
             >
-              <Text style={[styles.infoIcon, { color: c.text.muted }]}>{key.toUpperCase()} ⓘ</Text>
+              <Text style={[styles.infoIcon, { color: getThemeColors().text.muted }]}>{key.toUpperCase()} ⓘ</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -86,7 +87,7 @@ export function VolumeLandmarksCard({
         accessibilityLabel={expanded ? 'Hide trend chart' : 'Show trend chart'}
         accessibilityRole="button"
       >
-        <Text style={[styles.expandText, { color: c.accent.primary }]}>
+        <Text style={[styles.expandText, { color: getThemeColors().accent.primary }]}>
           {expanded ? '▾ Hide Trend' : '▸ Show Trend'}
         </Text>
       </TouchableOpacity>
@@ -107,7 +108,7 @@ export function VolumeLandmarksCard({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
     marginBottom: spacing[3],
   },
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
   },
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[1],
   },
   volumeText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
   },
   infoIcons: {
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     gap: spacing[3],
   },
   infoIcon: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs - 1,
     fontWeight: typography.weight.medium,
   },
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[1],
   },
   expandText: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
   },

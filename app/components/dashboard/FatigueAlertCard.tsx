@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { getFatigueColor } from '../../utils/fatigueColorMapping';
 import { Icon } from '../common/Icon';
 
@@ -21,6 +21,7 @@ interface Props {
 
 export function FatigueAlertCard({ suggestions, onPress }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   if (!Array.isArray(suggestions) || suggestions.length === 0) return null;
 
   // Filter out malformed entries before sorting
@@ -48,28 +49,28 @@ export function FatigueAlertCard({ suggestions, onPress }: Props) {
     >
       <View style={styles.header}>
         <Icon name="alert-triangle" size={16} color={borderColor} />
-        <Text style={[styles.title, { color: c.text.primary }]}>Fatigue Alert</Text>
+        <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Fatigue Alert</Text>
       </View>
-      <Text style={[styles.muscle, { color: c.text.primary }]}>{top.muscle_group}</Text>
-      <Text style={[styles.message, { color: c.text.secondary }]} numberOfLines={2}>
+      <Text style={[styles.muscle, { color: getThemeColors().text.primary }]}>{top.muscle_group}</Text>
+      <Text style={[styles.message, { color: getThemeColors().text.secondary }]} numberOfLines={2}>
         {top.message || 'Consider reducing volume for this muscle group.'}
       </Text>
       {valid.length > 1 && (
-        <Text style={[styles.more, { color: c.text.muted }]}>+{valid.length - 1} more muscle groups</Text>
+        <Text style={[styles.more, { color: getThemeColors().text.muted }]}>+{valid.length - 1} more muscle groups</Text>
       )}
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.sm,
     padding: spacing[3],
     marginTop: spacing[3],
     borderLeftWidth: 4,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
   },
   header: {
     flexDirection: 'row',
@@ -78,23 +79,23 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },
   muscle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.bold,
     textTransform: 'capitalize',
     marginBottom: spacing[1],
   },
   message: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
   },
   more: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     marginTop: spacing[1],
   },

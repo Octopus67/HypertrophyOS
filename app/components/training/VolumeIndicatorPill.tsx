@@ -14,8 +14,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import api from '../../services/api';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { getVolumeColor, VolumeColor } from '../../utils/intelligenceLayerLogic';
 import { HUExplainerSheet } from '../education/HUExplainerSheet';
 
@@ -37,19 +37,20 @@ interface VolumeIndicatorPillProps {
 }
 
 const COLOR_MAP: Record<VolumeColor, string> = {
-  red: colors.semantic.negative,
-  yellow: colors.semantic.warning,
-  green: colors.semantic.positive,
+  red: getThemeColors().semantic.negative,
+  yellow: getThemeColors().semantic.warning,
+  green: getThemeColors().semantic.positive,
 };
 
 const BG_COLOR_MAP: Record<VolumeColor, string> = {
-  red: colors.semantic.negativeSubtle,
-  yellow: colors.semantic.warningSubtle,
-  green: colors.semantic.positiveSubtle,
+  red: getThemeColors().semantic.negativeSubtle,
+  yellow: getThemeColors().semantic.warningSubtle,
+  green: getThemeColors().semantic.positiveSubtle,
 };
 
 export function VolumeIndicatorPill({ muscleGroups, completedSetCounts }: VolumeIndicatorPillProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [volumeData, setVolumeData] = useState<Record<string, MuscleVolumeData>>({});
   const [isWNS, setIsWNS] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -136,7 +137,7 @@ export function VolumeIndicatorPill({ muscleGroups, completedSetCounts }: Volume
           accessibilityLabel="How Hypertrophy Units work"
           accessibilityRole="button"
         >
-          <Text style={[styles.infoIcon, { color: c.text.muted }]}>ⓘ</Text>
+          <Text style={[styles.infoIcon, { color: getThemeColors().text.muted }]}>ⓘ</Text>
         </TouchableOpacity>
       )}
     </ScrollView>
@@ -145,7 +146,7 @@ export function VolumeIndicatorPill({ muscleGroups, completedSetCounts }: Volume
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scrollContainer: {
     flexGrow: 0,
     marginBottom: spacing[2],
@@ -170,6 +171,6 @@ const styles = StyleSheet.create({
   },
   infoIcon: {
     fontSize: typography.size.base,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
   },
 });

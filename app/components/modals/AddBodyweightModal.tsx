@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { ModalContainer } from '../common/ModalContainer';
 import { useStore } from '../../store';
 import { kgToLbs, lbsToKg, parseWeightToKg } from '../../utils/unitConversion';
@@ -23,6 +23,7 @@ interface Props {
 
 export function AddBodyweightModal({ visible, onClose, onSuccess }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const unitSystem = useStore((s) => s.unitSystem);
   const selectedDate = useStore((s) => s.selectedDate);
   const [weight, setWeight] = useState('');
@@ -84,7 +85,7 @@ export function AddBodyweightModal({ visible, onClose, onSuccess }: Props) {
       <View>
       <View style={styles.field}>
         <View style={styles.labelRow}>
-          <Text style={[styles.label, { color: c.text.secondary }]}>{`Weight (${unit})`}</Text>
+          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>{`Weight (${unit})`}</Text>
           <SegmentedControl
             options={[
               { label: 'kg', value: 'kg' },
@@ -95,12 +96,12 @@ export function AddBodyweightModal({ visible, onClose, onSuccess }: Props) {
           />
         </View>
         <TextInput
-          style={[styles.input, { color: c.text.primary, backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}
+          style={[styles.input, { color: getThemeColors().text.primary, backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
           value={weight}
           onChangeText={setWeight}
           keyboardType="numeric"
           placeholder={unit === 'kg' ? 'e.g. 82.5' : 'e.g. 181.9'}
-          placeholderTextColor={c.text.muted}
+          placeholderTextColor={getThemeColors().text.muted}
           testID="bodyweight-weight-input"
         />
       </View>
@@ -113,9 +114,9 @@ export function AddBodyweightModal({ visible, onClose, onSuccess }: Props) {
         testID="bodyweight-submit-button"
       >
         {loading ? (
-          <ActivityIndicator color={c.text.primary} />
+          <ActivityIndicator color={getThemeColors().text.primary} />
         ) : (
-          <Text style={[styles.submitText, { color: c.text.primary }]}>Save</Text>
+          <Text style={[styles.submitText, { color: getThemeColors().text.primary }]}>Save</Text>
         )}
       </TouchableOpacity>
       </View>
@@ -160,7 +161,7 @@ function SegmentedControl({
 const segmentStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.sm,
     overflow: 'hidden',
   },
@@ -170,20 +171,20 @@ const segmentStyles = StyleSheet.create({
     borderRadius: radius.sm,
   },
   segmentActive: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   segmentText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
   segmentTextActive: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontWeight: typography.weight.medium,
   },
 });
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   field: { marginBottom: spacing[3] },
   labelRow: {
     flexDirection: 'row',
@@ -192,23 +193,23 @@ const styles = StyleSheet.create({
     marginBottom: spacing[1],
   },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
   },
   input: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors.border.default,
-    color: colors.text.primary,
+    borderColor: getThemeColors().border.default,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     padding: spacing[3],
   },
   submitBtn: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: radius.sm,
     padding: spacing[3],
     alignItems: 'center',
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
   },
   submitBtnDisabled: { opacity: 0.6 },
   submitText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     lineHeight: typography.lineHeight.md,
     fontWeight: typography.weight.semibold,

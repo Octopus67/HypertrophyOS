@@ -8,8 +8,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, radius, spacing, typography, opacityScale } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography, opacityScale } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { groupMicroFields, MicroField } from '../../utils/microNutrientSerializer';
 import { getRDA, computeRDAPercentage, rdaColor, Sex } from '../../utils/rdaValues';
 import { useStore } from '../../store';
@@ -31,9 +31,9 @@ interface ContributingFood {
 }
 
 const COLOR_MAP = {
-  green: colors.semantic.positive,
-  yellow: colors.semantic.warning,
-  red: colors.semantic.negative,
+  green: getThemeColors().semantic.positive,
+  yellow: getThemeColors().semantic.warning,
+  red: getThemeColors().semantic.negative,
 } as const;
 
 function formatDate(d: Date): string {
@@ -80,39 +80,39 @@ function NutrientRow({
 
   return (
     <TouchableOpacity
-      style={[styles.nutrientRow, { backgroundColor: colors.bg.surface }]}
+      style={[getStyles().nutrientRow, { backgroundColor: getThemeColors().bg.surface }]}
       onPress={() => setExpanded(!expanded)}
       activeOpacity={0.7}
     >
-      <View style={styles.nutrientHeader}>
-        <Text style={[styles.nutrientLabel, { color: colors.text.primary }]}>{field.label}</Text>
-        <View style={styles.nutrientValues}>
+      <View style={getStyles().nutrientHeader}>
+        <Text style={[getStyles().nutrientLabel, { color: getThemeColors().text.primary }]}>{field.label}</Text>
+        <View style={getStyles().nutrientValues}>
           {hasData ? (
             <>
-              <Text style={[styles.intakeText, { color: colors.text.secondary }]}>
+              <Text style={[getStyles().intakeText, { color: getThemeColors().text.secondary }]}>
                 {intake.toFixed(1)} {field.unit}
               </Text>
               {rda > 0 && (
-                <Text style={[styles.rdaActual, { color: colors.text.muted }]}>/ {rda.toFixed(0)}{field.unit}</Text>
+                <Text style={[getStyles().rdaActual, { color: getThemeColors().text.muted }]}>/ {rda.toFixed(0)}{field.unit}</Text>
               )}
               {rda > 0 && (
-                <Text style={[styles.rdaPct, { color: barColor }]}>
+                <Text style={[getStyles().rdaPct, { color: barColor }]}>
                   {Math.round(percentage)}%
                 </Text>
               )}
             </>
           ) : (
-            <Text style={[styles.noDataText, { color: colors.text.muted }]}>—</Text>
+            <Text style={[getStyles().noDataText, { color: getThemeColors().text.muted }]}>—</Text>
           )}
         </View>
       </View>
 
       {/* Progress bar */}
-      <View style={[styles.barTrack, { backgroundColor: colors.bg.surfaceRaised }]}>
+      <View style={[getStyles().barTrack, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
         {hasData && rda > 0 && (
           <View
             style={[
-              styles.barFill,
+              getStyles().barFill,
               { width: `${barWidth}%`, backgroundColor: barColor },
             ]}
           />
@@ -121,16 +121,16 @@ function NutrientRow({
 
       {/* Expanded: top contributing foods */}
       {expanded && hasData && contributions.length > 0 && (
-        <View style={[styles.contributionList, { borderTopColor: colors.border.subtle }]}>
+        <View style={[getStyles().contributionList, { borderTopColor: getThemeColors().border.subtle }]}>
           {contributions.map((c, i) => (
-            <View key={i} style={styles.contributionRow}>
-              <Text style={[styles.contributionName, { color: colors.text.secondary }]} numberOfLines={1}>
+            <View key={i} style={getStyles().contributionRow}>
+              <Text style={[getStyles().contributionName, { color: getThemeColors().text.secondary }]} numberOfLines={1}>
                 {c.foodName}
               </Text>
-              <Text style={[styles.contributionAmount, { color: colors.text.muted }]}>
+              <Text style={[getStyles().contributionAmount, { color: getThemeColors().text.muted }]}>
                 {c.amount.toFixed(1)} {field.unit}
               </Text>
-              <Text style={[styles.contributionPct, { color: colors.text.muted }]}>
+              <Text style={[getStyles().contributionPct, { color: getThemeColors().text.muted }]}>
                 {Math.round(c.percentage)}%
               </Text>
             </View>
@@ -143,6 +143,7 @@ function NutrientRow({
 
 export function NutritionReportScreen({ navigation }: { navigation?: any }) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const store = useStore();
   const birthYear = useOnboardingStore((s) => s.birthYear);
   const birthMonth = useOnboardingStore((s) => s.birthMonth);
@@ -213,8 +214,8 @@ export function NutritionReportScreen({ navigation }: { navigation?: any }) {
   const hasAnyData = Object.keys(dailyTotals).length > 0;
 
   const renderSectionHeader = ({ section }: { section: { title: string } }) => (
-    <View style={styles.sectionHeader}>
-      <Text style={[styles.sectionTitle, { color: c.text.primary }]}>{section.title}</Text>
+    <View style={getStyles().sectionHeader}>
+      <Text style={[getStyles().sectionTitle, { color: getThemeColors().text.primary }]}>{section.title}</Text>
     </View>
   );
 
@@ -225,29 +226,29 @@ export function NutritionReportScreen({ navigation }: { navigation?: any }) {
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: c.bg.base }]} edges={['top']}>
+    <SafeAreaView style={[getStyles().safe, { backgroundColor: getThemeColors().bg.base }]} edges={['top']}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={getStyles().header}>
         {navigation && (
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Text style={[styles.backText, { color: c.accent.primary }]}>←</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={getStyles().backBtn}>
+            <Text style={[getStyles().backText, { color: getThemeColors().accent.primary }]}>←</Text>
           </TouchableOpacity>
         )}
-        <Text style={[styles.title, { color: c.text.primary }]}>Nutrition Report</Text>
+        <Text style={[getStyles().title, { color: getThemeColors().text.primary }]}>Nutrition Report</Text>
       </View>
 
       {/* Date selector */}
-      <View style={styles.dateRow}>
-        <TouchableOpacity onPress={() => changeDate(-1)} style={styles.dateArrow}>
-          <Text style={[styles.dateArrowText, { color: c.accent.primary }]}>‹</Text>
+      <View style={getStyles().dateRow}>
+        <TouchableOpacity onPress={() => changeDate(-1)} style={getStyles().dateArrow}>
+          <Text style={[getStyles().dateArrowText, { color: getThemeColors().accent.primary }]}>‹</Text>
         </TouchableOpacity>
-        <Text style={[styles.dateText, { color: c.text.primary }]}>{formatDisplayDate(selectedDate)}</Text>
+        <Text style={[getStyles().dateText, { color: getThemeColors().text.primary }]}>{formatDisplayDate(selectedDate)}</Text>
         <TouchableOpacity
           onPress={() => canGoForward && changeDate(1)}
-          style={styles.dateArrow}
+          style={getStyles().dateArrow}
           disabled={!canGoForward}
         >
-          <Text style={[styles.dateArrowText, !canGoForward && styles.dateArrowDisabled]}>›</Text>
+          <Text style={[getStyles().dateArrowText, !canGoForward && getStyles().dateArrowDisabled]}>›</Text>
         </TouchableOpacity>
       </View>
 
@@ -262,29 +263,29 @@ export function NutritionReportScreen({ navigation }: { navigation?: any }) {
 
       {/* RDA defaults warning */}
       {profileIncomplete && (
-        <View style={[styles.rdaWarningBanner, { backgroundColor: c.semantic.warningSubtle }]}>
-          <Text style={[styles.rdaWarningText, { color: c.semantic.warning }]}>
+        <View style={[getStyles().rdaWarningBanner, { backgroundColor: getThemeColors().semantic.warningSubtle }]}>
+          <Text style={[getStyles().rdaWarningText, { color: getThemeColors().semantic.warning }]}>
             <Icon name="warning" /> RDA values use defaults (age 30, male). Set your profile for accurate values.
           </Text>
           <TouchableOpacity
             onPress={() => navigation?.navigate?.('Profile')}
             activeOpacity={0.7}
           >
-            <Text style={[styles.rdaWarningLink, { color: c.semantic.warning }]}>Set Profile →</Text>
+            <Text style={[getStyles().rdaWarningLink, { color: getThemeColors().semantic.warning }]}>Set Profile →</Text>
           </TouchableOpacity>
         </View>
       )}
 
       {/* Content */}
       {isLoading ? (
-        <View style={styles.emptyContainer}>
-          <ActivityIndicator size="large" color={c.accent.primary} />
+        <View style={getStyles().emptyContainer}>
+          <ActivityIndicator size="large" color={getThemeColors().accent.primary} />
         </View>
       ) : !hasAnyData ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}><Icon name="salad" /></Text>
-          <Text style={[styles.emptyTitle, { color: c.text.primary }]}>No nutrient data</Text>
-          <Text style={[styles.emptyText, { color: c.text.muted }]}>Log food to see your nutrition report</Text>
+        <View style={getStyles().emptyContainer}>
+          <Text style={getStyles().emptyIcon}><Icon name="salad" /></Text>
+          <Text style={[getStyles().emptyTitle, { color: getThemeColors().text.primary }]}>No nutrient data</Text>
+          <Text style={[getStyles().emptyText, { color: getThemeColors().text.muted }]}>Log food to see your nutrition report</Text>
         </View>
       ) : (
         <SectionList
@@ -292,7 +293,7 @@ export function NutritionReportScreen({ navigation }: { navigation?: any }) {
           keyExtractor={(item) => item.key}
           renderSectionHeader={renderSectionHeader}
           renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={getStyles().listContent}
           stickySectionHeadersEnabled={false}
         />
       )}
@@ -300,8 +301,11 @@ export function NutritionReportScreen({ navigation }: { navigation?: any }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg.base },
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: getThemeColors().bg.base },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -309,9 +313,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
   },
   backBtn: { marginRight: spacing[3], minWidth: 44, minHeight: 44, justifyContent: 'center' },
-  backText: { color: colors.accent.primary, fontSize: typography.size['2xl'], lineHeight: typography.lineHeight['2xl'] },
+  backText: { color: getThemeColors().accent.primary, fontSize: typography.size['2xl'], lineHeight: typography.lineHeight['2xl'] },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.xl,
@@ -324,10 +328,10 @@ const styles = StyleSheet.create({
     gap: spacing[4],
   },
   dateArrow: { padding: spacing[2], minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
-  dateArrowText: { color: colors.accent.primary, fontSize: typography.size['2xl'], lineHeight: typography.lineHeight['2xl'] },
-  dateArrowDisabled: { color: colors.text.muted, opacity: opacityScale.disabled },
+  dateArrowText: { color: getThemeColors().accent.primary, fontSize: typography.size['2xl'], lineHeight: typography.lineHeight['2xl'] },
+  dateArrowDisabled: { color: getThemeColors().text.muted, opacity: opacityScale.disabled },
   dateText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.md,
@@ -338,13 +342,13 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[2],
   },
   sectionTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.lg,
   },
   nutrientRow: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.sm,
     padding: spacing[3],
     marginBottom: spacing[2],
@@ -356,7 +360,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   nutrientLabel: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.base,
@@ -368,7 +372,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   intakeText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
@@ -380,18 +384,18 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   rdaActual: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
   },
   noDataText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
   },
   barTrack: {
     height: 6,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.full,
     overflow: 'hidden',
   },
@@ -403,7 +407,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[3],
     paddingTop: spacing[2],
     borderTopWidth: 1,
-    borderTopColor: colors.border.subtle,
+    borderTopColor: getThemeColors().border.subtle,
   },
   contributionRow: {
     flexDirection: 'row',
@@ -411,19 +415,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[1],
   },
   contributionName: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     flex: 1,
   },
   contributionAmount: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     marginRight: spacing[2],
   },
   contributionPct: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     width: 36,
@@ -437,20 +441,20 @@ const styles = StyleSheet.create({
   },
   emptyIcon: { fontSize: 48, marginBottom: spacing[3] },
   emptyTitle: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.lg,
     marginBottom: spacing[2],
   },
   emptyText: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     textAlign: 'center',
   },
   rdaWarningBanner: {
-    backgroundColor: colors.semantic.warningSubtle,
+    backgroundColor: getThemeColors().semantic.warningSubtle,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     flexDirection: 'row',
@@ -459,13 +463,13 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   rdaWarningText: {
-    color: colors.semantic.warning,
+    color: getThemeColors().semantic.warning,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     flex: 1,
   },
   rdaWarningLink: {
-    color: colors.semantic.warning,
+    color: getThemeColors().semantic.warning,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.sm,

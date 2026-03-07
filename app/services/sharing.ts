@@ -25,9 +25,20 @@ export async function captureWorkoutAsImage(
 }
 
 /**
- * Open the native share sheet with a captured image.
+ * Build the public share URL for a workout session, with optional referral param.
  */
-export async function shareImage(uri: string): Promise<boolean> {
+export function buildShareUrl(sessionId: string, userId?: string): string {
+  const base = `https://repwise.app/share/workout/${sessionId}`;
+  return userId ? `${base}?ref=${userId}` : base;
+}
+
+/**
+ * Open the native share sheet with a captured image and share URL.
+ */
+export async function shareImage(
+  uri: string,
+  options?: { sessionId?: string; userId?: string },
+): Promise<boolean> {
   try {
     const Sharing = await import('expo-sharing');
     const available = await Sharing.isAvailableAsync();
@@ -35,9 +46,16 @@ export async function shareImage(uri: string): Promise<boolean> {
       Alert.alert('Sharing Unavailable', 'Sharing is not available on this device.');
       return false;
     }
+
+    const shareUrl = options?.sessionId
+      ? buildShareUrl(options.sessionId, options.userId)
+      : undefined;
+
     await Sharing.shareAsync(uri, {
       mimeType: 'image/png',
-      dialogTitle: 'Share Workout',
+      dialogTitle: shareUrl
+        ? `Check out my workout on Repwise! ${shareUrl}`
+        : 'Share Workout',
       UTI: 'public.png',
     });
     return true;

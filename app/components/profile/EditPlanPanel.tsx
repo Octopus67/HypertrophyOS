@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { colors } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 import { EmptyState } from '../common/EmptyState';
 import { PlanSummaryCard } from './PlanSummaryCard';
@@ -86,7 +86,7 @@ export function EditPlanPanel({
   if (!metrics && !goals) {
     return (
       <EmptyState
-        icon={<Icon name="target" size={28} color={c.accent.primary} />}
+        icon={<Icon name="target" size={28} color={getThemeColors().accent.primary} />}
         title="My Plan"
         description="Set up your body stats and goals to get personalized targets"
         actionLabel="Set Up My Plan"

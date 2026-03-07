@@ -5,15 +5,16 @@
  * and deload suggestions from training block data.
  */
 
-import { colors } from '../theme/tokens';
+;
+import { getThemeColors } from '../hooks/useThemeColors';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 export const PHASE_COLORS: Record<string, string> = {
-  accumulation: colors.chart.calories,
-  intensification: colors.accent.primary,
-  deload: colors.semantic.positive,
-  peak: colors.semantic.warning,
+  accumulation: getThemeColors().chart.calories,
+  intensification: getThemeColors().accent.primary,
+  deload: getThemeColors().semantic.positive,
+  peak: getThemeColors().semantic.warning,
 };
 
 export const NUTRITION_LABELS: Record<string, string> = {
@@ -78,7 +79,7 @@ function addDays(d: Date, n: number): Date {
 // ─── Public Functions ────────────────────────────────────────────────────────
 
 export function getPhaseColor(phaseType: string): string {
-  return PHASE_COLORS[phaseType] ?? colors.text.muted;
+  return PHASE_COLORS[phaseType] ?? getThemeColors().text.muted;
 }
 
 export function getNutritionLabel(nutritionPhase: string | null): string | null {

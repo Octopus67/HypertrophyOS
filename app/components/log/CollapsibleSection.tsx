@@ -6,8 +6,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import Animated, { Layout } from 'react-native-reanimated';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
 interface CollapsibleSectionProps {
@@ -24,6 +24,7 @@ export function CollapsibleSection({
   children,
 }: CollapsibleSectionProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [expanded, setExpanded] = useState(defaultExpanded ?? true);
   const reduceMotion = useReduceMotion();
 
@@ -32,7 +33,7 @@ export function CollapsibleSection({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: c.bg.surface }]}>
+    <View style={[styles.container, { backgroundColor: getThemeColors().bg.surface }]}>
       <TouchableOpacity
         style={styles.header}
         onPress={toggle}
@@ -43,9 +44,9 @@ export function CollapsibleSection({
       >
         <View style={styles.headerLeft}>
           {icon && <View style={styles.icon}>{icon}</View>}
-          <Text style={[styles.title, { color: c.text.primary }]}>{title}</Text>
+          <Text style={[styles.title, { color: getThemeColors().text.primary }]}>{title}</Text>
         </View>
-        <Text style={[styles.chevron, { color: c.text.muted }]}>{expanded ? '▾' : '▸'}</Text>
+        <Text style={[styles.chevron, { color: getThemeColors().text.muted }]}>{expanded ? '▾' : '▸'}</Text>
       </TouchableOpacity>
 
       {expanded && <Animated.View layout={reduceMotion ? undefined : Layout} style={styles.body}>{children}</Animated.View>}
@@ -53,9 +54,9 @@ export function CollapsibleSection({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.md,
     overflow: 'hidden',
   },
@@ -75,12 +76,12 @@ const styles = StyleSheet.create({
     marginRight: spacing[2],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
   },
   chevron: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.md,
     marginLeft: spacing[2],
   },

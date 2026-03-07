@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { generateWarmUpSets, WarmUpSet } from '../../utils/warmUpGenerator';
-import { colors, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface WarmUpSuggestionProps {
   workingWeightKg: number;
@@ -12,6 +12,7 @@ interface WarmUpSuggestionProps {
 
 export function WarmUpSuggestion({ workingWeightKg, barWeightKg, onGenerate }: WarmUpSuggestionProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [generated, setGenerated] = useState(false);
 
   if (generated || workingWeightKg <= barWeightKg) return null;
@@ -24,12 +25,12 @@ export function WarmUpSuggestion({ workingWeightKg, barWeightKg, onGenerate }: W
 
   return (
     <TouchableOpacity onPress={handlePress} style={styles.button}>
-      <Text style={[styles.text, { color: c.accent.primary }]}>Generate Warm-Up →</Text>
+      <Text style={[styles.text, { color: getThemeColors().accent.primary }]}>Generate Warm-Up →</Text>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   button: {
     paddingVertical: spacing[1],
     paddingHorizontal: spacing[2],
@@ -37,6 +38,6 @@ const styles = StyleSheet.create({
   text: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
 });

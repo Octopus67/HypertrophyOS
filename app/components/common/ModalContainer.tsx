@@ -17,10 +17,10 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { colors, typography, radius, spacing, motion } from '../../theme/tokens';
+import { typography, radius, spacing, motion } from '../../theme/tokens';
 import { springs } from '../../theme/tokens';
 import { Icon } from './Icon';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface ModalContainerProps {
   visible: boolean;
@@ -100,15 +100,15 @@ export function ModalContainer({
   if (isWeb) {
     return (
       <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-        <Pressable style={styles.webOverlay} onPress={onClose}>
-          <Animated.View style={[styles.backdrop, { backgroundColor: themeColors.bg.overlay }, backdropStyle]} pointerEvents="none" />
-          <Animated.View style={[styles.webDialog, { backgroundColor: themeColors.bg.surface, borderColor: themeColors.border.default }, webContentStyle]} testID={testID}>
+        <Pressable style={getStyles().webOverlay} onPress={onClose}>
+          <Animated.View style={[getStyles().backdrop, { backgroundColor: themeColors.bg.overlay }, backdropStyle]} pointerEvents="none" />
+          <Animated.View style={[getStyles().webDialog, { backgroundColor: themeColors.bg.surface, borderColor: themeColors.border.default }, webContentStyle]} testID={testID}>
             <Pressable onPress={(e) => e.stopPropagation()} style={{ flex: 1 }}>
-              <View style={styles.header}>
+              <View style={getStyles().header}>
                 {typeof title === 'string' ? (
-                  <Text style={[styles.title, { color: themeColors.text.primary }]}>{title}</Text>
+                  <Text style={[getStyles().title, { color: themeColors.text.primary }]}>{title}</Text>
                 ) : (
-                  <View style={styles.titleRow}>{title}</View>
+                  <View style={getStyles().titleRow}>{title}</View>
                 )}
                 <TouchableOpacity onPress={onClose} hitSlop={8} style={{ padding: 8 }} testID={closeButtonTestID}>
                   <Icon name="close" size={18} color={themeColors.text.secondary} />
@@ -124,20 +124,20 @@ export function ModalContainer({
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-      <View style={styles.mobileOverlay}>
-        <Animated.View style={[styles.backdrop, { backgroundColor: themeColors.bg.overlay }, backdropStyle]}>
+      <View style={getStyles().mobileOverlay}>
+        <Animated.View style={[getStyles().backdrop, { backgroundColor: themeColors.bg.overlay }, backdropStyle]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         </Animated.View>
         <GestureDetector gesture={panGesture}>
-          <Animated.View style={[styles.mobileSheet, { backgroundColor: themeColors.bg.surface, borderColor: themeColors.border.default }, mobileContentStyle]} testID={testID}>
-            <View style={styles.dragHandleContainer}>
-              <View style={[styles.dragHandle, { backgroundColor: themeColors.bg.surfaceRaised }]} />
+          <Animated.View style={[getStyles().mobileSheet, { backgroundColor: themeColors.bg.surface, borderColor: themeColors.border.default }, mobileContentStyle]} testID={testID}>
+            <View style={getStyles().dragHandleContainer}>
+              <View style={[getStyles().dragHandle, { backgroundColor: themeColors.bg.surfaceRaised }]} />
             </View>
-            <View style={styles.header}>
+            <View style={getStyles().header}>
               {typeof title === 'string' ? (
-                <Text style={[styles.title, { color: themeColors.text.primary }]}>{title}</Text>
+                <Text style={[getStyles().title, { color: themeColors.text.primary }]}>{title}</Text>
               ) : (
-                <View style={styles.titleRow}>{title}</View>
+                <View style={getStyles().titleRow}>{title}</View>
               )}
               <TouchableOpacity onPress={onClose} hitSlop={8} style={{ padding: 8, zIndex: 30 }} testID={closeButtonTestID}>
                 <Icon name="close" size={18} color={themeColors.text.secondary} />
@@ -151,10 +151,13 @@ export function ModalContainer({
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.bg.overlay,
+    backgroundColor: getThemeColors().bg.overlay,
   },
   webOverlay: {
     flex: 1,
@@ -164,10 +167,10 @@ const styles = StyleSheet.create({
   webDialog: {
     maxWidth: 480,
     width: '90%',
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     padding: spacing[6],
     maxHeight: '85%',
   },
@@ -176,12 +179,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   mobileSheet: {
-    backgroundColor: colors.bg.surface,
+    backgroundColor: getThemeColors().bg.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     borderWidth: 1,
     borderBottomWidth: 0,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     padding: spacing[6],
     paddingTop: spacing[2],
     maxHeight: '90%',
@@ -194,7 +197,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
   },
   header: {
     flexDirection: 'row',
@@ -205,7 +208,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
   },
   titleRow: {
     flexDirection: 'row',

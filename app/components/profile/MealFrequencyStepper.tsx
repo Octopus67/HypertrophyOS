@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 const COUNTS = [2, 3, 4, 5, 6];
 
@@ -9,6 +10,8 @@ interface Props {
 }
 
 export function MealFrequencyStepper({ value, onChange }: Props) {
+  const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Meals per day</Text>
@@ -34,10 +37,10 @@ export function MealFrequencyStepper({ value, onChange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { marginBottom: spacing[3] },
   label: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
@@ -51,21 +54,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.border.default,
-    backgroundColor: colors.bg.surfaceRaised,
+    borderColor: getThemeColors().border.default,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
   },
   btnActive: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   text: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.md,
   },
   textActive: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontWeight: typography.weight.semibold,
   },
 });

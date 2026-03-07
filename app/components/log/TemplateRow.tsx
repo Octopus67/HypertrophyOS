@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius, shadows } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius, shadows } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface TemplateRowProps {
   name: string;
@@ -10,30 +10,31 @@ interface TemplateRowProps {
 
 export function TemplateRow({ name, exerciseCount, onStart }: TemplateRowProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
-    <View style={[styles.card, { backgroundColor: c.bg.surface, borderColor: c.border.subtle }]}>
+    <View style={[styles.card, { backgroundColor: getThemeColors().bg.surface, borderColor: getThemeColors().border.subtle }]}>
       <View style={styles.content}>
-        <Text style={[styles.name, { color: c.text.primary }]} numberOfLines={1}>{name}</Text>
-        <Text style={[styles.badge, { color: c.text.secondary }]}>
+        <Text style={[styles.name, { color: getThemeColors().text.primary }]} numberOfLines={1}>{name}</Text>
+        <Text style={[styles.badge, { color: getThemeColors().text.secondary }]}>
           {exerciseCount} {exerciseCount === 1 ? 'exercise' : 'exercises'}
         </Text>
       </View>
-      <TouchableOpacity style={[styles.startButton, { backgroundColor: c.accent.primary }]} onPress={onStart} activeOpacity={0.8}>
-        <Text style={[styles.startText, { color: c.text.inverse }]}>Start</Text>
+      <TouchableOpacity style={[styles.startButton, { backgroundColor: getThemeColors().accent.primary }]} onPress={onStart} activeOpacity={0.8}>
+        <Text style={[styles.startText, { color: getThemeColors().text.inverse }]}>Start</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing[4],
     borderRadius: radius.md,
     borderWidth: 1,
-    backgroundColor: colors.bg.surface,
-    borderColor: colors.border.subtle,
+    backgroundColor: getThemeColors().bg.surface,
+    borderColor: getThemeColors().border.subtle,
   },
   content: {
     flex: 1,
@@ -43,17 +44,17 @@ const styles = StyleSheet.create({
   },
   name: {
     flex: 1,
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },
   badge: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.regular,
   },
   startButton: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
     borderRadius: radius.sm,
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
     ...shadows.sm,
   },
   startText: {
-    color: colors.text.inverse,
+    color: getThemeColors().text.inverse,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },

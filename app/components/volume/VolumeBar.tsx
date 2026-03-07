@@ -6,8 +6,8 @@
  */
 
 import { View, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import type { WNSLandmarks } from '../../types/volume';
 
 export interface VolumeBarProps {
@@ -18,10 +18,10 @@ export interface VolumeBarProps {
 
 /** Zone colors derived from theme semantic tokens. */
 const ZONE_COLORS = {
-  belowMev: colors.semantic.warning,        // MV → MEV: yellow
-  optimal: colors.semantic.positive,         // MEV → MAV: green
-  approachingMrv: colors.semantic.caution,   // MAV → MRV: orange
-  aboveMrv: colors.semantic.negative,        // > MRV: red
+  belowMev: getThemeColors().semantic.warning,        // MV → MEV: yellow
+  optimal: getThemeColors().semantic.positive,         // MEV → MAV: green
+  approachingMrv: getThemeColors().semantic.caution,   // MAV → MRV: orange
+  aboveMrv: getThemeColors().semantic.negative,        // > MRV: red
 } as const;
 
 const DOT_SIZE = 14;
@@ -36,6 +36,7 @@ function getZoneLabel(volume: number, landmarks: WNSLandmarks): string {
 
 export function VolumeBar({ landmarks, currentVolume, muscleGroup }: VolumeBarProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const { mv, mev, mav_high, mrv } = landmarks;
   // Total range extends 20% past MRV to show overflow
   const maxRange = mrv * 1.2;
@@ -56,7 +57,7 @@ export function VolumeBar({ landmarks, currentVolume, muscleGroup }: VolumeBarPr
       accessibilityRole="progressbar"
     >
       {/* Zone bar */}
-      <View style={[styles.barTrack, { backgroundColor: c.bg.surfaceRaised }]}>
+      <View style={[styles.barTrack, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
         {/* MV → MEV zone */}
         <View
           style={[
@@ -105,13 +106,13 @@ export function VolumeBar({ landmarks, currentVolume, muscleGroup }: VolumeBarPr
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     paddingVertical: spacing[2],
   },
   barTrack: {
     height: BAR_HEIGHT,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: BAR_HEIGHT / 2,
     overflow: 'visible',
     position: 'relative',
@@ -128,9 +129,9 @@ const styles = StyleSheet.create({
     width: DOT_SIZE,
     height: DOT_SIZE,
     borderRadius: DOT_SIZE / 2,
-    backgroundColor: colors.text.primary,
+    backgroundColor: getThemeColors().text.primary,
     borderWidth: 2,
-    borderColor: colors.bg.base,
+    borderColor: getThemeColors().bg.base,
     marginLeft: -(DOT_SIZE / 2),
   },
   labels: {
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   label: {
     position: 'absolute',
     fontSize: typography.size.xs - 2,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontWeight: typography.weight.medium,
     transform: [{ translateX: -12 }],
   },

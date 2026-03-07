@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { colors, typography, spacing, letterSpacing } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { typography, spacing, letterSpacing } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Button } from './Button';
 
 interface EmptyStateProps {
@@ -23,11 +23,12 @@ export function EmptyState({
   children,
 }: EmptyStateProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
       <View style={styles.iconWrap} accessibilityLabel={`${title} illustration`}>{icon}</View>
-      <Text style={[styles.title, { color: c.text.secondary }]}>{title}</Text>
-      <Text style={[styles.description, { color: c.text.muted }]}>{description}</Text>
+      <Text style={[styles.title, { color: getThemeColors().text.secondary }]}>{title}</Text>
+      <Text style={[styles.description, { color: getThemeColors().text.muted }]}>{description}</Text>
       {children}
       {actionLabel ? (
         <Button
@@ -41,7 +42,7 @@ export function EmptyState({
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     letterSpacing: letterSpacing.tight,
     marginBottom: spacing[2],
     textAlign: 'center',
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.regular,
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     textAlign: 'center',
     marginBottom: spacing[4],
   },

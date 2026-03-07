@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, useWindowDimensions, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography, letterSpacing as ls } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, letterSpacing as ls } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { AchievementCard } from './AchievementCard';
 import { AchievementDetailSheet } from './AchievementDetailSheet';
 import { Skeleton } from '../common/Skeleton';
@@ -47,6 +47,7 @@ export function groupAchievementsByCategory(
 
 export function AchievementGrid() {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [achievements, setAchievements] = useState<AchievementItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -143,13 +144,13 @@ export function AchievementGrid() {
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   skeletonRow: {
     flexDirection: 'row',
     gap: spacing[3],
   },
   empty: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.sm,
     textAlign: 'center',
     paddingVertical: spacing[4],
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   sectionTitle: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     marginBottom: spacing[2],
@@ -176,11 +177,11 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
     borderRadius: 8,
   },
   retryText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
   },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 const OPTIONS = ['7d', '14d', '30d', '90d'] as const;
 
@@ -12,20 +12,21 @@ interface TimeRangeSelectorProps {
 
 export function TimeRangeSelector({ selected, onSelect }: TimeRangeSelectorProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   return (
-    <View style={[styles.container, { backgroundColor: c.bg.surfaceRaised }]}>
+    <View style={[styles.container, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
       {OPTIONS.map((option) => {
         const isActive = selected === option;
         return (
           <TouchableOpacity
             key={option}
-            style={[styles.segment, isActive && { backgroundColor: c.accent.primary }]}
+            style={[styles.segment, isActive && { backgroundColor: getThemeColors().accent.primary }]}
             onPress={() => onSelect(option)}
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={`${option} time range`}
           >
-            <Text style={[styles.label, { color: isActive ? c.text.inverse : c.text.secondary }]}>
+            <Text style={[styles.label, { color: isActive ? getThemeColors().text.inverse : getThemeColors().text.secondary }]}>
               {option}
             </Text>
           </TouchableOpacity>
@@ -35,10 +36,10 @@ export function TimeRangeSelector({ selected, onSelect }: TimeRangeSelectorProps
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     padding: 2,
   },
@@ -49,15 +50,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm - 2,
   },
   segmentActive: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: getThemeColors().accent.primary,
   },
   label: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
   labelActive: {
-    color: colors.text.inverse,
+    color: getThemeColors().text.inverse,
     fontWeight: typography.weight.semibold,
   },
 });

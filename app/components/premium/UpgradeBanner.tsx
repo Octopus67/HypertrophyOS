@@ -7,8 +7,8 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { radius, spacing, typography } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
@@ -18,6 +18,7 @@ interface UpgradeBannerProps {
 
 export function UpgradeBanner({ onPress }: UpgradeBannerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const reduceMotion = useReduceMotion();
   const pulseOpacity = useSharedValue(1);
 
@@ -38,27 +39,27 @@ export function UpgradeBanner({ onPress }: UpgradeBannerProps) {
   }));
 
   return (
-    <TouchableOpacity style={[styles.banner, { backgroundColor: c.accent.primaryMuted, borderColor: c.accent.primary }]} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity style={[styles.banner, { backgroundColor: getThemeColors().accent.primaryMuted, borderColor: getThemeColors().accent.primary }]} onPress={onPress} activeOpacity={0.8}>
       <Animated.View style={[styles.content, pulseStyle]}>
-        <Icon name="star" size={16} color={c.premium.gold} />
+        <Icon name="star" size={16} color={getThemeColors().premium.gold} />
         <View style={styles.textContainer}>
-          <Text style={[styles.title, { color: c.text.primary }]}>Unlock Premium</Text>
-          <Text style={[styles.subtitle, { color: c.text.secondary }]}>
+          <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Unlock Premium</Text>
+          <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>
             Coaching, advanced analytics & more
           </Text>
         </View>
-        <Text style={[styles.arrow, { color: c.accent.primary }]}>→</Text>
+        <Text style={[styles.arrow, { color: getThemeColors().accent.primary }]}>→</Text>
       </Animated.View>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   banner: {
-    backgroundColor: colors.accent.primaryMuted,
+    backgroundColor: getThemeColors().accent.primaryMuted,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.accent.primary,
+    borderColor: getThemeColors().accent.primary,
     padding: spacing[4],
     marginHorizontal: spacing[4],
     marginVertical: spacing[2],
@@ -73,19 +74,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     fontWeight: typography.weight.semibold,
   },
   subtitle: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginTop: 2,
   },
   arrow: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.lg,
     lineHeight: typography.lineHeight.lg,
     fontWeight: typography.weight.semibold,

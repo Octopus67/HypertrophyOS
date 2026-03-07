@@ -13,8 +13,8 @@ import {
 import api from '../../services/api';
 import { orderTemplates } from '../../utils/templateConversion';
 import type { WorkoutTemplateResponse } from '../../types/training';
-import { colors, spacing, typography, radius, shadows, letterSpacing as ls } from '../../theme/tokens';
-import { useThemeColors } from '../../hooks/useThemeColors';
+import { spacing, typography, radius, shadows, letterSpacing as ls } from '../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface TemplatePickerProps {
   onSelectTemplate: (templateId: string, isSystem: boolean) => void;
@@ -28,6 +28,7 @@ export function TemplatePicker({
   onStartEmpty,
 }: TemplatePickerProps) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const [userTemplates, setUserTemplates] = useState<WorkoutTemplateResponse[]>([]);
   const [systemTemplates, setSystemTemplates] = useState<WorkoutTemplateResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,27 +115,27 @@ export function TemplatePicker({
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator color={c.accent.primary} />
+      <View style={getStyles().loadingContainer}>
+        <ActivityIndicator color={getThemeColors().accent.primary} />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={getStyles().container} contentContainerStyle={getStyles().content}>
       {/* Quick actions */}
-      <TouchableOpacity style={[styles.quickAction, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]} onPress={onCopyLast} activeOpacity={0.7}>
-        <Text style={[styles.quickActionText, { color: c.text.primary }]}>📋 Copy Last Workout</Text>
+      <TouchableOpacity style={[getStyles().quickAction, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]} onPress={onCopyLast} activeOpacity={0.7}>
+        <Text style={[getStyles().quickActionText, { color: getThemeColors().text.primary }]}>📋 Copy Last Workout</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.quickAction, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]} onPress={onStartEmpty} activeOpacity={0.7}>
-        <Text style={[styles.quickActionText, { color: c.text.primary }]}>➕ Start Empty Workout</Text>
+      <TouchableOpacity style={[getStyles().quickAction, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]} onPress={onStartEmpty} activeOpacity={0.7}>
+        <Text style={[getStyles().quickActionText, { color: getThemeColors().text.primary }]}>➕ Start Empty Workout</Text>
       </TouchableOpacity>
 
       {/* My Templates */}
       {userTemplates.length > 0 && (
         <>
-          <Text style={[styles.sectionTitle, { color: c.text.secondary }]}>My Templates</Text>
+          <Text style={[getStyles().sectionTitle, { color: getThemeColors().text.secondary }]}>My Templates</Text>
           {userTemplates.map((t) => (
             <TemplateCard
               key={t.id}
@@ -149,7 +150,7 @@ export function TemplatePicker({
       {/* System Templates */}
       {systemTemplates.length > 0 && (
         <>
-          <Text style={[styles.sectionTitle, { color: c.text.secondary }]}>System Templates</Text>
+          <Text style={[getStyles().sectionTitle, { color: getThemeColors().text.secondary }]}>System Templates</Text>
           {systemTemplates.map((t) => (
             <TemplateCard
               key={t.id}
@@ -174,25 +175,28 @@ function TemplateCard({
 }) {
   return (
     <TouchableOpacity
-      style={[styles.card, { backgroundColor: colors.bg.surfaceRaised, borderColor: colors.border.default }]}
+      style={[getStyles().card, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}
       onPress={onPress}
       onLongPress={onLongPress}
       activeOpacity={0.7}
     >
-      <Text style={[styles.cardName, { color: colors.text.primary }]}>{template.name}</Text>
+      <Text style={[getStyles().cardName, { color: getThemeColors().text.primary }]}>{template.name}</Text>
       {template.description ? (
-        <Text style={[styles.cardDesc, { color: colors.text.secondary }]} numberOfLines={1}>
+        <Text style={[getStyles().cardDesc, { color: getThemeColors().text.secondary }]} numberOfLines={1}>
           {template.description}
         </Text>
       ) : null}
-      <Text style={[styles.cardMeta, { color: colors.text.muted }]}>
+      <Text style={[getStyles().cardMeta, { color: getThemeColors().text.muted }]}>
         {template.exercises.length} exercise{template.exercises.length !== 1 ? 's' : ''}
       </Text>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -207,19 +211,19 @@ const styles = StyleSheet.create({
     padding: spacing[8],
   },
   quickAction: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     padding: spacing[4],
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
   },
   quickActionText: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
   },
   sectionTitle: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
     textTransform: 'uppercase',
@@ -227,26 +231,26 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   card: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.sm,
     padding: spacing[4],
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     ...shadows.sm,
   },
   cardName: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     marginBottom: spacing[1],
   },
   cardDesc: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     marginBottom: spacing[1],
   },
   cardMeta: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
   },
 });

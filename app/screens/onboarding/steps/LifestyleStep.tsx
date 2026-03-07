@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { colors, spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors } from '../../../hooks/useThemeColors';
+import { spacing, typography, radius } from '../../../theme/tokens';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
 import type { ActivityLevel, ExerciseType } from '../../../store/onboardingSlice';
 import { computeBMR, computeNEAT, computeEAT } from '../../../utils/onboardingCalculations';
@@ -49,6 +49,7 @@ const EXERCISE_CHIPS: ExerciseChip[] = [
 
 export function LifestyleStep({ onNext }: Props) {
   const c = useThemeColors();
+  const styles = getThemedStyles(c);
   const {
     activityLevel,
     exerciseSessionsPerWeek,
@@ -87,11 +88,11 @@ export function LifestyleStep({ onNext }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={[styles.title, { color: c.text.primary }]}>Lifestyle</Text>
-      <Text style={[styles.subtitle, { color: c.text.secondary }]}>Help us understand your daily activity</Text>
+      <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Lifestyle</Text>
+      <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>Help us understand your daily activity</Text>
 
       {/* Activity level */}
-      <Text style={[styles.sectionLabel, { color: c.text.primary }]}>What does a typical day look like?</Text>
+      <Text style={[styles.sectionLabel, { color: getThemeColors().text.primary }]}>What does a typical day look like?</Text>
       <View style={styles.activityGrid}>
         {ACTIVITY_OPTIONS.map((opt) => {
           const isSelected = activityLevel === opt.value;
@@ -115,7 +116,7 @@ export function LifestyleStep({ onNext }: Props) {
       </View>
 
       {/* Exercise sessions per week */}
-      <Text style={[styles.sectionLabel, { color: c.text.primary }]}>How many times per week do you exercise?</Text>
+      <Text style={[styles.sectionLabel, { color: getThemeColors().text.primary }]}>How many times per week do you exercise?</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sessionRow}>
         {SESSION_COUNTS.map((n) => {
           const isSelected = exerciseSessionsPerWeek === n;
@@ -136,7 +137,7 @@ export function LifestyleStep({ onNext }: Props) {
       </ScrollView>
 
       {/* Exercise types */}
-      <Text style={[styles.sectionLabel, { color: c.text.primary }]}>What kind?</Text>
+      <Text style={[styles.sectionLabel, { color: getThemeColors().text.primary }]}>What kind?</Text>
       <View style={styles.chipRow}>
         {EXERCISE_CHIPS.map((chip) => {
           const isSelected = exerciseTypes.includes(chip.value);
@@ -157,10 +158,10 @@ export function LifestyleStep({ onNext }: Props) {
 
       {/* Live activity calorie display */}
       {liveActivity > 0 && (
-        <View style={[styles.activityCalCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.accent.primaryMuted }]}>
-          <Text style={[styles.activityCalLabel, { color: c.text.secondary }]}>Daily activity burn</Text>
-          <Text style={[styles.activityCalValue, { color: c.accent.primary }]}>~{liveActivity.toLocaleString()} kcal</Text>
-          <Text style={[styles.activityCalHint, { color: c.text.muted }]}>From daily movement + exercise</Text>
+        <View style={[styles.activityCalCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().accent.primaryMuted }]}>
+          <Text style={[styles.activityCalLabel, { color: getThemeColors().text.secondary }]}>Daily activity burn</Text>
+          <Text style={[styles.activityCalValue, { color: getThemeColors().accent.primary }]}>~{liveActivity.toLocaleString()} kcal</Text>
+          <Text style={[styles.activityCalHint, { color: getThemeColors().text.muted }]}>From daily movement + exercise</Text>
         </View>
       )}
 
@@ -173,7 +174,7 @@ export function LifestyleStep({ onNext }: Props) {
 }
 
 
-const styles = StyleSheet.create({
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -182,20 +183,20 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[10],
   },
   title: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.bold,
     marginBottom: spacing[1],
     lineHeight: typography.lineHeight['2xl'],
   },
   subtitle: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     marginBottom: spacing[6],
     lineHeight: typography.lineHeight.base,
   },
   sectionLabel: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     marginBottom: spacing[3],
@@ -208,36 +209,36 @@ const styles = StyleSheet.create({
   activityCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     padding: spacing[4],
     gap: spacing[3],
   },
   activityCardSelected: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   activityLabel: {
-    color: colors.text.primary,
+    color: getThemeColors().text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     flex: 1,
     lineHeight: typography.lineHeight.base,
   },
   activityLabelSelected: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
   activityDesc: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     flex: 1,
     textAlign: 'right',
     lineHeight: typography.lineHeight.xs,
   },
   activityDescSelected: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
   },
   sessionRow: {
     flexDirection: 'row',
@@ -247,26 +248,26 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: radius.md,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing[2],
   },
   sessionBtnSelected: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   sessionText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight.base,
   },
   sessionTextSelected: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
   },
   chipRow: {
     flexDirection: 'row',
@@ -277,43 +278,43 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
     borderRadius: radius.full,
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
+    borderColor: getThemeColors().border.subtle,
     minHeight: 44,
     justifyContent: 'center',
   },
   chipSelected: {
-    borderColor: colors.accent.primary,
-    backgroundColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primary,
+    backgroundColor: getThemeColors().accent.primaryMuted,
   },
   chipText: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
   },
   chipTextSelected: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontWeight: typography.weight.semibold,
   },
   activityCalCard: {
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.accent.primaryMuted,
+    borderColor: getThemeColors().accent.primaryMuted,
     padding: spacing[4],
     marginTop: spacing[6],
     alignItems: 'center',
   },
   activityCalLabel: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
   },
   activityCalValue: {
-    color: colors.accent.primary,
+    color: getThemeColors().accent.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
     marginTop: spacing[1],
@@ -321,7 +322,7 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.xl,
   },
   activityCalHint: {
-    color: colors.text.muted,
+    color: getThemeColors().text.muted,
     fontSize: typography.size.xs,
     marginTop: spacing[1],
     lineHeight: typography.lineHeight.xs,

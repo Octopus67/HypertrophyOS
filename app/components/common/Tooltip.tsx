@@ -2,8 +2,9 @@ import { useEffect } from 'react';
 import { View, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useTooltipStore } from '../../store/tooltipStore';
-import { colors, radius, spacing, typography, shadows, motion } from '../../theme/tokens';
+import { radius, spacing, typography, shadows, motion } from '../../theme/tokens';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
+import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 interface TooltipProps {
   tooltipId: string;
@@ -35,19 +36,22 @@ export const Tooltip = ({ tooltipId, text, children }: TooltipProps) => {
   if (dismissed) return <>{children}</>;
 
   return (
-    <View style={styles.container}>
+    <View style={getStyles().container}>
       {children}
       <TouchableWithoutFeedback onPress={() => dismiss(tooltipId)}>
-        <Animated.View style={[styles.bubble, animatedBubbleStyle]}>
-          <Text style={styles.text}>{text}</Text>
-          <View style={styles.arrow} />
+        <Animated.View style={[getStyles().bubble, animatedBubbleStyle]}>
+          <Text style={getStyles().text}>{text}</Text>
+          <View style={getStyles().arrow} />
         </Animated.View>
       </TouchableWithoutFeedback>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+/** Lazy styles for module-level helpers */
+function getStyles() { return getThemedStyles(getThemeColors()); }
+
+const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     position: 'relative',
   },
@@ -58,16 +62,16 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     marginBottom: spacing[1],
-    backgroundColor: colors.bg.surfaceRaised,
+    backgroundColor: getThemeColors().bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: colors.border.default,
+    borderColor: getThemeColors().border.default,
     borderRadius: radius.sm,
     paddingVertical: spacing[1],
     paddingHorizontal: spacing[3],
     ...shadows.md,
   },
   text: {
-    color: colors.text.secondary,
+    color: getThemeColors().text.secondary,
     fontSize: typography.size.sm,
     textAlign: 'center',
   },
@@ -82,6 +86,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 6,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: colors.bg.surfaceRaised,
+    borderTopColor: getThemeColors().bg.surfaceRaised,
   },
 });
