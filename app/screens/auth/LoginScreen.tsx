@@ -16,7 +16,6 @@ import { radius, spacing, typography } from '../../theme/tokens';
 import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Button } from '../../components/common/Button';
 import api, { setTokenProvider } from '../../services/api';
-import { useStore } from '../../store';
 import { isValidEmail, trimEmail } from '../../utils/validation';
 import Animated from 'react-native-reanimated';
 import { useStaggeredEntrance } from '../../hooks/useStaggeredEntrance';
@@ -67,7 +66,7 @@ export function initTokenProvider(clearAuth: () => void) {
 
 interface LoginScreenProps {
   onNavigateRegister: () => void;
-  onLoginSuccess: () => void;
+  onLoginSuccess: (user: { id: string; email: string }, tokens: { accessToken: string; refreshToken: string; expiresIn: number }) => void;
   onNavigateForgotPassword?: () => void;
 }
 
@@ -80,7 +79,6 @@ export function LoginScreen({ onNavigateRegister, onLoginSuccess, onNavigateForg
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
-  const setAuth = useStore((s) => s.setAuth);
   const passwordRef = useRef<TextInput>(null);
   const titleAnim = useStaggeredEntrance(0, 80);
   const subtitleAnim = useStaggeredEntrance(1, 80);
@@ -104,15 +102,14 @@ export function LoginScreen({ onNavigateRegister, onLoginSuccess, onNavigateForg
     try {
       const { data } = await api.post('auth/login', { email: cleanEmail, password });
       await saveTokens(data.access_token, data.refresh_token);
-      setAuth(
-        { id: parseJwtSub(data.access_token), email: cleanEmail, role: 'user' },
+      onLoginSuccess(
+        { id: parseJwtSub(data.access_token), email: cleanEmail },
         {
           accessToken: data.access_token,
           refreshToken: data.refresh_token,
           expiresIn: data.expires_in,
         },
       );
-      onLoginSuccess();
     } catch (err: any) {
       setError(err?.response?.data?.message ?? err?.response?.data?.detail ?? 'Login failed. Please check your credentials.');
       setEmailError('');
@@ -123,11 +120,10 @@ export function LoginScreen({ onNavigateRegister, onLoginSuccess, onNavigateForg
 
   const handleSocialSuccess = async (tokens: { access_token: string; refresh_token: string; expires_in: number }) => {
     await saveTokens(tokens.access_token, tokens.refresh_token);
-    setAuth(
-      { id: parseJwtSub(tokens.access_token), email: '', role: 'user' },
+    onLoginSuccess(
+      { id: parseJwtSub(tokens.access_token), email: '' },
       { accessToken: tokens.access_token, refreshToken: tokens.refresh_token, expiresIn: tokens.expires_in },
     );
-    onLoginSuccess();
   };
 
   return (

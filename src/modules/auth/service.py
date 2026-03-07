@@ -146,11 +146,27 @@ class AuthService:
         user = result.scalar_one_or_none()
 
         if user is None:
+            # Check if an active user already exists with this email
+            existing = await self._get_user_by_email(email)
+            if existing is not None:
+                if existing.auth_provider == AuthProvider.EMAIL:
+                    # Link the OAuth provider to the existing email account
+                    existing.auth_provider = provider
+                    existing.auth_provider_id = provider_user_id
+                    existing.email_verified = True
+                    await self.session.flush()
+                    return _generate_tokens(existing.id)
+                else:
+                    raise ConflictError(
+                        "An account with this email already exists via another provider"
+                    )
+
             # Create a new user linked to this OAuth provider
             user = User(
                 email=email,
                 auth_provider=provider,
                 auth_provider_id=provider_user_id,
+                email_verified=True,
                 role=UserRole.USER,
             )
             self.session.add(user)

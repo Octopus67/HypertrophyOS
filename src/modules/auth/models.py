@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, Index, String, Text
+from sqlalchemy import Boolean, DateTime, Index, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.shared.base_model import Base
@@ -22,7 +22,7 @@ class User(SoftDeleteMixin, Base):
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(
-        String(320), unique=True, index=True, nullable=False
+        String(320), index=True, nullable=False
     )
     hashed_password: Mapped[Optional[str]] = mapped_column(
         String(128), nullable=True
@@ -55,6 +55,12 @@ class User(SoftDeleteMixin, Base):
 
     __table_args__ = (
         Index("ix_users_auth_provider_id", "auth_provider", "auth_provider_id"),
+        Index(
+            "ix_users_email_active",
+            "email",
+            unique=True,
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
     )
 
 

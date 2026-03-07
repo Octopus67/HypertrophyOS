@@ -100,16 +100,11 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
     setLoading(true);
     try {
       const { data } = await api.post('auth/register', { email: cleanEmail, password });
-      await secureSet('rw_access_token', data.access_token);
-      await secureSet('rw_refresh_token', data.refresh_token);
-      setAuth(
-        { id: parseJwtSub(data.access_token), email: cleanEmail, role: 'user' },
-        {
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
-          expiresIn: data.expires_in,
-        },
-      );
+      // Don't set auth until email is verified — just store tokens for post-verification
+      if (data.access_token && data.refresh_token) {
+        await secureSet('rw_access_token', data.access_token);
+        await secureSet('rw_refresh_token', data.refresh_token);
+      }
       onRegisterSuccess(cleanEmail);
     } catch (err: unknown) {
       const msg = extractApiError(err, 'Registration failed');
@@ -122,11 +117,12 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
   const handleSocialSuccess = async (tokens: { access_token: string; refresh_token: string; expires_in: number }) => {
     await secureSet('rw_access_token', tokens.access_token);
     await secureSet('rw_refresh_token', tokens.refresh_token);
+    // OAuth users are pre-verified — set auth immediately with onboarding flag
     setAuth(
       { id: parseJwtSub(tokens.access_token), email: '', role: 'user' },
       { accessToken: tokens.access_token, refreshToken: tokens.refresh_token, expiresIn: tokens.expires_in },
     );
-    onRegisterSuccess('');
+    useStore.getState().setNeedsOnboarding(true);
   };
 
   return (

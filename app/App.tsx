@@ -44,13 +44,61 @@ type AuthStackParamList = {
 const AuthStack = createStackNavigator<AuthStackParamList>();
 
 function AuthNavigator() {
+  const setAuth = useStore((s) => s.setAuth);
+  const setNeedsOnboarding = useStore((s) => s.setNeedsOnboarding);
+  const setProfile = useStore((s) => s.setProfile);
+  const setSubscription = useStore((s) => s.setSubscription);
+
+  /** After email verification, read stored tokens and activate auth + onboarding. */
+  const handleVerified = async () => {
+    const accessToken = Platform.OS === 'web'
+      ? localStorage.getItem('rw_access_token')
+      : await SecureStore.getItemAsync('rw_access_token');
+    const refreshToken = Platform.OS === 'web'
+      ? localStorage.getItem('rw_refresh_token')
+      : await SecureStore.getItemAsync('rw_refresh_token');
+    if (!accessToken || !refreshToken) return;
+
+    try {
+      const { data } = await api.get('auth/me');
+      setAuth(
+        { id: data.id, email: data.email, role: data.role ?? 'user' },
+        { accessToken, refreshToken, expiresIn: data.expires_in ?? 3600 },
+      );
+      setNeedsOnboarding(true);
+    } catch {
+      // Token invalid — user stays on auth screen
+    }
+  };
+
+  /** After login, set auth then load profile + subscription. */
+  const handleLoginSuccess = async (user: { id: string; email: string }, tokens: { accessToken: string; refreshToken: string; expiresIn: number }) => {
+    setAuth({ id: user.id, email: user.email, role: 'user' }, tokens);
+
+    // Load profile and subscription in parallel
+    try {
+      const [profileRes, subRes] = await Promise.allSettled([
+        api.get('users/profile'),
+        api.get('subscriptions/current'),
+      ]);
+      if (profileRes.status === 'fulfilled' && profileRes.value.data) {
+        setProfile(profileRes.value.data);
+      }
+      if (subRes.status === 'fulfilled' && subRes.value.data) {
+        setSubscription(subRes.value.data);
+      }
+    } catch {
+      // Non-blocking — profile/subscription will load on next screen
+    }
+  };
+
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login">
         {({ navigation }: any) => (
           <LoginScreen
             onNavigateRegister={() => navigation.navigate('Register')}
-            onLoginSuccess={() => {}}
+            onLoginSuccess={(user, tokens) => handleLoginSuccess(user, tokens)}
             onNavigateForgotPassword={() => navigation.navigate('ForgotPassword')}
           />
         )}
@@ -84,7 +132,7 @@ function AuthNavigator() {
         {({ route, navigation }: any) => (
           <EmailVerificationScreen
             email={route.params.email}
-            onVerified={() => {}}
+            onVerified={handleVerified}
             onBack={() => navigation.goBack()}
           />
         )}
@@ -99,6 +147,8 @@ export default function App() {
   const setAuth = useStore((s) => s.setAuth);
   const clearAuth = useStore((s) => s.clearAuth);
   const setNeedsOnboarding = useStore((s) => s.setNeedsOnboarding);
+  const setProfile = useStore((s) => s.setProfile);
+  const setSubscription = useStore((s) => s.setSubscription);
   const [ready, setReady] = useState(false);
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
   const themeMode = useThemeStore((s) => s.theme);
@@ -147,6 +197,22 @@ export default function App() {
         } catch {
           // If goals fetch fails, assume onboarding not needed to avoid blocking
           setNeedsOnboarding(false);
+        }
+
+        // Load profile and subscription in parallel
+        try {
+          const [profileRes, subRes] = await Promise.allSettled([
+            api.get('users/profile'),
+            api.get('subscriptions/current'),
+          ]);
+          if (profileRes.status === 'fulfilled' && profileRes.value.data) {
+            setProfile(profileRes.value.data);
+          }
+          if (subRes.status === 'fulfilled' && subRes.value.data) {
+            setSubscription(subRes.value.data);
+          }
+        } catch {
+          // Non-blocking
         }
       }
     } catch {
