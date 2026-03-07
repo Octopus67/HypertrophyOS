@@ -23,7 +23,7 @@ import type { ActiveSet } from '../../types/training';
 import type { UnitSystem } from '../../utils/unitConversion';
 import { convertWeight } from '../../utils/unitConversion';
 import { typography, spacing, radius, springs } from '../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { useHaptics } from '../../hooks/useHaptics';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
@@ -147,7 +147,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
         keyboardType="number-pad"
         returnKeyType="next"
         placeholder="Reps"
-        placeholderTextColor={getThemeColors().text.muted}
+        placeholderTextColor={c.text.muted}
         accessibilityLabel={`Reps for set ${setIndex + 1}`}
         blurOnSubmit={false}
         maxLength={4}
@@ -174,7 +174,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
           keyboardType="decimal-pad"
           returnKeyType={showRpeRir ? 'next' : 'done'}
           placeholder={unitSystem === 'metric' ? 'kg' : 'lbs'}
-          placeholderTextColor={getThemeColors().text.muted}
+          placeholderTextColor={c.text.muted}
           accessibilityLabel={`Weight for set ${setIndex + 1}`}
           blurOnSubmit={false}
           maxLength={6}
@@ -202,7 +202,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
           keyboardType="decimal-pad"
           returnKeyType="next"
           placeholder="RPE"
-          placeholderTextColor={getThemeColors().text.muted}
+          placeholderTextColor={c.text.muted}
           accessibilityLabel={`RPE for set ${setIndex + 1}`}
           blurOnSubmit={false}
           maxLength={4}
@@ -220,7 +220,7 @@ export const SetRowPremium: React.FC<SetRowPremiumProps> = ({
           keyboardType="number-pad"
           returnKeyType="done"
           placeholder="RIR"
-          placeholderTextColor={getThemeColors().text.muted}
+          placeholderTextColor={c.text.muted}
           accessibilityLabel={`RIR for set ${setIndex + 1}`}
           blurOnSubmit={false}
           maxLength={2}
@@ -265,7 +265,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   rowCompleted: {
     backgroundColor: 'rgba(0, 255, 100, 0.08)',
     borderLeftWidth: 3,
-    borderLeftColor: getThemeColors().semantic.positive,
+    borderLeftColor: c.semantic.positive,
   },
   rowUncompleted: {
     opacity: 0.7,
@@ -275,7 +275,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     width: 18,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.semibold,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
 
@@ -284,20 +284,20 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   previousText: {
     fontSize: typography.size.xs,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
   },
   previousPlaceholder: {
     fontSize: typography.size.xs,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
 
   input: {
     width: 48,
     height: 36,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.sm,
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
     textAlign: 'center',
@@ -313,20 +313,20 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     width: 56,
     fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
   },
   stepperBtn: {
     width: 26,
     height: 26,
     borderRadius: radius.full,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepperText: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
   },
 
   intensityInput: {
@@ -338,21 +338,21 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     height: 32,
     borderRadius: radius.full,
     borderWidth: 2,
-    borderColor: getThemeColors().border.default,
+    borderColor: c.border.default,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkBtnCompleted: {
-    backgroundColor: getThemeColors().semantic.positive,
-    borderColor: getThemeColors().semantic.positive,
+    backgroundColor: c.semantic.positive,
+    borderColor: c.semantic.positive,
   },
   checkText: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.bold,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
   },
   checkTextCompleted: {
-    color: getThemeColors().text.inverse,
+    color: c.text.inverse,
   },
 });
 

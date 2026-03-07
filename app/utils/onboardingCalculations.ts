@@ -451,6 +451,8 @@ export function getProteinRecommendation(
     'lose_fat_no_strength':   { min: 1.6, max: 2.0, default: 1.8 },
     'build_muscle_strength':  { min: 1.8, max: 2.2, default: 2.0 },
     'build_muscle_no_strength': { min: 1.6, max: 2.0, default: 1.8 },
+    'recomposition_strength':   { min: 1.8, max: 2.4, default: 2.0 },
+    'recomposition_no_strength': { min: 1.6, max: 2.0, default: 1.8 },
     'maintain_strength':      { min: 1.6, max: 2.0, default: 1.8 },
     'maintain_no_strength':   { min: 1.4, max: 1.8, default: 1.6 },
   };

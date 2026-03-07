@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Animated, { useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
 import { computeBMR } from '../../../utils/onboardingCalculations';
 import { Button } from '../../../components/common/Button';
@@ -53,6 +53,8 @@ interface ScaleProps {
 }
 
 function HorizontalScale({ min, max, step, value, unit, formatLabel, onValueChange }: ScaleProps) {
+  const c = useThemeColors();
+  const sStyles = getScaleStyles(c);
   const scrollRef = useRef<ScrollView>(null);
   const displayValueRef = useRef(value);
   const [displayValue, setDisplayValue] = useState(value);
@@ -112,14 +114,14 @@ function HorizontalScale({ min, max, step, value, unit, formatLabel, onValueChan
   }, [min, max, step]);
 
   return (
-    <View style={scaleStyles.wrapper}>
-      <Text style={scaleStyles.valueDisplay}>
-        {formatLabel(displayValue)} <Text style={scaleStyles.unitText}>{unit}</Text>
+    <View style={sStyles.wrapper}>
+      <Text style={sStyles.valueDisplay}>
+        {formatLabel(displayValue)} <Text style={sStyles.unitText}>{unit}</Text>
       </Text>
-      <View style={scaleStyles.rulerContainer}>
-        <View style={scaleStyles.fadeLeft} pointerEvents="none" />
-        <View style={scaleStyles.fadeRight} pointerEvents="none" />
-        <View style={scaleStyles.centerLine} />
+      <View style={sStyles.rulerContainer}>
+        <View style={sStyles.fadeLeft} pointerEvents="none" />
+        <View style={sStyles.fadeRight} pointerEvents="none" />
+        <View style={sStyles.centerLine} />
         <ScrollView
           ref={scrollRef}
           horizontal
@@ -136,16 +138,16 @@ function HorizontalScale({ min, max, step, value, unit, formatLabel, onValueChan
             const isFifth = i % 5 === 0;
             const isTenth = i % 10 === 0;
             return (
-              <View key={i} style={scaleStyles.tickContainer}>
+              <View key={i} style={sStyles.tickContainer}>
                 <View
                   style={[
-                    scaleStyles.tick,
+                    sStyles.tick,
                     { height: isFifth ? 24 : 16 },
-                    isFifth && scaleStyles.tickMajor,
+                    isFifth && sStyles.tickMajor,
                   ]}
                 />
                 {isTenth && (
-                  <Text style={scaleStyles.tickLabel}>
+                  <Text style={sStyles.tickLabel}>
                     {step < 1 ? val.toFixed(0) : Math.round(val)}
                   </Text>
                 )}
@@ -158,7 +160,7 @@ function HorizontalScale({ min, max, step, value, unit, formatLabel, onValueChan
   );
 }
 
-const scaleStyles = StyleSheet.create({
+const getScaleStyles = (c: ThemeColors) => StyleSheet.create({
   wrapper: {
     marginTop: spacing[2],
   },
@@ -166,7 +168,7 @@ const scaleStyles = StyleSheet.create({
     textAlign: 'center',
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.bold,
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     marginBottom: spacing[2],
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight['2xl'],
@@ -174,7 +176,7 @@ const scaleStyles = StyleSheet.create({
   unitText: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     lineHeight: typography.lineHeight.md,
   },
   rulerContainer: {
@@ -188,7 +190,7 @@ const scaleStyles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 40,
-    backgroundColor: getThemeColors().bg.base,
+    backgroundColor: c.bg.base,
     opacity: 0.7,
     zIndex: 5,
   },
@@ -198,7 +200,7 @@ const scaleStyles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 40,
-    backgroundColor: getThemeColors().bg.base,
+    backgroundColor: c.bg.base,
     opacity: 0.7,
     zIndex: 5,
   },
@@ -208,7 +210,7 @@ const scaleStyles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 2,
-    backgroundColor: getThemeColors().accent.primary,
+    backgroundColor: c.accent.primary,
     zIndex: 10,
     marginLeft: -1,
   },
@@ -219,15 +221,15 @@ const scaleStyles = StyleSheet.create({
   },
   tick: {
     width: 1,
-    backgroundColor: getThemeColors().border.default,
+    backgroundColor: c.border.default,
   },
   tickMajor: {
     width: 1.5,
-    backgroundColor: getThemeColors().text.muted,
+    backgroundColor: c.text.muted,
   },
   tickLabel: {
     fontSize: typography.size.xs,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     marginTop: spacing[0.5],
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight.xs,
@@ -335,14 +337,14 @@ export function BodyMeasurementsStep({ onNext }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Measurements</Text>
-      <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>Height and weight help us dial in your metabolism</Text>
+      <Text style={[styles.title, { color: c.text.primary }]}>Measurements</Text>
+      <Text style={[styles.subtitle, { color: c.text.secondary }]}>Height and weight help us dial in your metabolism</Text>
 
       {/* ── Height — horizontal scroll scale ─────────────────────────── */}
       <View style={styles.fieldRow}>
-        <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Height</Text>
-        <TouchableOpacity onPress={toggleUnits} style={[styles.unitToggle, { backgroundColor: getThemeColors().accent.primaryMuted }]} accessibilityLabel="Toggle units" accessibilityRole="button">
-          <Text style={[styles.unitToggleText, { color: getThemeColors().accent.primary }]}>
+        <Text style={[styles.label, { color: c.text.secondary }]}>Height</Text>
+        <TouchableOpacity onPress={toggleUnits} style={[styles.unitToggle, { backgroundColor: c.accent.primaryMuted }]} accessibilityLabel="Toggle units" accessibilityRole="button">
+          <Text style={[styles.unitToggleText, { color: c.accent.primary }]}>
             {unitSystem === 'metric' ? 'cm → ft/in' : 'ft/in → cm'}
           </Text>
         </TouchableOpacity>
@@ -357,14 +359,14 @@ export function BodyMeasurementsStep({ onNext }: Props) {
         onValueChange={handleHeightChange}
       />
       {!heightValid && (
-        <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>Height must be between 100-250 cm (3'3" - 8'2")</Text>
+        <Text style={[styles.errorText, { color: c.semantic.negative }]}>Height must be between 100-250 cm (3'3" - 8'2")</Text>
       )}
 
       {/* ── Weight — horizontal scroll scale ─────────────────────────── */}
       <View style={styles.fieldRow}>
-        <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Weight</Text>
-        <TouchableOpacity onPress={toggleUnits} style={[styles.unitToggle, { backgroundColor: getThemeColors().accent.primaryMuted }]} accessibilityLabel="Toggle units" accessibilityRole="button">
-          <Text style={[styles.unitToggleText, { color: getThemeColors().accent.primary }]}>
+        <Text style={[styles.label, { color: c.text.secondary }]}>Weight</Text>
+        <TouchableOpacity onPress={toggleUnits} style={[styles.unitToggle, { backgroundColor: c.accent.primaryMuted }]} accessibilityLabel="Toggle units" accessibilityRole="button">
+          <Text style={[styles.unitToggleText, { color: c.accent.primary }]}>
             {unitSystem === 'metric' ? 'kg → lbs' : 'lbs → kg'}
           </Text>
         </TouchableOpacity>
@@ -379,15 +381,15 @@ export function BodyMeasurementsStep({ onNext }: Props) {
         onValueChange={handleWeightChange}
       />
       {!weightValid && (
-        <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>Weight must be between 30-300 kg (66-660 lbs)</Text>
+        <Text style={[styles.errorText, { color: c.semantic.negative }]}>Weight must be between 30-300 kg (66-660 lbs)</Text>
       )}
 
       {/* ── Live BMR display ─────────────────────────────────────────── */}
       {liveBMR > 0 && (
-        <View style={[styles.bmrCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().accent.primaryMuted }]}>
-          <Text style={[styles.bmrLabel, { color: getThemeColors().text.secondary }]}>Your BMR</Text>
-          <Text style={[styles.bmrValue, { color: getThemeColors().accent.primary }]}>~{displayBMR.toLocaleString()} kcal/day</Text>
-          <Text style={[styles.bmrHint, { color: getThemeColors().text.muted }]}>Calories your body burns at rest</Text>
+        <View style={[styles.bmrCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.accent.primaryMuted }]}>
+          <Text style={[styles.bmrLabel, { color: c.text.secondary }]}>Your BMR</Text>
+          <Text style={[styles.bmrValue, { color: c.accent.primary }]}>~{displayBMR.toLocaleString()} kcal/day</Text>
+          <Text style={[styles.bmrHint, { color: c.text.muted }]}>Calories your body burns at rest</Text>
         </View>
       )}
 
@@ -401,16 +403,16 @@ export function BodyMeasurementsStep({ onNext }: Props) {
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   content: { paddingHorizontal: spacing[4], paddingBottom: spacing[10] },
-  title: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[1], lineHeight: typography.lineHeight['2xl'] },
-  subtitle: { color: getThemeColors().text.secondary, fontSize: typography.size.base, marginBottom: spacing[6], lineHeight: typography.lineHeight.base },
-  label: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, marginBottom: spacing[2], marginTop: spacing[4], lineHeight: typography.lineHeight.sm },
+  title: { color: c.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[1], lineHeight: typography.lineHeight['2xl'] },
+  subtitle: { color: c.text.secondary, fontSize: typography.size.base, marginBottom: spacing[6], lineHeight: typography.lineHeight.base },
+  label: { color: c.text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, marginBottom: spacing[2], marginTop: spacing[4], lineHeight: typography.lineHeight.sm },
   fieldRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing[4], marginBottom: spacing[2] },
-  unitToggle: { paddingHorizontal: spacing[3], paddingVertical: spacing[1], borderRadius: radius.full, backgroundColor: getThemeColors().accent.primaryMuted },
-  unitToggleText: { color: getThemeColors().accent.primary, fontSize: typography.size.xs, fontWeight: typography.weight.semibold, lineHeight: typography.lineHeight.xs },
-  errorText: { color: getThemeColors().semantic.negative, fontSize: typography.size.sm, marginTop: spacing[2], textAlign: 'center', lineHeight: typography.lineHeight.sm },
-  bmrCard: { backgroundColor: getThemeColors().bg.surfaceRaised, borderRadius: radius.md, borderWidth: 1, borderColor: getThemeColors().accent.primaryMuted, padding: spacing[4], marginTop: spacing[6], alignItems: 'center' },
-  bmrLabel: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.sm },
-  bmrValue: { color: getThemeColors().accent.primary, fontSize: typography.size.xl, fontWeight: typography.weight.bold, marginTop: spacing[1], fontVariant: ['tabular-nums'], lineHeight: typography.lineHeight.xl },
-  bmrHint: { color: getThemeColors().text.muted, fontSize: typography.size.xs, marginTop: spacing[1], lineHeight: typography.lineHeight.xs },
+  unitToggle: { paddingHorizontal: spacing[3], paddingVertical: spacing[1], borderRadius: radius.full, backgroundColor: c.accent.primaryMuted },
+  unitToggleText: { color: c.accent.primary, fontSize: typography.size.xs, fontWeight: typography.weight.semibold, lineHeight: typography.lineHeight.xs },
+  errorText: { color: c.semantic.negative, fontSize: typography.size.sm, marginTop: spacing[2], textAlign: 'center', lineHeight: typography.lineHeight.sm },
+  bmrCard: { backgroundColor: c.bg.surfaceRaised, borderRadius: radius.md, borderWidth: 1, borderColor: c.accent.primaryMuted, padding: spacing[4], marginTop: spacing[6], alignItems: 'center' },
+  bmrLabel: { color: c.text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.sm },
+  bmrValue: { color: c.accent.primary, fontSize: typography.size.xl, fontWeight: typography.weight.bold, marginTop: spacing[1], fontVariant: ['tabular-nums'], lineHeight: typography.lineHeight.xl },
+  bmrHint: { color: c.text.muted, fontSize: typography.size.xs, marginTop: spacing[1], lineHeight: typography.lineHeight.xs },
   nextBtn: { marginTop: spacing[6], width: '100%' },
 });

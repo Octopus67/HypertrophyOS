@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 import { Button } from '../common/Button';
 
@@ -27,20 +27,20 @@ export function OnboardingTrialPrompt({
   const c = useThemeColors();
 
   return (
-    <View style={[styles.container, { backgroundColor: getThemeColors().bg.surface }]}>
-      <Icon name="star" size={40} color={getThemeColors().premium.gold} />
-      <Text style={[styles.title, { color: getThemeColors().text.primary }]}>
+    <View style={[styles.container, { backgroundColor: c.bg.surface }]}>
+      <Icon name="star" size={40} color={c.premium.gold} />
+      <Text style={[styles.title, { color: c.text.primary }]}>
         Try Premium Free for 7 Days
       </Text>
-      <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>
+      <Text style={[styles.subtitle, { color: c.text.secondary }]}>
         No credit card required. Full access to every feature.
       </Text>
 
       <View style={styles.features}>
         {TRIAL_FEATURES.map((feature) => (
           <View key={feature} style={styles.featureRow}>
-            <Icon name="check" size={14} color={getThemeColors().semantic.positive} />
-            <Text style={[styles.featureText, { color: getThemeColors().text.primary }]}>{feature}</Text>
+            <Icon name="check" size={14} color={c.semantic.positive} />
+            <Text style={[styles.featureText, { color: c.text.primary }]}>{feature}</Text>
           </View>
         ))}
       </View>

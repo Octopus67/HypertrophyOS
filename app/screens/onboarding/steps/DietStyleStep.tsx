@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback } from 'react';
+import { useMemo, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   NativeScrollEvent,
 } from 'react-native';
 import { spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { Button } from '../../../components/common/Button';
 import { useOnboardingStore, DietStyle, computeAge } from '../../../store/onboardingSlice';
 import {
@@ -47,6 +47,7 @@ export function DietStyleStep({ onNext }: Props) {
   const age = computeAge(store.birthYear, store.birthMonth);
   const goalType = store.goalType ?? 'maintain';
   const scrollRef = useRef<ScrollView>(null);
+  const lastProteinValue = useRef(store.proteinPerKg);
 
   const tdee = useMemo(() => {
     if (store.tdeeOverride) return store.tdeeOverride;
@@ -68,6 +69,13 @@ export function DietStyleStep({ onNext }: Props) {
     () => getProteinRecommendation(goalType, store.exerciseTypes.length > 0 ? store.exerciseTypes : ['strength']),
     [goalType, store.exerciseTypes],
   );
+
+  // Auto-set protein to recommendation default on mount (only if user hasn't manually changed it)
+  useEffect(() => {
+    if (proteinRec && !store.proteinUserModified) {
+      store.updateField('proteinPerKg', proteinRec.default);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const macros = useMemo(
     () => computeMacroSplit(budget, store.weightKg, store.proteinPerKg, store.dietStyle),
@@ -98,15 +106,21 @@ export function DietStyleStep({ onNext }: Props) {
       const index = Math.round(offset / TICK_WIDTH);
       const clamped = Math.max(0, Math.min(index, PROTEIN_TICK_COUNT - 1));
       const value = Math.round((PROTEIN_MIN + clamped * PROTEIN_STEP) * 10) / 10;
-      store.updateField('proteinPerKg', value);
+      if (value !== lastProteinValue.current) {
+        lastProteinValue.current = value;
+        store.updateField('proteinPerKg', value);
+        if (!store.proteinUserModified) {
+          store.updateField('proteinUserModified', true);
+        }
+      }
     },
     [store],
   );
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <Text style={[styles.heading, { color: getThemeColors().text.primary }]}>Diet Style</Text>
-      <Text style={[styles.subheading, { color: getThemeColors().text.secondary }]}>
+      <Text style={[styles.heading, { color: c.text.primary }]}>Diet Style</Text>
+      <Text style={[styles.subheading, { color: c.text.secondary }]}>
         Choose your macro balance. Protein is set first from your body weight — these styles change how carbs and fat are split.
       </Text>
 
@@ -128,16 +142,16 @@ export function DietStyleStep({ onNext }: Props) {
               activeOpacity={0.7}
             >
               <Text style={[styles.cardTitle, selected && styles.cardTitleSelected]}>{d.title}</Text>
-              <Text style={[styles.cardDesc, { color: getThemeColors().text.muted }]}>{d.desc}</Text>
+              <Text style={[styles.cardDesc, { color: c.text.muted }]}>{d.desc}</Text>
 
               {/* Mini macro bar */}
               <View style={styles.miniBar}>
-                <View style={[styles.miniBarSegment, { flex: pFlex, backgroundColor: getThemeColors().macro.protein, borderTopLeftRadius: 3, borderBottomLeftRadius: 3 }]} />
-                <View style={[styles.miniBarSegment, { flex: cFlex, backgroundColor: getThemeColors().macro.carbs }]} />
-                <View style={[styles.miniBarSegment, { flex: fFlex, backgroundColor: getThemeColors().macro.fat, borderTopRightRadius: 3, borderBottomRightRadius: 3 }]} />
+                <View style={[styles.miniBarSegment, { flex: pFlex, backgroundColor: c.macro.protein, borderTopLeftRadius: 3, borderBottomLeftRadius: 3 }]} />
+                <View style={[styles.miniBarSegment, { flex: cFlex, backgroundColor: c.macro.carbs }]} />
+                <View style={[styles.miniBarSegment, { flex: fFlex, backgroundColor: c.macro.fat, borderTopRightRadius: 3, borderBottomRightRadius: 3 }]} />
               </View>
 
-              <Text style={[styles.miniBarLabel, { color: getThemeColors().text.secondary }]}>
+              <Text style={[styles.miniBarLabel, { color: c.text.secondary }]}>
                 P: {sm.proteinG}g · C: {sm.carbsG}g · F: {sm.fatG}g
               </Text>
             </TouchableOpacity>
@@ -146,14 +160,14 @@ export function DietStyleStep({ onNext }: Props) {
       </View>
 
       {/* Protein scale */}
-      <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Protein per kg body weight</Text>
-      <Text style={[styles.proteinValueDisplay, { color: getThemeColors().text.primary }]}>
+      <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Protein per kg body weight</Text>
+      <Text style={[styles.proteinValueDisplay, { color: c.text.primary }]}>
         {store.proteinPerKg.toFixed(1)} g/kg · {Math.round(store.proteinPerKg * store.weightKg)}g/day
       </Text>
 
       <View style={styles.scaleContainer}>
         {/* Center indicator line */}
-        <View style={[styles.centerIndicator, { backgroundColor: getThemeColors().accent.primary }]} />
+        <View style={[styles.centerIndicator, { backgroundColor: c.accent.primary }]} />
 
         <ScrollView
           ref={scrollRef}
@@ -163,6 +177,7 @@ export function DietStyleStep({ onNext }: Props) {
           decelerationRate="fast"
           contentContainerStyle={styles.scaleContent}
           onMomentumScrollEnd={handleScrollEnd}
+          onScrollEndDrag={handleScrollEnd}
           contentOffset={{ x: Math.round((store.proteinPerKg - PROTEIN_MIN) / PROTEIN_STEP) * TICK_WIDTH, y: 0 }}
         >
           {proteinTicks.map((val, i) => {
@@ -170,7 +185,7 @@ export function DietStyleStep({ onNext }: Props) {
             const inRange = proteinRec && val >= proteinRec.min && val <= proteinRec.max;
             return (
               <View key={i} style={styles.tickContainer}>
-                {inRange && <View style={[styles.tickRecommendedBg, { backgroundColor: getThemeColors().semantic.positiveSubtle }]} />}
+                {inRange && <View style={[styles.tickRecommendedBg, { backgroundColor: c.semantic.positiveSubtle }]} />}
                 <View
                   style={[
                     styles.tick,
@@ -178,7 +193,7 @@ export function DietStyleStep({ onNext }: Props) {
                   ]}
                 />
                 {isMajor && (
-                  <Text style={[styles.tickLabel, { color: getThemeColors().text.secondary }]}>{val.toFixed(1)}</Text>
+                  <Text style={[styles.tickLabel, { color: c.text.secondary }]}>{val.toFixed(1)}</Text>
                 )}
               </View>
             );
@@ -187,35 +202,35 @@ export function DietStyleStep({ onNext }: Props) {
       </View>
 
       {proteinRec && (
-        <Text style={[styles.recHint, { color: getThemeColors().semantic.positive }]}>
+        <Text style={[styles.recHint, { color: c.semantic.positive }]}>
           Recommended: {proteinRec.min}–{proteinRec.max} g/kg
         </Text>
       )}
 
       {/* Protein info card */}
-      <View style={[styles.infoCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.subtle }]}>
-        <Text style={[styles.infoText, { color: getThemeColors().text.muted }]}>
+      <View style={[styles.infoCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.subtle }]}>
+        <Text style={[styles.infoText, { color: c.text.muted }]}>
           Protein preserves muscle during fat loss and supports growth during bulking. The green zone is optimal for your goal and training style.
         </Text>
       </View>
 
       {/* Live macro display */}
-      <View style={[styles.macroCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}>
+      <View style={[styles.macroCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
         <View style={styles.macroRow}>
           <View style={styles.macroItem}>
-            <View style={[styles.macroDot, { backgroundColor: getThemeColors().macro.protein }]} />
-            <Text style={[styles.macroLabel, { color: getThemeColors().text.muted }]}>Protein</Text>
-            <Text style={[styles.macroValue, { color: getThemeColors().text.primary }]}>{macros.proteinG}g</Text>
+            <View style={[styles.macroDot, { backgroundColor: c.macro.protein }]} />
+            <Text style={[styles.macroLabel, { color: c.text.muted }]}>Protein</Text>
+            <Text style={[styles.macroValue, { color: c.text.primary }]}>{macros.proteinG}g</Text>
           </View>
           <View style={styles.macroItem}>
-            <View style={[styles.macroDot, { backgroundColor: getThemeColors().macro.carbs }]} />
-            <Text style={[styles.macroLabel, { color: getThemeColors().text.muted }]}>Carbs</Text>
-            <Text style={[styles.macroValue, { color: getThemeColors().text.primary }]}>{macros.carbsG}g</Text>
+            <View style={[styles.macroDot, { backgroundColor: c.macro.carbs }]} />
+            <Text style={[styles.macroLabel, { color: c.text.muted }]}>Carbs</Text>
+            <Text style={[styles.macroValue, { color: c.text.primary }]}>{macros.carbsG}g</Text>
           </View>
           <View style={styles.macroItem}>
-            <View style={[styles.macroDot, { backgroundColor: getThemeColors().macro.fat }]} />
-            <Text style={[styles.macroLabel, { color: getThemeColors().text.muted }]}>Fat</Text>
-            <Text style={[styles.macroValue, { color: getThemeColors().text.primary }]}>{macros.fatG}g</Text>
+            <View style={[styles.macroDot, { backgroundColor: c.macro.fat }]} />
+            <Text style={[styles.macroLabel, { color: c.text.muted }]}>Fat</Text>
+            <Text style={[styles.macroValue, { color: c.text.primary }]}>{macros.fatG}g</Text>
           </View>
         </View>
       </View>
@@ -229,14 +244,14 @@ export function DietStyleStep({ onNext }: Props) {
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scroll: { paddingBottom: spacing[8] },
   heading: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.bold,
     marginBottom: spacing[2],
     lineHeight: typography.lineHeight['2xl'],
   },
   subheading: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.base,
     marginBottom: spacing[6],
     lineHeight: typography.lineHeight.base,
@@ -245,27 +260,27 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   /* Diet style cards */
   cardsGrid: { marginBottom: spacing[6] },
   card: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: getThemeColors().border.default,
+    borderColor: c.border.default,
     padding: spacing[4],
     marginBottom: spacing[3],
   },
   cardSelected: {
-    borderColor: getThemeColors().accent.primary,
-    backgroundColor: getThemeColors().accent.primaryMuted,
+    borderColor: c.accent.primary,
+    backgroundColor: c.accent.primaryMuted,
   },
   cardTitle: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.md,
     fontWeight: typography.weight.semibold,
     marginBottom: spacing[0.5],
     lineHeight: typography.lineHeight.md,
   },
-  cardTitleSelected: { color: getThemeColors().accent.primary },
+  cardTitleSelected: { color: c.accent.primary },
   cardDesc: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.sm,
     marginBottom: spacing[2],
     lineHeight: typography.lineHeight.sm,
@@ -281,21 +296,21 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     height: 6,
   },
   miniBarLabel: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
   },
 
   /* Protein scale */
   sectionLabel: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     marginBottom: spacing[1],
     lineHeight: typography.lineHeight.sm,
   },
   proteinValueDisplay: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     marginBottom: spacing[3],
@@ -313,7 +328,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 2,
-    backgroundColor: getThemeColors().accent.primary,
+    backgroundColor: c.accent.primary,
     zIndex: 10,
   },
   scaleContent: {
@@ -333,11 +348,11 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: getThemeColors().semantic.positiveSubtle,
+    backgroundColor: c.semantic.positiveSubtle,
   },
   tick: {
     width: 2,
-    backgroundColor: getThemeColors().text.muted,
+    backgroundColor: c.text.muted,
   },
   tickNormal: {
     height: 20,
@@ -346,13 +361,13 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     height: 30,
   },
   tickLabel: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.xs,
     marginTop: spacing[0.5],
     lineHeight: typography.lineHeight.xs,
   },
   recHint: {
-    color: getThemeColors().semantic.positive,
+    color: c.semantic.positive,
     fontSize: typography.size.xs,
     marginBottom: spacing[3],
     lineHeight: typography.lineHeight.xs,
@@ -360,39 +375,39 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
 
   /* Protein info card */
   infoCard: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[4],
     marginBottom: spacing[6],
     borderWidth: 1,
-    borderColor: getThemeColors().border.subtle,
+    borderColor: c.border.subtle,
   },
   infoText: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.sm,
     lineHeight: typography.size.sm * typography.lineHeight.relaxed,
   },
 
   /* Live macro display */
   macroCard: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[4],
     marginBottom: spacing[6],
     borderWidth: 1,
-    borderColor: getThemeColors().border.default,
+    borderColor: c.border.default,
   },
   macroRow: { flexDirection: 'row', justifyContent: 'space-around' },
   macroItem: { alignItems: 'center' },
   macroDot: { width: 8, height: 8, borderRadius: 4, marginBottom: spacing[1] },
   macroLabel: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.xs,
     marginBottom: spacing[0.5],
     lineHeight: typography.lineHeight.xs,
   },
   macroValue: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     lineHeight: typography.lineHeight.lg,

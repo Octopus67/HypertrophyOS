@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { useOnboardingStore, GoalType } from '../../../store/onboardingSlice';
 import { Icon, IconName } from '../../../components/common/Icon';
 import { Button } from '../../../components/common/Button';
@@ -37,8 +37,8 @@ export function IntentStep({ onNext }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <Text style={[styles.heading, { color: getThemeColors().text.primary }]}>What's your mission?</Text>
-      <Text style={[styles.subheading, { color: getThemeColors().text.secondary }]}>We'll build a plan tailored to your goal</Text>
+      <Text style={[styles.heading, { color: c.text.primary }]}>What's your mission?</Text>
+      <Text style={[styles.subheading, { color: c.text.secondary }]}>We'll build a plan tailored to your goal</Text>
 
       {GOALS.map((g, i) => (
         <GoalCard key={g.type} index={i}>
@@ -48,14 +48,14 @@ export function IntentStep({ onNext }: Props) {
             activeOpacity={0.7}
           >
             <View style={styles.iconWrap}>
-              <Icon name={g.icon} size={24} color={getThemeColors().accent.primary} />
+              <Icon name={g.icon} size={24} color={c.accent.primary} />
             </View>
             <View style={styles.cardContent}>
-              <Text style={[styles.cardTitle, { color: getThemeColors().text.primary }]}>{g.title}</Text>
-              <Text style={[styles.cardDesc, { color: getThemeColors().text.secondary }]}>{g.desc}</Text>
+              <Text style={[styles.cardTitle, { color: c.text.primary }]}>{g.title}</Text>
+              <Text style={[styles.cardDesc, { color: c.text.secondary }]}>{g.desc}</Text>
             </View>
             {goalType === g.type && (
-              <Icon name="check" size={16} color={getThemeColors().accent.primary} />
+              <Icon name="check" size={16} color={c.accent.primary} />
             )}
           </TouchableOpacity>
         </GoalCard>
@@ -68,19 +68,19 @@ export function IntentStep({ onNext }: Props) {
 
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scroll: { paddingBottom: spacing[8] },
-  heading: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2], lineHeight: typography.lineHeight['2xl'] },
-  subheading: { color: getThemeColors().text.secondary, fontSize: typography.size.base, marginBottom: spacing[6], lineHeight: typography.lineHeight.base },
+  heading: { color: c.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2], lineHeight: typography.lineHeight['2xl'] },
+  subheading: { color: c.text.secondary, fontSize: typography.size.base, marginBottom: spacing[6], lineHeight: typography.lineHeight.base },
   card: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: getThemeColors().bg.surfaceRaised, borderRadius: radius.md,
-    borderWidth: 1, borderColor: getThemeColors().border.default,
+    backgroundColor: c.bg.surfaceRaised, borderRadius: radius.md,
+    borderWidth: 1, borderColor: c.border.default,
     padding: spacing[4], marginBottom: spacing[3],
   },
-  cardSelected: { borderColor: getThemeColors().accent.primary, backgroundColor: getThemeColors().accent.primaryMuted },
+  cardSelected: { borderColor: c.accent.primary, backgroundColor: c.accent.primaryMuted },
   iconWrap: { marginRight: spacing[3] },
   cardContent: { flex: 1 },
-  cardTitle: { color: getThemeColors().text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, lineHeight: typography.lineHeight.lg },
-  cardDesc: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, marginTop: spacing[0.5], lineHeight: typography.lineHeight.sm },
+  cardTitle: { color: c.text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.semibold, lineHeight: typography.lineHeight.lg },
+  cardDesc: { color: c.text.secondary, fontSize: typography.size.sm, marginTop: spacing[0.5], lineHeight: typography.lineHeight.sm },
   skipLink: { alignItems: 'center', marginTop: spacing[4], minHeight: 44, justifyContent: 'center' },
-  skipText: { color: getThemeColors().text.muted, fontSize: typography.size.sm, lineHeight: typography.lineHeight.sm },
+  skipText: { color: c.text.muted, fontSize: typography.size.sm, lineHeight: typography.lineHeight.sm },
 });

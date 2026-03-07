@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { useOnboardingStore } from '../../../store/onboardingSlice';
 import { estimateBodyFat } from '../../../utils/onboardingCalculations';
 import { Button } from '../../../components/common/Button';
@@ -72,24 +72,24 @@ export function BodyCompositionStep({ onNext }: Props) {
   const canProceed = (bodyFatPct !== null && bodyFatValid) || bodyFatSkipped;
 
   const getFillColor = (midpoint: number) => {
-    if (midpoint <= 17) return getThemeColors().semantic.positive;
-    if (midpoint <= 27) return getThemeColors().semantic.warning;
-    return getThemeColors().semantic.negative;
+    if (midpoint <= 17) return c.semantic.positive;
+    if (midpoint <= 27) return c.semantic.warning;
+    return c.semantic.negative;
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Body Composition</Text>
-      <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>
+      <Text style={[styles.title, { color: c.text.primary }]}>Body Composition</Text>
+      <Text style={[styles.subtitle, { color: c.text.secondary }]}>
         Select the range that best describes your current physique
       </Text>
 
       {/* Educational info card */}
-      <View style={[styles.infoCard, { backgroundColor: getThemeColors().bg.surfaceRaised }]}>
-        <Text style={[styles.infoText, { color: getThemeColors().text.secondary }]}>
+      <View style={[styles.infoCard, { backgroundColor: c.bg.surfaceRaised }]}>
+        <Text style={[styles.infoText, { color: c.text.secondary }]}>
           Body fat percentage is the proportion of your total weight that comes from fat tissue. Knowing your approximate body fat helps us calculate your lean mass for more accurate calorie targets.
         </Text>
-        <Text style={[styles.infoHint, { color: getThemeColors().text.muted }]}>
+        <Text style={[styles.infoHint, { color: c.text.muted }]}>
           Don't worry about being exact — an estimate within 5% is perfectly fine.
         </Text>
       </View>
@@ -109,7 +109,7 @@ export function BodyCompositionStep({ onNext }: Props) {
             >
               <View style={styles.cardRow}>
                 {/* Vertical fill bar */}
-                <View style={[styles.barTrack, { backgroundColor: getThemeColors().border.subtle }]}>
+                <View style={[styles.barTrack, { backgroundColor: c.border.subtle }]}>
                   <View
                     style={[
                       styles.barFill,
@@ -137,20 +137,20 @@ export function BodyCompositionStep({ onNext }: Props) {
 
       {/* Validation error */}
       {bodyFatPct !== null && !bodyFatValid && (
-        <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>Body fat must be between 3-60%</Text>
+        <Text style={[styles.errorText, { color: c.semantic.negative }]}>Body fat must be between 3-60%</Text>
       )}
 
       {/* Skip / auto-estimate */}
-      <TouchableOpacity style={[styles.skipBtn, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.subtle }]} onPress={handleSkip} activeOpacity={0.7} accessibilityLabel="Skip body fat selection" accessibilityRole="button">
-        <Text style={[styles.skipText, { color: getThemeColors().text.secondary }]}>Not sure? We'll estimate for you</Text>
+      <TouchableOpacity style={[styles.skipBtn, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.subtle }]} onPress={handleSkip} activeOpacity={0.7} accessibilityLabel="Skip body fat selection" accessibilityRole="button">
+        <Text style={[styles.skipText, { color: c.text.secondary }]}>Not sure? We'll estimate for you</Text>
       </TouchableOpacity>
 
       {/* Show auto-estimate if skipped */}
       {bodyFatSkipped && autoEstimate && (
-        <View style={[styles.estimateCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().accent.primaryMuted }]}>
-          <Text style={[styles.estimateLabel, { color: getThemeColors().text.secondary }]}>Based on your profile, we estimate</Text>
-          <Text style={[styles.estimateValue, { color: getThemeColors().accent.primary }]}>~{autoEstimate.estimate}%</Text>
-          <Text style={[styles.estimateRange, { color: getThemeColors().text.muted }]}>
+        <View style={[styles.estimateCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.accent.primaryMuted }]}>
+          <Text style={[styles.estimateLabel, { color: c.text.secondary }]}>Based on your profile, we estimate</Text>
+          <Text style={[styles.estimateValue, { color: c.accent.primary }]}>~{autoEstimate.estimate}%</Text>
+          <Text style={[styles.estimateRange, { color: c.text.muted }]}>
             Range: {autoEstimate.low}% – {autoEstimate.high}%
           </Text>
         </View>
@@ -179,13 +179,13 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     paddingBottom: spacing[10],
   },
   title: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size['2xl'],
     fontWeight: typography.weight.bold,
     marginBottom: spacing[1],
   },
   subtitle: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.base,
     marginBottom: spacing[6],
   },
@@ -196,35 +196,35 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   card: {
     width: '47%',
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: getThemeColors().border.subtle,
+    borderColor: c.border.subtle,
     padding: 0,
     overflow: 'hidden',
   },
   cardSelected: {
-    borderColor: getThemeColors().accent.primary,
-    backgroundColor: getThemeColors().accent.primaryMuted,
+    borderColor: c.accent.primary,
+    backgroundColor: c.accent.primaryMuted,
   },
   cardPct: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     marginBottom: spacing[1],
     fontVariant: ['tabular-nums'],
   },
   cardPctSelected: {
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
   },
   cardDesc: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.xs,
     textAlign: 'center',
     lineHeight: typography.size.xs * typography.lineHeight.normal,
   },
   cardDescSelected: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
   },
   cardRow: {
     flexDirection: 'row',
@@ -235,7 +235,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     width: 4,
     alignSelf: 'stretch',
     borderRadius: 2,
-    backgroundColor: getThemeColors().border.subtle,
+    backgroundColor: c.border.subtle,
     overflow: 'hidden',
     justifyContent: 'flex-end',
   },
@@ -250,24 +250,24 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     justifyContent: 'center',
   },
   infoCard: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[4],
     marginBottom: spacing[4],
   },
   infoText: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.size.sm * typography.lineHeight.normal,
   },
   infoHint: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.xs,
     marginTop: spacing[2],
     lineHeight: typography.size.xs * typography.lineHeight.normal,
   },
   errorText: {
-    color: getThemeColors().semantic.negative,
+    color: c.semantic.negative,
     fontSize: typography.size.sm,
     marginTop: spacing[2],
     textAlign: 'center',
@@ -279,37 +279,37 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[5],
     borderRadius: radius.full,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: getThemeColors().border.subtle,
+    borderColor: c.border.subtle,
   },
   skipText: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
   },
   estimateCard: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: getThemeColors().accent.primaryMuted,
+    borderColor: c.accent.primaryMuted,
     padding: spacing[4],
     marginTop: spacing[4],
     alignItems: 'center',
   },
   estimateLabel: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.sm,
   },
   estimateValue: {
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
     marginTop: spacing[1],
     fontVariant: ['tabular-nums'],
   },
   estimateRange: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.xs,
     marginTop: spacing[1],
     fontVariant: ['tabular-nums'],

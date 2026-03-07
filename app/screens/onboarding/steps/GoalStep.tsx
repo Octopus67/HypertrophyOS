@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView } from 'react-native';
 import { spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { Button } from '../../../components/common/Button';
 import { Icon } from '../../../components/common/Icon';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
@@ -17,11 +17,11 @@ interface Props { onNext?: () => void; onBack?: () => void; onSkip?: () => void;
 const LOSE_RATES = [0.25, 0.5, 0.75, 1.0];
 const BUILD_RATES = [0.1, 0.25, 0.5];
 
-function rateColor(rate: number, isLose: boolean): string {
-  if (!isLose) return getThemeColors().semantic.positive;
-  if (rate <= 0.25) return getThemeColors().semantic.positive;
-  if (rate <= 0.5) return getThemeColors().semantic.warning;
-  return getThemeColors().semantic.negative;
+function rateColor(rate: number, isLose: boolean, c: ThemeColors): string {
+  if (!isLose) return c.semantic.positive;
+  if (rate <= 0.25) return c.semantic.positive;
+  if (rate <= 0.5) return c.semantic.warning;
+  return c.semantic.negative;
 }
 
 function formatDate(d: Date): string {
@@ -68,8 +68,8 @@ export function GoalStep({ onNext }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <Text style={[styles.heading, { color: getThemeColors().text.primary }]}>Set Your Pace</Text>
-      <Text style={[styles.subheading, { color: getThemeColors().text.secondary }]}>
+      <Text style={[styles.heading, { color: c.text.primary }]}>Set Your Pace</Text>
+      <Text style={[styles.subheading, { color: c.text.secondary }]}>
         {isMaintain ? 'Maintain your current weight' : `How fast do you want to ${isLose ? 'lose' : 'gain'}?`}
       </Text>
 
@@ -78,7 +78,7 @@ export function GoalStep({ onNext }: Props) {
         <View style={styles.rateRow}>
           {rates.map((r) => {
             const selected = store.rateKgPerWeek === r;
-            const color = rateColor(r, isLose);
+            const color = rateColor(r, isLose, c);
             return (
               <TouchableOpacity
                 key={r}
@@ -92,7 +92,7 @@ export function GoalStep({ onNext }: Props) {
                 accessibilityRole="button"
               >
                 <Text style={[styles.rateValue, selected && { color }]}>{r}</Text>
-                <Text style={[styles.rateUnit, { color: getThemeColors().text.muted }]}>kg/wk</Text>
+                <Text style={[styles.rateUnit, { color: c.text.muted }]}>kg/wk</Text>
               </TouchableOpacity>
             );
           })}
@@ -100,23 +100,23 @@ export function GoalStep({ onNext }: Props) {
       )}
 
       {/* Live calorie budget */}
-      <View style={[styles.budgetCard, { backgroundColor: getThemeColors().bg.surfaceRaised, borderColor: getThemeColors().border.default }]}>
-        <Text style={[styles.budgetLabel, { color: getThemeColors().text.secondary }]}>Your daily budget</Text>
-        <Text style={[styles.budgetValue, { color: getThemeColors().text.primary }]}>{budget.budget.toLocaleString()} kcal</Text>
+      <View style={[styles.budgetCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+        <Text style={[styles.budgetLabel, { color: c.text.secondary }]}>Your daily budget</Text>
+        <Text style={[styles.budgetValue, { color: c.text.primary }]}>{budget.budget.toLocaleString()} kcal</Text>
       </View>
 
       {/* Calorie floor warning */}
       {budget.floorApplied && (
-        <View style={[styles.warningBanner, { backgroundColor: getThemeColors().semantic.warningSubtle, borderColor: getThemeColors().semantic.warning }]}>
-          <Text style={[styles.warningText, { color: getThemeColors().semantic.warning }]}>
-            <Icon name="warning" size={16} color={getThemeColors().semantic.warning} />{' '}Calorie floor applied — we won't go below a safe minimum for your profile
+        <View style={[styles.warningBanner, { backgroundColor: c.semantic.warningSubtle, borderColor: c.semantic.warning }]}>
+          <Text style={[styles.warningText, { color: c.semantic.warning }]}>
+            <Icon name="warning" size={16} color={c.semantic.warning} />{' '}Calorie floor applied — we won't go below a safe minimum for your profile
           </Text>
         </View>
       )}
 
       {/* Projected date */}
       {projectedDate && (
-        <Text style={[styles.projected, { color: getThemeColors().text.secondary }]}>
+        <Text style={[styles.projected, { color: c.text.secondary }]}>
           You'll reach your goal by {formatDate(projectedDate)}
         </Text>
       )}
@@ -124,7 +124,7 @@ export function GoalStep({ onNext }: Props) {
       {/* Target weight input */}
       {!isMaintain && (
         <View style={styles.targetRow}>
-          <Text style={[styles.targetLabel, { color: getThemeColors().text.secondary }]}>Target weight (optional)</Text>
+          <Text style={[styles.targetLabel, { color: c.text.secondary }]}>Target weight (optional)</Text>
           <TextInput
             style={[styles.targetInput, !targetWeightValid && styles.targetInputError]}
             value={store.targetWeightKg ? String(store.targetWeightKg) : ''}
@@ -134,11 +134,11 @@ export function GoalStep({ onNext }: Props) {
             }}
             keyboardType="numeric"
             placeholder="kg"
-            placeholderTextColor={getThemeColors().text.muted}
+            placeholderTextColor={c.text.muted}
             accessibilityLabel="Target weight in kilograms"
           />
           {!targetWeightValid && (
-            <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>Target weight must be between 30-300 kg</Text>
+            <Text style={[styles.errorText, { color: c.semantic.negative }]}>Target weight must be between 30-300 kg</Text>
           )}
         </View>
       )}
@@ -151,8 +151,8 @@ export function GoalStep({ onNext }: Props) {
 
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scroll: { paddingBottom: spacing[8] },
-  heading: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2] },
-  subheading: { color: getThemeColors().text.secondary, fontSize: typography.size.base, marginBottom: spacing[6] },
+  heading: { color: c.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2] },
+  subheading: { color: c.text.secondary, fontSize: typography.size.base, marginBottom: spacing[6] },
   rateRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -165,48 +165,48 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     marginHorizontal: spacing[1],
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: getThemeColors().border.default,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    borderColor: c.border.default,
+    backgroundColor: c.bg.surfaceRaised,
   },
-  rateValue: { color: getThemeColors().text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.bold },
-  rateUnit: { color: getThemeColors().text.muted, fontSize: typography.size.xs, marginTop: 2 },
+  rateValue: { color: c.text.primary, fontSize: typography.size.lg, fontWeight: typography.weight.bold },
+  rateUnit: { color: c.text.muted, fontSize: typography.size.xs, marginTop: 2 },
   budgetCard: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     padding: spacing[5],
     alignItems: 'center',
     marginBottom: spacing[4],
     borderWidth: 1,
-    borderColor: getThemeColors().border.default,
+    borderColor: c.border.default,
   },
-  budgetLabel: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, marginBottom: spacing[1] },
-  budgetValue: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold },
+  budgetLabel: { color: c.text.secondary, fontSize: typography.size.sm, marginBottom: spacing[1] },
+  budgetValue: { color: c.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold },
   warningBanner: {
-    backgroundColor: getThemeColors().semantic.warningSubtle,
+    backgroundColor: c.semantic.warningSubtle,
     borderRadius: radius.sm,
     padding: spacing[3],
     marginBottom: spacing[4],
     borderWidth: 1,
-    borderColor: getThemeColors().semantic.warning,
+    borderColor: c.semantic.warning,
   },
-  warningText: { color: getThemeColors().semantic.warning, fontSize: typography.size.sm },
-  projected: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, textAlign: 'center', marginBottom: spacing[5] },
+  warningText: { color: c.semantic.warning, fontSize: typography.size.sm },
+  projected: { color: c.text.secondary, fontSize: typography.size.sm, textAlign: 'center', marginBottom: spacing[5] },
   targetRow: { marginBottom: spacing[5] },
-  targetLabel: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, marginBottom: spacing[2] },
+  targetLabel: { color: c.text.secondary, fontSize: typography.size.sm, marginBottom: spacing[2] },
   targetInput: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: getThemeColors().border.default,
-    color: getThemeColors().text.primary,
+    borderColor: c.border.default,
+    color: c.text.primary,
     fontSize: typography.size.md,
     padding: spacing[3],
   },
   targetInputError: {
-    borderColor: getThemeColors().semantic.negative,
+    borderColor: c.semantic.negative,
   },
   errorText: {
-    color: getThemeColors().semantic.negative,
+    color: c.semantic.negative,
     fontSize: typography.size.sm,
     marginTop: spacing[1],
     lineHeight: typography.lineHeight.sm,

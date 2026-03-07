@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { spacing, typography, radius } from '../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 const MIN = 1.2;
 const MAX = 3.0;
@@ -64,7 +64,7 @@ export function ProteinTargetSlider({ value, weightKg, onChange }: Props) {
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { marginBottom: spacing[3] },
   label: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
     lineHeight: typography.lineHeight.sm,
@@ -80,30 +80,30 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: radius.md,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderWidth: 1,
-    borderColor: getThemeColors().border.default,
+    borderColor: c.border.default,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnDisabled: { opacity: 0.3 },
   btnText: {
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
     lineHeight: typography.lineHeight.xl,
   },
-  btnTextDisabled: { color: getThemeColors().text.muted },
+  btnTextDisabled: { color: c.text.muted },
   display: { alignItems: 'center' },
   valueText: {
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight.lg,
   },
   dailyText: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.xs,
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight.xs,
@@ -114,7 +114,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     marginTop: spacing[1],
   },
   rangeText: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
   },

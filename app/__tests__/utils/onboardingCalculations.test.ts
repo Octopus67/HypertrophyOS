@@ -525,3 +525,35 @@ describe('getProteinRecommendation missing combos', () => {
     expect(withEmpty.default).toBe(withNoStrength.default);
   });
 });
+
+describe('getProteinRecommendation recomposition goal', () => {
+  test('recomposition + strength → { min: 1.8, max: 2.4, default: 2.0 }', () => {
+    const result = getProteinRecommendation('recomposition', ['strength']);
+    expect(result).toBeDefined();
+    expect(result.min).toBeCloseTo(1.8, 1);
+    expect(result.max).toBeCloseTo(2.4, 1);
+    expect(result.default).toBeCloseTo(2.0, 1);
+  });
+
+  test('recomposition + no strength → { min: 1.6, max: 2.0, default: 1.8 }', () => {
+    const result = getProteinRecommendation('recomposition', ['cardio']);
+    expect(result).toBeDefined();
+    expect(result.min).toBeCloseTo(1.6, 1);
+    expect(result.max).toBeCloseTo(2.0, 1);
+    expect(result.default).toBeCloseTo(1.8, 1);
+  });
+
+  test('recomposition does not return undefined', () => {
+    const withStrength = getProteinRecommendation('recomposition', ['strength']);
+    const withoutStrength = getProteinRecommendation('recomposition', []);
+    expect(withStrength).toBeDefined();
+    expect(withoutStrength).toBeDefined();
+  });
+});
+
+describe('computeCalorieBudget recomposition goal', () => {
+  test('recomposition → budget equals TDEE (maintenance)', () => {
+    const result = computeCalorieBudget(2500, 'recomposition', 0, 'male');
+    expect(result.budget).toBeCloseTo(2500, 0);
+  });
+});

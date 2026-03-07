@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 import { Button } from '../common/Button';
 import api from '../../services/api';
@@ -91,13 +91,13 @@ export function UpgradeModal({ visible, onClose, trialEligible, onStartTrial }: 
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={[styles.overlay, { backgroundColor: getThemeColors().bg.overlay }]}>
-        <View style={[styles.sheet, { backgroundColor: getThemeColors().bg.surface }]}>
-          <View style={[styles.handle, { backgroundColor: getThemeColors().border.default }]} />
+      <View style={[styles.overlay, { backgroundColor: c.bg.overlay }]}>
+        <View style={[styles.sheet, { backgroundColor: c.bg.surface }]}>
+          <View style={[styles.handle, { backgroundColor: c.border.default }]} />
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Upgrade to Premium</Text>
-            <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>
+            <Text style={[styles.title, { color: c.text.primary }]}>Upgrade to Premium</Text>
+            <Text style={[styles.subtitle, { color: c.text.secondary }]}>
               Unlock the full Repwise experience
             </Text>
 
@@ -112,10 +112,10 @@ export function UpgradeModal({ visible, onClose, trialEligible, onStartTrial }: 
                   onPress={() => setSelectedPlan(plan.key)}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.planLabel, { color: getThemeColors().text.secondary }]}>{plan.label}</Text>
-                  <Text style={[styles.planPrice, { color: getThemeColors().text.primary }]}>{plan.price}</Text>
+                  <Text style={[styles.planLabel, { color: c.text.secondary }]}>{plan.label}</Text>
+                  <Text style={[styles.planPrice, { color: c.text.primary }]}>{plan.price}</Text>
                   {plan.savings ? (
-                    <Text style={[styles.planSavings, { color: getThemeColors().semantic.positive }]}>{plan.savings}</Text>
+                    <Text style={[styles.planSavings, { color: c.semantic.positive }]}>{plan.savings}</Text>
                   ) : null}
                 </TouchableOpacity>
               ))}
@@ -124,8 +124,8 @@ export function UpgradeModal({ visible, onClose, trialEligible, onStartTrial }: 
             <View style={styles.features}>
               {FEATURES.map((feature) => (
                 <View key={feature} style={styles.featureRow}>
-                  <Icon name="check" size={16} color={getThemeColors().semantic.positive} />
-                  <Text style={[styles.featureText, { color: getThemeColors().text.primary }]}>{feature}</Text>
+                  <Icon name="check" size={16} color={c.semantic.positive} />
+                  <Text style={[styles.featureText, { color: c.text.primary }]}>{feature}</Text>
                 </View>
               ))}
             </View>
@@ -146,7 +146,7 @@ export function UpgradeModal({ visible, onClose, trialEligible, onStartTrial }: 
               />
             )}
             <TouchableOpacity onPress={onClose} style={styles.cancelBtn}>
-              <Text style={[styles.cancelText, { color: getThemeColors().text.muted }]}>Maybe later</Text>
+              <Text style={[styles.cancelText, { color: c.text.muted }]}>Maybe later</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -158,11 +158,11 @@ export function UpgradeModal({ visible, onClose, trialEligible, onStartTrial }: 
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: getThemeColors().bg.overlay,
+    backgroundColor: c.bg.overlay,
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: getThemeColors().bg.surface,
+    backgroundColor: c.bg.surface,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     padding: spacing[6],
@@ -172,20 +172,20 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: getThemeColors().border.default,
+    backgroundColor: c.border.default,
     borderRadius: radius.full,
     alignSelf: 'center',
     marginBottom: spacing[6],
   },
   title: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.xl,
     lineHeight: typography.lineHeight.xl,
     fontWeight: typography.weight.semibold,
     textAlign: 'center',
   },
   subtitle: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     textAlign: 'center',
@@ -199,32 +199,32 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   planCard: {
     flex: 1,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: getThemeColors().border.subtle,
+    borderColor: c.border.subtle,
     padding: spacing[4],
     alignItems: 'center',
   },
   planCardSelected: {
-    borderColor: getThemeColors().accent.primary,
-    backgroundColor: getThemeColors().accent.primaryMuted,
+    borderColor: c.accent.primary,
+    backgroundColor: c.accent.primaryMuted,
   },
   planLabel: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     fontWeight: typography.weight.medium,
   },
   planPrice: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.lg,
     lineHeight: typography.lineHeight.lg,
     fontWeight: typography.weight.semibold,
     marginTop: spacing[1],
   },
   planSavings: {
-    color: getThemeColors().semantic.positive,
+    color: c.semantic.positive,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     fontWeight: typography.weight.medium,
@@ -241,7 +241,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   checkmark: {},
   featureText: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
   },
@@ -256,7 +256,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     padding: spacing[3],
   },
   cancelText: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
   },

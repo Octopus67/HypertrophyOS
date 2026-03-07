@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { useOnboardingStore } from '../../../store/onboardingSlice';
 import { Button } from '../../../components/common/Button';
 import { Icon } from '../../../components/common/Icon';
@@ -39,10 +39,10 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <Text style={[styles.heading, { color: getThemeColors().text.primary }]}>Your Food DNA</Text>
-      <Text style={[styles.subheading, { color: getThemeColors().text.secondary }]}>Help us personalize your food search from day one</Text>
+      <Text style={[styles.heading, { color: c.text.primary }]}>Your Food DNA</Text>
+      <Text style={[styles.subheading, { color: c.text.secondary }]}>Help us personalize your food search from day one</Text>
 
-      <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Dietary Identity</Text>
+      <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Dietary Identity</Text>
       <View style={styles.chipRow}>
         {DIETS.map((d) => (
           <TouchableOpacity
@@ -56,7 +56,7 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
         ))}
       </View>
 
-      <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Allergies / Intolerances</Text>
+      <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Allergies / Intolerances</Text>
       <View style={styles.chipRow}>
         {ALLERGIES.map((a) => (
           <TouchableOpacity
@@ -70,7 +70,7 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
         ))}
       </View>
 
-      <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Cuisines You Eat Most</Text>
+      <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Cuisines You Eat Most</Text>
       <View style={styles.chipRow}>
         {CUISINES.map((cuisine) => (
           <TouchableOpacity
@@ -79,15 +79,15 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
             onPress={() => toggleChip(store.cuisinePreferences, cuisine.value, 'cuisinePreferences')}
             activeOpacity={0.7}
           >
-            <View style={[styles.cuisineBadge, { backgroundColor: getThemeColors().accent.primaryMuted }]}>
-              <Text style={[styles.cuisineBadgeText, { color: getThemeColors().accent.primary }]}>{cuisine.code}</Text>
+            <View style={[styles.cuisineBadge, { backgroundColor: c.accent.primaryMuted }]}>
+              <Text style={[styles.cuisineBadgeText, { color: c.accent.primary }]}>{cuisine.code}</Text>
             </View>
             <Text style={[styles.chipText, store.cuisinePreferences.includes(cuisine.value) && styles.chipTextActive]}>{cuisine.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <Text style={[styles.sectionLabel, { color: getThemeColors().text.secondary }]}>Meals Per Day</Text>
+      <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Meals Per Day</Text>
       <View style={styles.stepperRow}>
         {[2, 3, 4, 5, 6].map((n) => (
           <TouchableOpacity
@@ -103,7 +103,7 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
 
       <Button title="Continue" onPress={onNext} style={styles.btn} />
       <TouchableOpacity onPress={handleSkip} style={styles.skipLink}>
-        <Text style={[styles.skipText, { color: getThemeColors().text.muted }]}>Set this up later</Text>
+        <Text style={[styles.skipText, { color: c.text.muted }]}>Set this up later</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -111,21 +111,21 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
 
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scroll: { paddingBottom: spacing[8] },
-  heading: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2] },
-  subheading: { color: getThemeColors().text.secondary, fontSize: typography.size.base, marginBottom: spacing[6] },
-  sectionLabel: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, marginBottom: spacing[2], marginTop: spacing[4] },
+  heading: { color: c.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2] },
+  subheading: { color: c.text.secondary, fontSize: typography.size.base, marginBottom: spacing[6] },
+  sectionLabel: { color: c.text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, marginBottom: spacing[2], marginTop: spacing[4] },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
   chip: {
     paddingHorizontal: spacing[3], paddingVertical: spacing[2],
-    borderRadius: radius.full, borderWidth: 1, borderColor: getThemeColors().border.default,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    borderRadius: radius.full, borderWidth: 1, borderColor: c.border.default,
+    backgroundColor: c.bg.surfaceRaised,
   },
-  chipActive: { borderColor: getThemeColors().accent.primary, backgroundColor: getThemeColors().accent.primaryMuted },
-  chipText: { color: getThemeColors().text.secondary, fontSize: typography.size.sm },
-  chipTextActive: { color: getThemeColors().accent.primary, fontWeight: typography.weight.medium },
+  chipActive: { borderColor: c.accent.primary, backgroundColor: c.accent.primaryMuted },
+  chipText: { color: c.text.secondary, fontSize: typography.size.sm },
+  chipTextActive: { color: c.accent.primary, fontWeight: typography.weight.medium },
   cuisineChip: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
   cuisineBadge: {
-    backgroundColor: getThemeColors().accent.primaryMuted,
+    backgroundColor: c.accent.primaryMuted,
     borderRadius: radius.sm,
     paddingHorizontal: spacing[1],
     paddingVertical: 1,
@@ -133,19 +133,19 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     alignItems: 'center',
   },
   cuisineBadgeText: {
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.bold,
   },
   stepperRow: { flexDirection: 'row', gap: spacing[2], marginTop: spacing[1] },
   stepperBtn: {
     width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: getThemeColors().border.default, backgroundColor: getThemeColors().bg.surfaceRaised,
+    borderWidth: 1, borderColor: c.border.default, backgroundColor: c.bg.surfaceRaised,
   },
-  stepperBtnActive: { borderColor: getThemeColors().accent.primary, backgroundColor: getThemeColors().accent.primaryMuted },
-  stepperText: { color: getThemeColors().text.secondary, fontSize: typography.size.md },
-  stepperTextActive: { color: getThemeColors().accent.primary, fontWeight: typography.weight.semibold },
+  stepperBtnActive: { borderColor: c.accent.primary, backgroundColor: c.accent.primaryMuted },
+  stepperText: { color: c.text.secondary, fontSize: typography.size.md },
+  stepperTextActive: { color: c.accent.primary, fontWeight: typography.weight.semibold },
   btn: { marginTop: spacing[6] },
   skipLink: { alignItems: 'center', marginTop: spacing[3] },
-  skipText: { color: getThemeColors().text.muted, fontSize: typography.size.sm },
+  skipText: { color: c.text.muted, fontSize: typography.size.sm },
 });

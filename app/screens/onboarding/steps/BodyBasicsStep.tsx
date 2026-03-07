@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { spacing, typography, radius } from '../../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
 import type { Sex } from '../../../store/onboardingSlice';
 import { Button } from '../../../components/common/Button';
@@ -47,6 +47,8 @@ interface VerticalPickerProps {
 }
 
 function VerticalPicker({ data, selectedValue, onValueChange }: VerticalPickerProps) {
+  const c = useThemeColors();
+  const pStyles = getPickerStyles(c);
   const scrollRef = useRef<ScrollView>(null);
   const VISIBLE_COUNT = 5;
   const ITEM_H = PICKER_ITEM_HEIGHT;
@@ -72,9 +74,9 @@ function VerticalPicker({ data, selectedValue, onValueChange }: VerticalPickerPr
   );
 
   return (
-    <View style={[pickerStyles.wrapper, { height: containerH }]}>
-      <View style={pickerStyles.fadeTop} pointerEvents="none" />
-      <View style={pickerStyles.fadeBottom} pointerEvents="none" />
+    <View style={[pStyles.wrapper, { height: containerH }]}>
+      <View style={pStyles.fadeTop} pointerEvents="none" />
+      <View style={pStyles.fadeBottom} pointerEvents="none" />
       <ScrollView
         ref={scrollRef}
         showsVerticalScrollIndicator={false}
@@ -85,11 +87,11 @@ function VerticalPicker({ data, selectedValue, onValueChange }: VerticalPickerPr
           return (
             <TouchableOpacity
               key={item.value}
-              style={pickerStyles.item}
+              style={pStyles.item}
               onPress={() => handleTap(item.value, i)}
               activeOpacity={0.6}
             >
-              <Text style={[pickerStyles.text, isSelected ? pickerStyles.textSelected : pickerStyles.textMuted]}>
+              <Text style={[pStyles.text, isSelected ? pStyles.textSelected : pStyles.textMuted]}>
                 {item.label}
               </Text>
             </TouchableOpacity>
@@ -100,12 +102,12 @@ function VerticalPicker({ data, selectedValue, onValueChange }: VerticalPickerPr
   );
 }
 
-const pickerStyles = StyleSheet.create({
+const getPickerStyles = (c: ThemeColors) => StyleSheet.create({
   wrapper: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: getThemeColors().border.subtle,
+    borderColor: c.border.subtle,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -115,7 +117,7 @@ const pickerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     height: PICKER_ITEM_HEIGHT * 1.5,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     opacity: 0.75,
     zIndex: 5,
   },
@@ -125,7 +127,7 @@ const pickerStyles = StyleSheet.create({
     left: 0,
     right: 0,
     height: PICKER_ITEM_HEIGHT * 1.5,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     opacity: 0.75,
     zIndex: 5,
   },
@@ -140,13 +142,13 @@ const pickerStyles = StyleSheet.create({
   textSelected: {
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
     lineHeight: typography.lineHeight.xl,
   },
   textMuted: {
     fontSize: typography.size.md,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     opacity: 0.4,
     lineHeight: typography.lineHeight.md,
   },
@@ -199,11 +201,11 @@ export function BodyBasicsStep({ onNext }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Body Basics</Text>
-      <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>We'll use this to calculate your metabolism</Text>
+      <Text style={[styles.title, { color: c.text.primary }]}>Body Basics</Text>
+      <Text style={[styles.subtitle, { color: c.text.secondary }]}>We'll use this to calculate your metabolism</Text>
 
       {/* ── Sex selector ─────────────────────────────────────────────── */}
-      <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Sex</Text>
+      <Text style={[styles.label, { color: c.text.secondary }]}>Sex</Text>
       <View style={styles.pillRow}>
         {SEX_OPTIONS.map((opt) => (
           <TouchableOpacity
@@ -224,18 +226,18 @@ export function BodyBasicsStep({ onNext }: Props) {
       {/* ── Birth Year & Month — side by side scroll pickers ────────── */}
       <View style={styles.dateRow}>
         <View style={styles.dateCol}>
-          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Birth Year</Text>
+          <Text style={[styles.label, { color: c.text.secondary }]}>Birth Year</Text>
           <VerticalPicker data={yearData} selectedValue={selectedYear} onValueChange={handleYearChange} />
         </View>
         <View style={styles.dateCol}>
-          <Text style={[styles.label, { color: getThemeColors().text.secondary }]}>Month</Text>
+          <Text style={[styles.label, { color: c.text.secondary }]}>Month</Text>
           <VerticalPicker data={monthData} selectedValue={selectedMonth} onValueChange={handleMonthChange} />
         </View>
       </View>
 
       {/* Age validation error */}
       {birthYear && !ageValid && (
-        <Text style={[styles.errorText, { color: getThemeColors().semantic.negative }]}>Age must be between 13 and 120 years</Text>
+        <Text style={[styles.errorText, { color: c.semantic.negative }]}>Age must be between 13 and 120 years</Text>
       )}
 
       {onNext && (
@@ -248,16 +250,16 @@ export function BodyBasicsStep({ onNext }: Props) {
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: { flex: 1 },
   content: { paddingHorizontal: spacing[4], paddingBottom: spacing[10] },
-  title: { color: getThemeColors().text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[1], lineHeight: typography.lineHeight['2xl'] },
-  subtitle: { color: getThemeColors().text.secondary, fontSize: typography.size.base, marginBottom: spacing[6], lineHeight: typography.lineHeight.base },
-  label: { color: getThemeColors().text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, marginBottom: spacing[2], marginTop: spacing[4], lineHeight: typography.lineHeight.sm },
+  title: { color: c.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[1], lineHeight: typography.lineHeight['2xl'] },
+  subtitle: { color: c.text.secondary, fontSize: typography.size.base, marginBottom: spacing[6], lineHeight: typography.lineHeight.base },
+  label: { color: c.text.secondary, fontSize: typography.size.sm, fontWeight: typography.weight.medium, marginBottom: spacing[2], marginTop: spacing[4], lineHeight: typography.lineHeight.sm },
   pillRow: { flexDirection: 'row', gap: spacing[2] },
-  pill: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, backgroundColor: getThemeColors().bg.surfaceRaised, borderWidth: 1, borderColor: getThemeColors().border.subtle, alignItems: 'center', minHeight: 44, justifyContent: 'center' },
-  pillActive: { backgroundColor: getThemeColors().accent.primaryMuted, borderColor: getThemeColors().accent.primary },
-  pillText: { color: getThemeColors().text.secondary, fontSize: typography.size.base, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.base },
-  pillTextActive: { color: getThemeColors().accent.primary, fontWeight: typography.weight.semibold },
+  pill: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, backgroundColor: c.bg.surfaceRaised, borderWidth: 1, borderColor: c.border.subtle, alignItems: 'center', minHeight: 44, justifyContent: 'center' },
+  pillActive: { backgroundColor: c.accent.primaryMuted, borderColor: c.accent.primary },
+  pillText: { color: c.text.secondary, fontSize: typography.size.base, fontWeight: typography.weight.medium, lineHeight: typography.lineHeight.base },
+  pillTextActive: { color: c.accent.primary, fontWeight: typography.weight.semibold },
   dateRow: { flexDirection: 'row', gap: spacing[3], marginTop: spacing[2] },
   dateCol: { flex: 1 },
-  errorText: { color: getThemeColors().semantic.negative, fontSize: typography.size.sm, marginTop: spacing[2], textAlign: 'center', lineHeight: typography.lineHeight.sm },
+  errorText: { color: c.semantic.negative, fontSize: typography.size.sm, marginTop: spacing[2], textAlign: 'center', lineHeight: typography.lineHeight.sm },
   nextBtn: { marginTop: spacing[6], width: '100%' },
 });

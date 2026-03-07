@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { colors, radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors, getThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 import { Button } from '../common/Button';
 import type { TrialInsights } from '../../utils/trialLogic';
@@ -39,15 +39,15 @@ export function TrialExpirationModal({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={[styles.overlay, { backgroundColor: getThemeColors().bg.overlay }]}>
-        <View style={[styles.sheet, { backgroundColor: getThemeColors().bg.surface }]}>
-          <View style={[styles.handle, { backgroundColor: getThemeColors().border.default }]} />
+      <View style={[styles.overlay, { backgroundColor: c.bg.overlay }]}>
+        <View style={[styles.sheet, { backgroundColor: c.bg.surface }]}>
+          <View style={[styles.handle, { backgroundColor: c.border.default }]} />
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={[styles.title, { color: getThemeColors().text.primary }]}>
+            <Text style={[styles.title, { color: c.text.primary }]}>
               Your Trial Has Ended
             </Text>
-            <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>
+            <Text style={[styles.subtitle, { color: c.text.secondary }]}>
               Here's what you accomplished in 7 days
             </Text>
 
@@ -56,13 +56,13 @@ export function TrialExpirationModal({
                 {stats.map((stat) => (
                   <View
                     key={stat.label}
-                    style={[styles.statCard, { backgroundColor: getThemeColors().bg.surfaceRaised }]}
+                    style={[styles.statCard, { backgroundColor: c.bg.surfaceRaised }]}
                   >
-                    <Icon name={stat.icon} size={20} color={getThemeColors().accent.primary} />
-                    <Text style={[styles.statValue, { color: getThemeColors().text.primary }]}>
+                    <Icon name={stat.icon} size={20} color={c.accent.primary} />
+                    <Text style={[styles.statValue, { color: c.text.primary }]}>
                       {stat.value}
                     </Text>
-                    <Text style={[styles.statLabel, { color: getThemeColors().text.muted }]}>
+                    <Text style={[styles.statLabel, { color: c.text.muted }]}>
                       {stat.label}
                     </Text>
                   </View>

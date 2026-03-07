@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 import { useReduceMotion } from '../../hooks/useReduceMotion';
 
@@ -39,16 +39,16 @@ export function UpgradeBanner({ onPress }: UpgradeBannerProps) {
   }));
 
   return (
-    <TouchableOpacity style={[styles.banner, { backgroundColor: getThemeColors().accent.primaryMuted, borderColor: getThemeColors().accent.primary }]} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity style={[styles.banner, { backgroundColor: c.accent.primaryMuted, borderColor: c.accent.primary }]} onPress={onPress} activeOpacity={0.8}>
       <Animated.View style={[styles.content, pulseStyle]}>
-        <Icon name="star" size={16} color={getThemeColors().premium.gold} />
+        <Icon name="star" size={16} color={c.premium.gold} />
         <View style={styles.textContainer}>
-          <Text style={[styles.title, { color: getThemeColors().text.primary }]}>Unlock Premium</Text>
-          <Text style={[styles.subtitle, { color: getThemeColors().text.secondary }]}>
+          <Text style={[styles.title, { color: c.text.primary }]}>Unlock Premium</Text>
+          <Text style={[styles.subtitle, { color: c.text.secondary }]}>
             Coaching, advanced analytics & more
           </Text>
         </View>
-        <Text style={[styles.arrow, { color: getThemeColors().accent.primary }]}>→</Text>
+        <Text style={[styles.arrow, { color: c.accent.primary }]}>→</Text>
       </Animated.View>
     </TouchableOpacity>
   );
@@ -56,10 +56,10 @@ export function UpgradeBanner({ onPress }: UpgradeBannerProps) {
 
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   banner: {
-    backgroundColor: getThemeColors().accent.primaryMuted,
+    backgroundColor: c.accent.primaryMuted,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: getThemeColors().accent.primary,
+    borderColor: c.accent.primary,
     padding: spacing[4],
     marginHorizontal: spacing[4],
     marginVertical: spacing[2],
@@ -74,19 +74,19 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.base,
     lineHeight: typography.lineHeight.base,
     fontWeight: typography.weight.semibold,
   },
   subtitle: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.sm,
     lineHeight: typography.lineHeight.sm,
     marginTop: 2,
   },
   arrow: {
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
     fontSize: typography.size.lg,
     lineHeight: typography.lineHeight.lg,
     fontWeight: typography.weight.semibold,

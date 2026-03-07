@@ -26,7 +26,7 @@ import type {
 import { SetRowPremium } from './SetRowPremium';
 import { OverloadBadge } from './OverloadBadge';
 import { typography, spacing, radius } from '../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -290,7 +290,7 @@ export const ExerciseCardPremium: React.FC<ExerciseCardPremiumProps> = ({
           value={notesText}
           onChangeText={setNotesText}
           placeholder="Exercise notes..."
-          placeholderTextColor={getThemeColors().text.muted}
+          placeholderTextColor={c.text.muted}
           multiline
           accessibilityLabel={`Notes for ${exercise.exerciseName}`}
           accessibilityRole="text"
@@ -304,12 +304,12 @@ export const ExerciseCardPremium: React.FC<ExerciseCardPremiumProps> = ({
 
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   card: {
-    backgroundColor: getThemeColors().bg.surface,
+    backgroundColor: c.bg.surface,
     borderRadius: radius.md,
     padding: spacing[3],
     marginBottom: spacing[3],
     borderWidth: 1,
-    borderColor: getThemeColors().border.subtle,
+    borderColor: c.border.subtle,
   },
   cardSkipped: {
     opacity: 0.4,
@@ -319,7 +319,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     position: 'absolute',
     top: spacing[2],
     right: spacing[2],
-    backgroundColor: getThemeColors().semantic.negativeSubtle,
+    backgroundColor: c.semantic.negativeSubtle,
     paddingVertical: 2,
     paddingHorizontal: spacing[2],
     borderRadius: radius.full,
@@ -328,7 +328,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   skippedBadgeText: {
     fontSize: typography.size.xs,
     fontWeight: typography.weight.bold,
-    color: getThemeColors().semantic.negative,
+    color: c.semantic.negative,
   },
 
   header: {
@@ -344,7 +344,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   dragHandleText: {
     fontSize: typography.size.md,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
   },
   nameBlock: {
     flex: 1,
@@ -352,7 +352,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   exerciseName: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
   },
   progressRow: {
     flexDirection: 'row',
@@ -361,16 +361,16 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   progressText: {
     fontSize: typography.size.xs,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
   },
   dotFilled: {
     fontSize: 8,
-    color: getThemeColors().semantic.positive,
+    color: c.semantic.positive,
     marginHorizontal: 1,
   },
   dotEmpty: {
     fontSize: 8,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     marginHorizontal: 1,
   },
 
@@ -383,7 +383,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   menuBtnText: {
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
   },
 
   menuBackdrop: {
@@ -398,10 +398,10 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     position: 'absolute',
     top: 44,
     right: 0,
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: getThemeColors().border.default,
+    borderColor: c.border.default,
     zIndex: 100,
     minWidth: 180,
     elevation: 8,
@@ -415,12 +415,12 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     paddingHorizontal: spacing[4],
   },
   actionMenuItemText: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },
   actionMenuItemTextDanger: {
-    color: getThemeColors().semantic.negative,
+    color: c.semantic.negative,
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
   },
@@ -440,49 +440,49 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   columnHeader: {
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
   columnHeaderSetNum: {
     width: 18,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
   columnHeaderPrev: {
     width: 68,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
   columnHeaderReps: {
     width: 48,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
   columnHeaderWeight: {
     width: 108, // 26 + 56 + 26 (steppers + input)
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
   columnHeaderIntensity: {
     width: 44,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
   columnHeaderDone: {
     width: 32,
     fontSize: typography.size.xs,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     textAlign: 'center',
   },
   rpeHeaderContainer: {
@@ -498,7 +498,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   infoButtonText: {
     fontSize: 12,
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
   },
 
   addSetBtn: {
@@ -509,14 +509,14 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   addSetText: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
   },
 
   huBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: getThemeColors().accent.primaryMuted,
+    backgroundColor: c.accent.primaryMuted,
     borderRadius: radius.full,
     paddingVertical: 2,
     paddingHorizontal: spacing[2],
@@ -526,20 +526,20 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   huBadgeText: {
     fontSize: typography.size.xs,
     fontWeight: typography.weight.semibold,
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
     fontVariant: ['tabular-nums'],
   },
   huInfoIcon: {
     fontSize: 10,
-    color: getThemeColors().accent.primary,
+    color: c.accent.primary,
   },
 
   notesInput: {
-    backgroundColor: getThemeColors().bg.surfaceRaised,
+    backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.sm,
     padding: spacing[2],
     marginTop: spacing[2],
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.sm,
     minHeight: 60,
     textAlignVertical: 'top',

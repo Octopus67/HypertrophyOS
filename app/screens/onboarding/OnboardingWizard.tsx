@@ -2,7 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Platform } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { spacing, typography, radius, motion } from '../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { useStepTransition } from '../../hooks/useStepTransition';
 import { useHaptics } from '../../hooks/useHaptics';
 import { useOnboardingStore } from '../../store/onboardingSlice';
@@ -98,7 +98,7 @@ export function OnboardingWizard({ onComplete }: Props) {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: getThemeColors().bg.base }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.bg.base }]}>
       <ErrorBoundary
         onError={(error, errorInfo) => {
           console.error('[ErrorBoundary:Onboarding]', error.message);
@@ -106,10 +106,10 @@ export function OnboardingWizard({ onComplete }: Props) {
         }}
         fallback={(error, retry) => (
           <View style={styles.errorContainer}>
-            <Text style={[styles.errorTitle, { color: getThemeColors().text.primary }]}>Something went wrong</Text>
-            <Text style={[styles.errorMessage, { color: getThemeColors().text.secondary }]}>We encountered an error during onboarding.</Text>
+            <Text style={[styles.errorTitle, { color: c.text.primary }]}>Something went wrong</Text>
+            <Text style={[styles.errorMessage, { color: c.text.secondary }]}>We encountered an error during onboarding.</Text>
             <TouchableOpacity 
-              style={[styles.restartButton, { backgroundColor: getThemeColors().accent.primary }]} 
+              style={[styles.restartButton, { backgroundColor: c.accent.primary }]} 
               onPress={() => {
                 reset();
                 setStep(1);
@@ -124,16 +124,16 @@ export function OnboardingWizard({ onComplete }: Props) {
       >
         {/* Progress bar */}
         <View style={styles.progressContainer}>
-          <View style={[styles.progressTrack, { backgroundColor: getThemeColors().border.subtle }]}>
+          <View style={[styles.progressTrack, { backgroundColor: c.border.subtle }]}>
             <Animated.View style={[styles.progressFill, progressStyle]} />
           </View>
-          <Text style={[styles.stepCounter, { color: getThemeColors().text.muted }]}>Step {currentStep} of {TOTAL_STEPS}</Text>
+          <Text style={[styles.stepCounter, { color: c.text.muted }]}>Step {currentStep} of {TOTAL_STEPS}</Text>
         </View>
 
         {/* Back button (hidden on step 1) */}
         {currentStep > 1 && (
           <TouchableOpacity onPress={goBack} style={styles.backButton} activeOpacity={0.7} accessibilityLabel="Go back" accessibilityRole="button">
-            <Text style={[styles.backText, { color: getThemeColors().text.secondary }]}>← Back</Text>
+            <Text style={[styles.backText, { color: c.text.secondary }]}>← Back</Text>
           </TouchableOpacity>
         )}
 
@@ -149,7 +149,7 @@ export function OnboardingWizard({ onComplete }: Props) {
 const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: getThemeColors().bg.base,
+    backgroundColor: c.bg.base,
   },
   progressContainer: {
     paddingHorizontal: spacing[6],
@@ -158,17 +158,17 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   progressTrack: {
     height: 3,
-    backgroundColor: getThemeColors().border.subtle,
+    backgroundColor: c.border.subtle,
     borderRadius: 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: getThemeColors().accent.primary,
+    backgroundColor: c.accent.primary,
     borderRadius: 2,
   },
   stepCounter: {
-    color: getThemeColors().text.muted,
+    color: c.text.muted,
     fontSize: typography.size.xs,
     textAlign: 'right',
     marginTop: spacing[1],
@@ -178,7 +178,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     paddingVertical: spacing[2],
   },
   backText: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.sm,
   },
   content: {
@@ -192,20 +192,20 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     paddingHorizontal: spacing[6],
   },
   errorTitle: {
-    color: getThemeColors().text.primary,
+    color: c.text.primary,
     fontSize: typography.size.xl,
     fontWeight: typography.weight.bold,
     marginBottom: spacing[2],
     textAlign: 'center',
   },
   errorMessage: {
-    color: getThemeColors().text.secondary,
+    color: c.text.secondary,
     fontSize: typography.size.base,
     textAlign: 'center',
     marginBottom: spacing[6],
   },
   restartButton: {
-    backgroundColor: getThemeColors().accent.primary,
+    backgroundColor: c.accent.primary,
     paddingHorizontal: spacing[6],
     paddingVertical: spacing[3],
     borderRadius: radius.md,

@@ -42,6 +42,7 @@ export interface OnboardingWizardState {
   // Screen 7: Diet Style
   dietStyle: DietStyle;
   proteinPerKg: number;
+  proteinUserModified: boolean;
 
   // Screen 8: Food DNA
   dietaryRestrictions: string[];
@@ -84,6 +85,7 @@ const INITIAL_STATE: OnboardingWizardState = {
   targetWeightKg: null,
   dietStyle: 'balanced',
   proteinPerKg: 2.0,
+  proteinUserModified: false,
   dietaryRestrictions: [],
   allergies: [],
   cuisinePreferences: [],

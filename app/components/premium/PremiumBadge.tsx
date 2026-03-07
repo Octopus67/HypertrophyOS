@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { radius, spacing, typography } from '../../theme/tokens';
-import { useThemeColors, getThemeColors, ThemeColors } from '../../hooks/useThemeColors';
+import { useThemeColors, ThemeColors } from '../../hooks/useThemeColors';
 import { Icon } from '../common/Icon';
 
 interface PremiumBadgeProps {
@@ -13,7 +13,7 @@ export function PremiumBadge({ size = 'sm' }: PremiumBadgeProps) {
   const styles = getThemedStyles(c);
   return (
     <View style={[styles.badge, size === 'md' && styles.badgeMd]}>
-      <Icon name="star" size={14} color={getThemeColors().premium.gold} />
+      <Icon name="star" size={14} color={c.premium.gold} />
       <Text style={[styles.label, size === 'md' && styles.labelMd]}>PRO</Text>
     </View>
   );
@@ -23,7 +23,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: getThemeColors().premium.goldSubtle,
+    backgroundColor: c.premium.goldSubtle,
     borderRadius: radius.full,
     paddingHorizontal: spacing[2],
     paddingVertical: 2,
@@ -37,7 +37,7 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   icon: {},
   iconMd: {},
   label: {
-    color: getThemeColors().premium.gold,
+    color: c.premium.gold,
     fontSize: typography.size.xs,
     lineHeight: typography.lineHeight.xs,
     fontWeight: typography.weight.semibold,
