@@ -9,6 +9,9 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
+import httpx
+import jwt as pyjwt
+from jwt import PyJWKClient
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from jose import JWTError, jwt
@@ -17,9 +20,14 @@ from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.settings import settings
-from src.modules.auth.models import User, PasswordResetToken, TokenBlacklist
-from src.shared.errors import ConflictError, UnauthorizedError
+from src.modules.auth.models import User, PasswordResetCode, TokenBlacklist, EmailVerificationCode
+from src.shared.errors import ConflictError, UnauthorizedError, RateLimitedError
 from src.shared.types import AuthProvider, UserRole
+
+APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys"
+APPLE_ISSUER = "https://appleid.apple.com"
+
+_apple_jwk_client = PyJWKClient(APPLE_JWKS_URL, cache_keys=True)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -62,6 +70,9 @@ class AuthService:
         self.session.add(user)
         await self.session.flush()
 
+        # Send email verification code
+        await self.create_and_send_verification_code(user)
+
         return _generate_tokens(user.id)
 
     async def login_email(self, email: str, password: str) -> AuthTokens:
@@ -96,8 +107,21 @@ class AuthService:
             except ValueError:
                 raise UnauthorizedError("Invalid Google token")
         elif provider == "apple":
-            from fastapi import HTTPException
-            raise HTTPException(status_code=501, detail="Apple Sign-In not yet implemented")
+            if not settings.APPLE_CLIENT_ID:
+                raise UnauthorizedError("Apple OAuth not configured")
+            try:
+                signing_key = _apple_jwk_client.get_signing_key_from_jwt(token)
+                decoded = pyjwt.decode(
+                    token,
+                    signing_key.key,
+                    algorithms=["RS256"],
+                    audience=settings.APPLE_CLIENT_ID,
+                    issuer=APPLE_ISSUER,
+                )
+                provider_user_id = decoded["sub"]
+                email = decoded.get("email", f"{decoded['sub']}@privaterelay.appleid.com")
+            except (pyjwt.InvalidTokenError, KeyError):
+                raise UnauthorizedError("Invalid Apple token")
         else:
             raise UnauthorizedError("Unsupported OAuth provider")
 
@@ -167,65 +191,128 @@ class AuthService:
     # Password reset
     # ------------------------------------------------------------------
 
-    async def generate_reset_token(self, email: str) -> Optional[str]:
-        """Generate a password reset token for the given email.
+    async def generate_reset_code(self, email: str) -> None:
+        """Generate a 6-digit OTP for password reset and send via email.
 
-        Returns None if no user exists with that email (caller should
-        still return a generic success message to avoid leaking info).
+        Does nothing if no user exists (caller should still return generic message).
         """
         user = await self._get_user_by_email(email)
         if user is None:
-            return None
+            return
 
-        token = str(uuid.uuid4())
-        token_hash = pwd_context.hash(token)
-        expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-        
-        reset_token = PasswordResetToken(
+        from src.services.email_service import EmailService, generate_otp
+
+        code = generate_otp()
+        code_hash = pwd_context.hash(code)
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+
+        reset_code = PasswordResetCode(
             user_id=user.id,
-            token_hash=token_hash,
+            code_hash=code_hash,
             expires_at=expires_at,
-            used=False
         )
-        self.session.add(reset_token)
+        self.session.add(reset_code)
         await self.session.flush()
-        
-        return token
 
-    async def reset_password(self, token: str, new_password: str) -> bool:
-        """Reset a user's password using a valid reset token.
+        EmailService().send_password_reset_code(user.email, code)
 
-        Returns False if the token is invalid or expired.
+    async def reset_password(self, email: str, code: str, new_password: str) -> bool:
+        """Reset a user's password using a valid 6-digit OTP.
+
+        Returns False if the code is invalid, expired, or already used.
         """
-        # Hash the provided token to match what's stored in the database
-        token_hash = pwd_context.hash(token)
+        user = await self._get_user_by_email(email)
+        if user is None:
+            return False
+
         now = datetime.now(timezone.utc)
-        
-        # Find a matching token by trying to verify against all stored hashes
-        stmt = select(PasswordResetToken).where(
-            PasswordResetToken.expires_at > now,
-            PasswordResetToken.used == False
+        stmt = (
+            select(PasswordResetCode)
+            .where(
+                PasswordResetCode.user_id == user.id,
+                PasswordResetCode.expires_at > now,
+                PasswordResetCode.used == False,
+            )
+            .order_by(PasswordResetCode.created_at.desc())
         )
         result = await self.session.execute(stmt)
-        reset_tokens = result.scalars().all()
-        
-        matching_token = None
-        for reset_token in reset_tokens:
-            if pwd_context.verify(token, reset_token.token_hash):
-                matching_token = reset_token
-                break
-        
-        if matching_token is None:
-            return False
+        codes = result.scalars().all()
 
-        user = await self.session.get(User, matching_token.user_id)
-        if user is None or user.deleted_at is not None:
-            return False
+        for rc in codes:
+            if pwd_context.verify(code, rc.code_hash):
+                rc.used = True
+                user.hashed_password = _hash_password(new_password)
+                await self.session.flush()
+                return True
 
-        user.hashed_password = _hash_password(new_password)
-        matching_token.used = True
-        await self.session.commit()
-        return True
+        return False
+
+    # ------------------------------------------------------------------
+    # Email verification
+    # ------------------------------------------------------------------
+
+    async def create_and_send_verification_code(self, user: User) -> None:
+        """Generate a 6-digit OTP, hash it, store it, and send via SES."""
+        from src.services.email_service import EmailService, generate_otp
+
+        code = generate_otp()
+        code_hash = pwd_context.hash(code)
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+
+        verification = EmailVerificationCode(
+            user_id=user.id,
+            code_hash=code_hash,
+            expires_at=expires_at,
+        )
+        self.session.add(verification)
+        await self.session.flush()
+
+        EmailService().send_verification_code(user.email, code)
+
+    async def verify_email(self, user_id: uuid.UUID, code: str) -> bool:
+        """Verify the OTP code and mark the user's email as verified."""
+        now = datetime.now(timezone.utc)
+        stmt = (
+            select(EmailVerificationCode)
+            .where(
+                EmailVerificationCode.user_id == user_id,
+                EmailVerificationCode.expires_at > now,
+                EmailVerificationCode.used == False,
+            )
+            .order_by(EmailVerificationCode.created_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        codes = result.scalars().all()
+
+        for vc in codes:
+            if pwd_context.verify(code, vc.code_hash):
+                vc.used = True
+                user = await self.session.get(User, user_id)
+                if user:
+                    user.email_verified = True
+                await self.session.flush()
+                return True
+        return False
+
+    async def resend_verification_code(self, user: User) -> None:
+        """Resend verification code with rate limiting (max 3 per 15 min)."""
+        now = datetime.now(timezone.utc)
+        window_start = now - timedelta(minutes=15)
+
+        stmt = select(EmailVerificationCode).where(
+            EmailVerificationCode.user_id == user.id,
+            EmailVerificationCode.created_at > window_start,
+        )
+        result = await self.session.execute(stmt)
+        recent_codes = result.scalars().all()
+
+        if len(recent_codes) >= 3:
+            raise RateLimitedError(
+                message="Too many verification code requests. Please try again later.",
+                retry_after=900,
+            )
+
+        await self.create_and_send_verification_code(user)
 
     # ------------------------------------------------------------------
     # Internal helpers

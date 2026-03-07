@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -26,8 +26,11 @@ import { Button } from '../../components/common/Button';
 import api from '../../services/api';
 import { useStore } from '../../store';
 import { isValidEmail, trimEmail } from '../../utils/validation';
+import { getPasswordStrength } from '../../utils/passwordStrength';
+import { PasswordStrengthMeter } from '../../components/auth/PasswordStrengthMeter';
 import Animated from 'react-native-reanimated';
 import { useStaggeredEntrance } from '../../hooks/useStaggeredEntrance';
+import { SocialLoginButtons } from '../../components/auth/SocialLoginButtons';
 
 /** Decode the user ID from a JWT access token. */
 function parseJwtSub(token: string): string {
@@ -41,7 +44,7 @@ function parseJwtSub(token: string): string {
 
 interface RegisterScreenProps {
   onNavigateLogin: () => void;
-  onRegisterSuccess: () => void;
+  onRegisterSuccess: (email: string) => void;
 }
 
 export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterScreenProps) {
@@ -65,6 +68,8 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
   const buttonAnim = useStaggeredEntrance(3, 80);
   const linkAnim = useStaggeredEntrance(4, 80);
 
+  const strengthResult = useMemo(() => getPasswordStrength(password), [password]);
+
   const handleRegister = async () => {
     setError('');
     setEmailError('');
@@ -81,12 +86,12 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
       setError('Please accept the Terms of Service');
       return;
     }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    if (!strengthResult.isValid) {
+      setError('Password does not meet all requirements');
       return;
     }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
@@ -103,13 +108,23 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
           expiresIn: data.expires_in,
         },
       );
-      onRegisterSuccess();
-    } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Registration failed';
+      onRegisterSuccess(cleanEmail);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Registration failed';
       setError(msg);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSocialSuccess = async (tokens: { access_token: string; refresh_token: string; expires_in: number }) => {
+    await secureSet('rw_access_token', tokens.access_token);
+    await secureSet('rw_refresh_token', tokens.refresh_token);
+    setAuth(
+      { id: parseJwtSub(tokens.access_token), email: '', role: 'user' },
+      { accessToken: tokens.access_token, refreshToken: tokens.refresh_token, expiresIn: tokens.expires_in },
+    );
+    onRegisterSuccess('');
   };
 
   return (
@@ -168,6 +183,9 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
             <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} color={getThemeColors().text.muted} />
           </TouchableOpacity>
         </View>
+
+        <PasswordStrengthMeter result={strengthResult} password={password} />
+
         <View style={{ position: 'relative' }}>
           <TextInput
             testID="register-confirm-password-input"
@@ -193,6 +211,9 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
             <Icon name={showConfirm ? 'eye-off' : 'eye'} size={20} color={getThemeColors().text.muted} />
           </TouchableOpacity>
         </View>
+        {confirmPassword.length > 0 && password !== confirmPassword && (
+          <Text style={[styles.emailError, { color: getThemeColors().semantic.negative }]}>Passwords do not match</Text>
+        )}
         </Animated.View>
 
         <Animated.View style={buttonAnim}>
@@ -204,6 +225,7 @@ export function RegisterScreen({ onNavigateLogin, onRegisterSuccess }: RegisterS
         </TouchableOpacity>
 
         <Button testID="register-submit-button" title="Register" onPress={handleRegister} loading={loading} disabled={!tosAccepted || loading} style={styles.btn} />
+        <SocialLoginButtons onSuccess={handleSocialSuccess} onError={setError} />
         </Animated.View>
 
         <Animated.View style={linkAnim}>

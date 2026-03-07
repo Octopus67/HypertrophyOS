@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     # OAuth
     GOOGLE_CLIENT_ID: str = ""
+    APPLE_CLIENT_ID: str = ""  # Bundle ID, e.g. com.repwise.app
 
     # Payment providers
     STRIPE_WEBHOOK_SECRET: str = "whsec_test_secret"
@@ -46,6 +47,10 @@ class Settings(BaseSettings):
     APNS_KEY_ID: str = ""
     APNS_TEAM_ID: str = ""
     APNS_AUTH_KEY_PATH: str = ""
+    # AWS SES
+    SES_REGION: str = "us-east-1"
+    SES_SENDER_EMAIL: str = "noreply@repwise.app"
+
     STRIPE_API_KEY: str = ""
     RAZORPAY_KEY_ID: str = ""
     RAZORPAY_KEY_SECRET: str = ""

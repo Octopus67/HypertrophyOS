@@ -143,18 +143,153 @@ async def test_refresh_invalid_token(client, override_get_db):
 
 
 # ------------------------------------------------------------------
-# 8. Apple OAuth returns 501 Not Implemented
+# 8. Apple OAuth — verifies token and creates/finds user
 # ------------------------------------------------------------------
 
 @pytest.mark.asyncio
-async def test_apple_oauth_returns_501(client, override_get_db):
-    """POST /oauth/apple → 501, Apple Sign-In not yet implemented."""
+async def test_apple_oauth_happy_path(client, override_get_db, monkeypatch):
+    """POST /oauth/apple with valid token → 200, returns tokens and creates user."""
+    import jwt as pyjwt
+    from unittest.mock import MagicMock
+
+    monkeypatch.setattr(settings, "APPLE_CLIENT_ID", "com.repwise.app")
+
+    fake_key = MagicMock()
+    decoded_payload = {
+        "sub": "apple-user-001",
+        "email": "user@example.com",
+        "iss": "https://appleid.apple.com",
+        "aud": "com.repwise.app",
+    }
+
+    def mock_get_signing_key(token):
+        return fake_key
+
+    def mock_decode(token, key, **kwargs):
+        return decoded_payload
+
+    monkeypatch.setattr(
+        "src.modules.auth.service._apple_jwk_client.get_signing_key_from_jwt",
+        mock_get_signing_key,
+    )
+    monkeypatch.setattr("src.modules.auth.service.pyjwt.decode", mock_decode)
+
+    resp = await client.post(
+        "/api/v1/auth/oauth/apple",
+        json={"provider": "apple", "token": "valid-apple-token"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "access_token" in body
+    assert "refresh_token" in body
+    assert body["token_type"] == "bearer"
+
+
+@pytest.mark.asyncio
+async def test_apple_oauth_invalid_token(client, override_get_db, monkeypatch):
+    """POST /oauth/apple with invalid token → 401."""
+    import jwt as pyjwt
+    from unittest.mock import MagicMock
+
+    monkeypatch.setattr(settings, "APPLE_CLIENT_ID", "com.repwise.app")
+
+    def mock_get_signing_key(token):
+        raise pyjwt.InvalidTokenError("bad key")
+
+    monkeypatch.setattr(
+        "src.modules.auth.service._apple_jwk_client.get_signing_key_from_jwt",
+        mock_get_signing_key,
+    )
+
+    resp = await client.post(
+        "/api/v1/auth/oauth/apple",
+        json={"provider": "apple", "token": "invalid-token"},
+    )
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_apple_oauth_not_configured(client, override_get_db, monkeypatch):
+    """POST /oauth/apple when APPLE_CLIENT_ID is empty → 401."""
+    monkeypatch.setattr(settings, "APPLE_CLIENT_ID", "")
+
     resp = await client.post(
         "/api/v1/auth/oauth/apple",
         json={"provider": "apple", "token": "any-token"},
     )
-    assert resp.status_code == 501
-    assert "not yet implemented" in resp.json()["detail"].lower()
+    assert resp.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_apple_oauth_privacy_relay_email(client, override_get_db, monkeypatch):
+    """Apple user with no email gets a privaterelay fallback."""
+    from unittest.mock import MagicMock
+
+    monkeypatch.setattr(settings, "APPLE_CLIENT_ID", "com.repwise.app")
+
+    fake_key = MagicMock()
+    decoded_payload = {
+        "sub": "apple-user-no-email",
+        "iss": "https://appleid.apple.com",
+        "aud": "com.repwise.app",
+    }
+
+    monkeypatch.setattr(
+        "src.modules.auth.service._apple_jwk_client.get_signing_key_from_jwt",
+        lambda t: fake_key,
+    )
+    monkeypatch.setattr(
+        "src.modules.auth.service.pyjwt.decode",
+        lambda token, key, **kw: decoded_payload,
+    )
+
+    resp = await client.post(
+        "/api/v1/auth/oauth/apple",
+        json={"provider": "apple", "token": "valid-apple-token"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "access_token" in body
+
+
+@pytest.mark.asyncio
+async def test_apple_oauth_existing_user(client, override_get_db, monkeypatch):
+    """Second Apple login with same sub returns tokens without creating duplicate."""
+    from unittest.mock import MagicMock
+
+    monkeypatch.setattr(settings, "APPLE_CLIENT_ID", "com.repwise.app")
+
+    fake_key = MagicMock()
+    decoded_payload = {
+        "sub": "apple-returning-user",
+        "email": "returning@example.com",
+        "iss": "https://appleid.apple.com",
+        "aud": "com.repwise.app",
+    }
+
+    monkeypatch.setattr(
+        "src.modules.auth.service._apple_jwk_client.get_signing_key_from_jwt",
+        lambda t: fake_key,
+    )
+    monkeypatch.setattr(
+        "src.modules.auth.service.pyjwt.decode",
+        lambda token, key, **kw: decoded_payload,
+    )
+
+    # First login — creates user
+    resp1 = await client.post(
+        "/api/v1/auth/oauth/apple",
+        json={"provider": "apple", "token": "token1"},
+    )
+    assert resp1.status_code == 200
+
+    # Second login — finds existing user
+    resp2 = await client.post(
+        "/api/v1/auth/oauth/apple",
+        json={"provider": "apple", "token": "token2"},
+    )
+    assert resp2.status_code == 200
+    assert resp2.json()["access_token"] != resp1.json()["access_token"]
 
 
 # ------------------------------------------------------------------

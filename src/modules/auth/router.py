@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.database import get_db
-from src.config.settings import settings
 from src.middleware.authenticate import get_current_user
 from src.middleware.rate_limiter import check_rate_limit, record_attempt, reset_attempts
 from src.modules.auth.models import User
@@ -16,6 +15,8 @@ from src.modules.auth.schemas import (
     RefreshTokenRequest,
     RegisterRequest,
     ResetPasswordRequest,
+    ResendVerificationRequest,
+    VerifyEmailRequest,
 )
 from src.modules.auth.service import AuthService
 from src.shared.errors import UnauthorizedError, ConflictError
@@ -113,18 +114,15 @@ async def forgot_password(
     data: ForgotPasswordRequest,
     service: AuthService = Depends(_get_auth_service),
 ) -> dict:
-    """Request a password reset link.
+    """Request a password reset OTP code via email.
 
     Always returns 200 regardless of whether the email exists,
     to avoid leaking account information.
     """
-    token = await service.generate_reset_token(email=data.email)
-    response: dict = {
-        "message": "If an account exists with that email, a reset link has been sent"
+    await service.generate_reset_code(email=data.email)
+    return {
+        "message": "If an account exists with that email, a reset code has been sent"
     }
-    if settings.DEBUG and token is not None:
-        response["dev_token"] = token
-    return response
 
 
 @router.post("/reset-password")
@@ -132,8 +130,39 @@ async def reset_password(
     data: ResetPasswordRequest,
     service: AuthService = Depends(_get_auth_service),
 ) -> dict:
-    """Reset password using a valid reset token."""
-    success = await service.reset_password(token=data.token, new_password=data.new_password)
+    """Reset password using a valid 6-digit OTP code."""
+    success = await service.reset_password(
+        email=data.email, code=data.code, new_password=data.new_password
+    )
     if not success:
-        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+        raise HTTPException(status_code=400, detail="Invalid or expired reset code")
     return {"message": "Password has been reset"}
+
+
+@router.post("/verify-email")
+async def verify_email(
+    data: VerifyEmailRequest,
+    user: User = Depends(get_current_user),
+    service: AuthService = Depends(_get_auth_service),
+) -> dict:
+    """Verify the user's email with a 6-digit OTP code."""
+    if user.email_verified:
+        return {"message": "Email already verified"}
+
+    success = await service.verify_email(user_id=user.id, code=data.code)
+    if not success:
+        raise HTTPException(status_code=400, detail="Invalid or expired verification code")
+    return {"message": "Email verified successfully"}
+
+
+@router.post("/resend-verification")
+async def resend_verification(
+    user: User = Depends(get_current_user),
+    service: AuthService = Depends(_get_auth_service),
+) -> dict:
+    """Resend the email verification code. Rate limited to 3 per 15 minutes."""
+    if user.email_verified:
+        return {"message": "Email already verified"}
+
+    await service.resend_verification_code(user)
+    return {"message": "Verification code sent"}

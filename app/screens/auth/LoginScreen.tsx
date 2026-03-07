@@ -20,6 +20,7 @@ import { useStore } from '../../store';
 import { isValidEmail, trimEmail } from '../../utils/validation';
 import Animated from 'react-native-reanimated';
 import { useStaggeredEntrance } from '../../hooks/useStaggeredEntrance';
+import { SocialLoginButtons } from '../../components/auth/SocialLoginButtons';
 
 const TOKEN_KEYS = { access: 'rw_access_token', refresh: 'rw_refresh_token' };
 
@@ -120,6 +121,15 @@ export function LoginScreen({ onNavigateRegister, onLoginSuccess, onNavigateForg
     }
   };
 
+  const handleSocialSuccess = async (tokens: { access_token: string; refresh_token: string; expires_in: number }) => {
+    await saveTokens(tokens.access_token, tokens.refresh_token);
+    setAuth(
+      { id: parseJwtSub(tokens.access_token), email: '', role: 'user' },
+      { accessToken: tokens.access_token, refreshToken: tokens.refresh_token, expiresIn: tokens.expires_in },
+    );
+    onLoginSuccess();
+  };
+
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: getThemeColors().bg.base }]}
@@ -187,6 +197,7 @@ export function LoginScreen({ onNavigateRegister, onLoginSuccess, onNavigateForg
         ) : null}
 
         <Button testID="login-submit-button" title="Sign In" onPress={handleLogin} loading={loading} style={styles.btn} />
+        <SocialLoginButtons onSuccess={handleSocialSuccess} onError={setError} />
         </Animated.View>
 
         <Animated.View style={linkAnim}>

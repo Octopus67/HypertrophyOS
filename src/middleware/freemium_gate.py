@@ -37,6 +37,10 @@ async def require_premium(
     if user.role == "admin":
         return user
 
+    # Require email verification for premium features
+    if not user.email_verified:
+        raise PremiumRequiredError("Email verification required for premium features")
+
     stmt = (
         select(Subscription)
         .where(Subscription.user_id == user.id)

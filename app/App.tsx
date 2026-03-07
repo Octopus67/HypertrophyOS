@@ -12,6 +12,8 @@ import { BottomTabNavigator } from './navigation/BottomTabNavigator';
 import { LoginScreen, initTokenProvider } from './screens/auth/LoginScreen';
 import { RegisterScreen } from './screens/auth/RegisterScreen';
 import { ForgotPasswordScreen } from './screens/auth/ForgotPasswordScreen';
+import { EmailVerificationScreen } from './screens/auth/EmailVerificationScreen';
+import { ResetPasswordScreen } from './screens/auth/ResetPasswordScreen';
 // import { OnboardingScreen } from './screens/onboarding/OnboardingScreen';
 import { OnboardingWizard } from './screens/onboarding/OnboardingWizard';
 import { initAnalytics } from './services/analytics';
@@ -35,6 +37,8 @@ type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
+  ResetPassword: { email: string };
+  EmailVerification: { email: string };
 };
 
 const AuthStack = createStackNavigator<AuthStackParamList>();
@@ -55,7 +59,7 @@ function AuthNavigator() {
         {({ navigation }: any) => (
           <RegisterScreen
             onNavigateLogin={() => navigation.goBack()}
-            onRegisterSuccess={() => {}}
+            onRegisterSuccess={(email: string) => navigation.navigate('EmailVerification', { email })}
           />
         )}
       </AuthStack.Screen>
@@ -63,6 +67,25 @@ function AuthNavigator() {
         {({ navigation }: any) => (
           <ForgotPasswordScreen
             onNavigateBack={() => navigation.goBack()}
+            onNavigateResetPassword={(email: string) => navigation.navigate('ResetPassword', { email })}
+          />
+        )}
+      </AuthStack.Screen>
+      <AuthStack.Screen name="ResetPassword">
+        {({ route, navigation }: any) => (
+          <ResetPasswordScreen
+            email={route.params.email}
+            onResetSuccess={() => navigation.navigate('Login')}
+            onBack={() => navigation.goBack()}
+          />
+        )}
+      </AuthStack.Screen>
+      <AuthStack.Screen name="EmailVerification">
+        {({ route, navigation }: any) => (
+          <EmailVerificationScreen
+            email={route.params.email}
+            onVerified={() => {}}
+            onBack={() => navigation.goBack()}
           />
         )}
       </AuthStack.Screen>

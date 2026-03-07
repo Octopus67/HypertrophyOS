@@ -37,6 +37,11 @@ class User(SoftDeleteMixin, Base):
         String(20), nullable=False, default=UserRole.USER
     )
 
+    # Email verification
+    email_verified: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+
     # Trial fields
     has_used_trial: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"
@@ -53,16 +58,17 @@ class User(SoftDeleteMixin, Base):
     )
 
 
-class PasswordResetToken(Base):
-    """Password reset tokens table.
-    
-    Stores hashed tokens for password reset with expiry and usage tracking.
+class PasswordResetCode(Base):
+    """Password reset codes table.
+
+    Stores hashed 6-digit OTP codes for password reset with expiry.
+    Same pattern as EmailVerificationCode.
     """
 
-    __tablename__ = "password_reset_tokens"
+    __tablename__ = "password_reset_codes"
 
     user_id: Mapped[uuid.UUID] = mapped_column(nullable=False, index=True)
-    token_hash: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    code_hash: Mapped[str] = mapped_column(String(128), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
@@ -77,3 +83,17 @@ class TokenBlacklist(Base):
 
     jti: Mapped[str] = mapped_column(String(36), nullable=False, unique=True, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class EmailVerificationCode(Base):
+    """Email verification codes table.
+
+    Stores hashed OTP codes for email verification with expiry.
+    """
+
+    __tablename__ = "email_verification_codes"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(nullable=False, index=True)
+    code_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

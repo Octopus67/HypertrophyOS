@@ -18,9 +18,10 @@ import { useStaggeredEntrance } from '../../hooks/useStaggeredEntrance';
 
 interface ForgotPasswordScreenProps {
   onNavigateBack: () => void;
+  onNavigateResetPassword?: (email: string) => void;
 }
 
-export function ForgotPasswordScreen({ onNavigateBack }: ForgotPasswordScreenProps) {
+export function ForgotPasswordScreen({ onNavigateBack, onNavigateResetPassword }: ForgotPasswordScreenProps) {
   const c = useThemeColors();
   const styles = getThemedStyles(c);
   const [email, setEmail] = useState('');
@@ -46,7 +47,11 @@ export function ForgotPasswordScreen({ onNavigateBack }: ForgotPasswordScreenPro
     setLoading(true);
     try {
       await api.post('auth/forgot-password', { email: cleanEmail });
-      setSubmitted(true);
+      if (onNavigateResetPassword) {
+        onNavigateResetPassword(cleanEmail);
+      } else {
+        setSubmitted(true);
+      }
     } catch (err: any) {
       setError(err?.response?.data?.message ?? 'Something went wrong. Please try again.');
     } finally {

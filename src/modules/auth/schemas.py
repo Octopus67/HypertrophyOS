@@ -75,7 +75,8 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     """Reset password request payload."""
 
-    token: str
+    email: EmailStr
+    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
     new_password: str = Field(min_length=8, description="Minimum 8 characters")
 
     @field_validator("new_password")
@@ -91,3 +92,15 @@ class ResetPasswordRequest(BaseModel):
             raise ValueError("Password must contain at least one digit")
         return v
 
+
+
+class VerifyEmailRequest(BaseModel):
+    """Email verification payload."""
+
+    code: str = Field(min_length=6, max_length=6, pattern=r"^\d{6}$")
+
+
+class ResendVerificationRequest(BaseModel):
+    """Resend verification code payload."""
+
+    pass
