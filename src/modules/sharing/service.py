@@ -99,15 +99,17 @@ class SharingService:
                         TrainingSession.user_id == session.user_id,
                         TrainingSession.session_date < session.session_date,
                     )
-                )
+                ).with_only_columns(TrainingSession.exercises)
             )
-            prev_sessions = prev_result.scalars().all()
+            prev_exercises_list = prev_result.scalars().all()
 
             # Build historical max per exercise name
             historical_maxes: dict[str, float] = {}
-            for ps in prev_sessions:
-                for ex in (ps.exercises or []):
+            for prev_exercises in prev_exercises_list:
+                for ex in (prev_exercises or []):
                     pname = ex.get("exercise_name", "")
+                    if pname not in current_maxes:
+                        continue
                     for s in ex.get("sets", []):
                         if s.get("set_type") == "warm-up":
                             continue

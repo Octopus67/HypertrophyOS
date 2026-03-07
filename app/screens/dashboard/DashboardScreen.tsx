@@ -20,8 +20,12 @@ import { QuickAddModal } from '../../components/modals/QuickAddModal';
 import { SectionHeader } from '../../components/common/SectionHeader';
 import { Skeleton } from '../../components/common/Skeleton';
 import { PremiumBadge } from '../../components/premium/PremiumBadge';
+import { TrialBadge } from '../../components/premium/TrialBadge';
+import { TrialExpirationModal } from '../../components/premium/TrialExpirationModal';
 import { UpgradeBanner } from '../../components/premium/UpgradeBanner';
 import { UpgradeModal } from '../../components/premium/UpgradeModal';
+import { useTrial } from '../../hooks/useTrial';
+import type { TrialInsights } from '../../utils/trialLogic';
 import { AddNutritionModal } from '../../components/modals/AddNutritionModal';
 import { AddTrainingModal } from '../../components/modals/AddTrainingModal';
 import { AddBodyweightModal } from '../../components/modals/AddBodyweightModal';
@@ -78,6 +82,9 @@ export function DashboardScreen({ navigation }: any) {
   const store = useStore();
   const { impact } = useHaptics();
   const premium = isPremium(store);
+  const { status: trialStatus, eligibility: trialEligibility, startTrial, fetchInsights } = useTrial();
+  const [showTrialExpiration, setShowTrialExpiration] = useState(false);
+  const [trialInsights, setTrialInsights] = useState<TrialInsights | null>(null);
   const selectedDate = useStore((s) => s.selectedDate);
   const setSelectedDate = useStore((s) => s.setSelectedDate);
   const adaptiveTargets = useStore((s) => s.adaptiveTargets);
@@ -151,6 +158,14 @@ export function DashboardScreen({ navigation }: any) {
   } = useDailyTargets(selectedDate);
 
   // Staggered entrance for each section
+  // Show trial expiration modal on day 7 (0 days remaining, trial just ended)
+  useEffect(() => {
+    if (trialStatus && !trialStatus.active && trialStatus.has_used_trial && trialStatus.days_remaining === 0) {
+      fetchInsights().then(setTrialInsights);
+      setShowTrialExpiration(true);
+    }
+  }, [trialStatus, fetchInsights]);
+
   const headerAnim = useStaggeredEntrance(0, 60);
   const dateScrollerAnim = useStaggeredEntrance(1, 60);
   const quickActionsAnim = useStaggeredEntrance(3, 60);
@@ -422,6 +437,9 @@ export function DashboardScreen({ navigation }: any) {
         <Animated.View style={headerAnim}>
           <View style={styles.header} testID="dashboard-greeting">
             {premium && <PremiumBadge size="md" />}
+            {trialStatus?.active && trialStatus.days_remaining > 0 && (
+              <TrialBadge daysRemaining={trialStatus.days_remaining} />
+            )}
           </View>
         </Animated.View>
 
@@ -786,7 +804,18 @@ export function DashboardScreen({ navigation }: any) {
         {!premium && <UpgradeBanner onPress={() => setShowUpgrade(true)} />}
       </ScrollView>
 
-      <UpgradeModal visible={showUpgrade} onClose={() => setShowUpgrade(false)} />
+      <UpgradeModal
+        visible={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        trialEligible={trialEligibility?.eligible}
+        onStartTrial={startTrial}
+      />
+      <TrialExpirationModal
+        visible={showTrialExpiration}
+        onClose={() => setShowTrialExpiration(false)}
+        onUpgrade={() => { setShowTrialExpiration(false); setShowUpgrade(true); }}
+        insights={trialInsights}
+      />
       <AddNutritionModal
         visible={showNutrition}
         onClose={() => {

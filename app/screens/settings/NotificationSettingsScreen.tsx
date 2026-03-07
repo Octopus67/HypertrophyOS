@@ -8,6 +8,8 @@ import {
   Alert,
   Linking,
   Platform,
+  TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -110,6 +112,31 @@ export function NotificationSettingsScreen() {
         ],
       );
     }
+  };
+
+  const handleQuietTimeChange = async (field: 'quiet_hours_start' | 'quiet_hours_end', timeStr: string) => {
+    // Validate HH:MM format
+    if (!/^\d{2}:\d{2}$/.test(timeStr)) return;
+    const [h, m] = timeStr.split(':').map(Number);
+    if (h < 0 || h > 23 || m < 0 || m > 59) return;
+    const prev = prefs;
+    setPrefs((p) => ({ ...p, [field]: timeStr }));
+    try {
+      await api.patch('notifications/preferences', { [field]: timeStr });
+    } catch {
+      setPrefs(prev);
+      Alert.alert('Error', 'Failed to update quiet hours time.');
+    }
+  };
+
+  const cycleTime = (current: string | null, direction: 'up' | 'down'): string => {
+    const [h, m] = (current ?? '22:00').split(':').map(Number);
+    let totalMins = h * 60 + m + (direction === 'up' ? 30 : -30);
+    if (totalMins < 0) totalMins += 24 * 60;
+    if (totalMins >= 24 * 60) totalMins -= 24 * 60;
+    const newH = String(Math.floor(totalMins / 60)).padStart(2, '0');
+    const newM = String(totalMins % 60).padStart(2, '0');
+    return `${newH}:${newM}`;
   };
 
   const handleSendTest = async () => {
@@ -236,6 +263,66 @@ export function NotificationSettingsScreen() {
               testID="toggle-quiet-hours"
             />
           </View>
+          {prefs.quiet_hours_start !== null && (
+            <View style={styles.timePickerRow}>
+              <View style={styles.timePickerField}>
+                <Text style={[styles.timeLabel, { color: c.text.secondary }]}>Start</Text>
+                <View style={styles.timeStepperRow}>
+                  <TouchableOpacity
+                    onPress={() => handleQuietTimeChange('quiet_hours_start', cycleTime(prefs.quiet_hours_start, 'down'))}
+                    style={[styles.timeStepBtn, { backgroundColor: c.bg.surfaceRaised }]}
+                    accessibilityLabel="Decrease start time"
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.timeStepText, { color: c.text.primary }]}>−</Text>
+                  </TouchableOpacity>
+                  <Text
+                    style={[styles.timeValue, { color: c.text.primary }]}
+                    accessibilityLabel={`Quiet hours start: ${prefs.quiet_hours_start}`}
+                    testID="quiet-hours-start-value"
+                  >
+                    {prefs.quiet_hours_start}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => handleQuietTimeChange('quiet_hours_start', cycleTime(prefs.quiet_hours_start, 'up'))}
+                    style={[styles.timeStepBtn, { backgroundColor: c.bg.surfaceRaised }]}
+                    accessibilityLabel="Increase start time"
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.timeStepText, { color: c.text.primary }]}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.timePickerField}>
+                <Text style={[styles.timeLabel, { color: c.text.secondary }]}>End</Text>
+                <View style={styles.timeStepperRow}>
+                  <TouchableOpacity
+                    onPress={() => handleQuietTimeChange('quiet_hours_end', cycleTime(prefs.quiet_hours_end, 'down'))}
+                    style={[styles.timeStepBtn, { backgroundColor: c.bg.surfaceRaised }]}
+                    accessibilityLabel="Decrease end time"
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.timeStepText, { color: c.text.primary }]}>−</Text>
+                  </TouchableOpacity>
+                  <Text
+                    style={[styles.timeValue, { color: c.text.primary }]}
+                    accessibilityLabel={`Quiet hours end: ${prefs.quiet_hours_end}`}
+                    testID="quiet-hours-end-value"
+                  >
+                    {prefs.quiet_hours_end}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => handleQuietTimeChange('quiet_hours_end', cycleTime(prefs.quiet_hours_end, 'up'))}
+                    style={[styles.timeStepBtn, { backgroundColor: c.bg.surfaceRaised }]}
+                    accessibilityLabel="Increase end time"
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.timeStepText, { color: c.text.primary }]}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
         </Card>
 
         {/* Test Button */}
@@ -301,4 +388,38 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     fontWeight: typography.weight.medium,
   },
   testSection: { marginTop: spacing[2] },
+  timePickerRow: {
+    flexDirection: 'row',
+    gap: spacing[4],
+    paddingTop: spacing[3],
+    paddingBottom: spacing[1],
+  },
+  timePickerField: { flex: 1 },
+  timeLabel: {
+    fontSize: typography.size.xs,
+    marginBottom: spacing[1],
+  },
+  timeStepperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+  },
+  timeStepBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timeStepText: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+  },
+  timeValue: {
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
+    minWidth: 50,
+    textAlign: 'center',
+  },
 });

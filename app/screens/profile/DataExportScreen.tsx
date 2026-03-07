@@ -5,17 +5,19 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  Linking,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as FileSystem from 'expo-file-system';
+import { downloadAsync, documentDirectory } from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import { spacing } from '../../theme/tokens';
 import { useThemeColors } from '../../hooks/useThemeColors';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { SectionHeader } from '../../components/common/SectionHeader';
 import { ErrorBanner } from '../../components/common/ErrorBanner';
-import api from '../../services/api';
+import api, { API_BASE_URL } from '../../services/api';
 
 type ExportFormat = 'json' | 'csv' | 'pdf';
 type ExportStatus = 'pending' | 'processing' | 'completed' | 'failed';
@@ -96,24 +98,51 @@ export function DataExportScreen() {
 
   const handleDownload = async (exportId: string) => {
     try {
-      const url = `/api/v1/export/download/${exportId}`;
+      const url = `${API_BASE_URL}/api/v1/export/download/${exportId}`;
       if (Platform.OS === 'web') {
-        window.open(url, '_blank');
+        // For web, open authenticated URL via blob
+        const res = await api.get(`/api/v1/export/download/${exportId}`, { responseType: 'blob' });
+        const blobUrl = URL.createObjectURL(res.data);
+        window.open(blobUrl, '_blank');
       } else {
-        await Linking.openURL(url);
+        // Get auth token from api interceptor
+        const token = api.defaults.headers.common['Authorization'] as string | undefined;
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = token;
+
+        const fileUri = `${documentDirectory}export_${exportId}`;
+        const result = await downloadAsync(url, fileUri, { headers });
+        if (result.status === 200) {
+          await Sharing.shareAsync(result.uri);
+        } else {
+          Alert.alert('Error', 'Download failed. Please try again.');
+        }
       }
     } catch {
-      Alert.alert('Error', 'Could not open download link.');
+      Alert.alert('Error', 'Could not download export.');
     }
   };
 
   const handleDelete = async (exportId: string) => {
-    try {
-      await api.delete(`/api/v1/export/${exportId}`);
-      await fetchHistory();
-    } catch {
-      Alert.alert('Error', 'Could not delete export.');
-    }
+    Alert.alert(
+      'Delete Export',
+      'Are you sure you want to delete this export? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.delete(`/api/v1/export/${exportId}`);
+              await fetchHistory();
+            } catch {
+              Alert.alert('Error', 'Could not delete export.');
+            }
+          },
+        },
+      ],
+    );
   };
 
   const formatBytes = (bytes: number | null) => {

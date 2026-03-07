@@ -301,9 +301,7 @@ class ExportService:
         data["sessions"] = [
             {
                 "date": str(r.session_date),
-                "name": r.name,
                 "exercises": r.exercises,
-                "notes": r.notes,
             }
             for r in result.scalars().all()
         ]
@@ -317,7 +315,7 @@ class ExportService:
         data["nutrition_entries"] = [
             {
                 "date": str(r.entry_date),
-                "name": r.name,
+                "meal_name": r.meal_name,
                 "calories": r.calories,
                 "protein_g": r.protein_g,
                 "carbs_g": r.carbs_g,
@@ -364,7 +362,7 @@ class ExportService:
         stmt = select(UserGoal).where(UserGoal.user_id == user_id)
         result = await self.session.execute(stmt)
         data["goals"] = [
-            {"goal_type": r.goal_type, "target_weight_kg": r.target_weight_kg, "weekly_rate_kg": r.weekly_rate_kg}
+            {"goal_type": r.goal_type, "target_weight_kg": r.target_weight_kg, "goal_rate_per_week": r.goal_rate_per_week}
             for r in result.scalars().all()
         ]
 

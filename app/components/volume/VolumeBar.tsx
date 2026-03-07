@@ -16,13 +16,16 @@ export interface VolumeBarProps {
   muscleGroup: string;
 }
 
-/** Zone colors derived from theme semantic tokens. */
-const ZONE_COLORS = {
-  belowMev: getThemeColors().semantic.warning,        // MV → MEV: yellow
-  optimal: getThemeColors().semantic.positive,         // MEV → MAV: green
-  approachingMrv: getThemeColors().semantic.caution,   // MAV → MRV: orange
-  aboveMrv: getThemeColors().semantic.negative,        // > MRV: red
-} as const;
+/** Zone colors derived from theme semantic tokens — computed at render time for reactivity. */
+function useZoneColors() {
+  const c = useThemeColors();
+  return {
+    belowMev: c.semantic.warning,
+    optimal: c.semantic.positive,
+    approachingMrv: c.semantic.caution,
+    aboveMrv: c.semantic.negative,
+  };
+}
 
 const DOT_SIZE = 14;
 const BAR_HEIGHT = 12;
@@ -37,6 +40,7 @@ function getZoneLabel(volume: number, landmarks: WNSLandmarks): string {
 export function VolumeBar({ landmarks, currentVolume, muscleGroup }: VolumeBarProps) {
   const c = useThemeColors();
   const styles = getThemedStyles(c);
+  const ZONE_COLORS = useZoneColors();
   const { mv, mev, mav_high, mrv } = landmarks;
   // Total range extends 20% past MRV to show overflow
   const maxRange = mrv * 1.2;

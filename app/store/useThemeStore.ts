@@ -1,14 +1,14 @@
 /**
  * Theme Store — Zustand with AsyncStorage persistence
  *
- * Manages light/dark theme preference. Default: dark.
+ * Manages light/dark/system theme preference. Default: dark.
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type ThemeMode = 'dark' | 'light';
+type ThemeMode = 'dark' | 'light' | 'system';
 
 interface ThemeState {
   theme: ThemeMode;
@@ -22,7 +22,11 @@ export const useThemeStore = create<ThemeState>()(
       theme: 'dark',
       setTheme: (theme) => set({ theme }),
       toggleTheme: () =>
-        set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+        set((s) => {
+          if (s.theme === 'dark') return { theme: 'light' };
+          if (s.theme === 'light') return { theme: 'system' };
+          return { theme: 'dark' };
+        }),
     }),
     {
       name: '@repwise:theme',

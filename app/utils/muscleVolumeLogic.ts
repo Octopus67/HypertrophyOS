@@ -4,6 +4,9 @@
  * Pure utility functions for muscle volume heat map feature.
  */
 
+import type { WNSLandmarks } from '../types/volume';
+import { getThemeColors } from '../hooks/useThemeColors';
+
 const STATUS_COLORS: Record<string, string> = {
   below_mev: '#6B7280',
   optimal: '#22C55E',
@@ -82,9 +85,6 @@ export function getHeatMapColor(effectiveSets: number, mev: number, mrv: number)
 }
 
 // ─── WNS Heat Map Color ──────────────────────────────────────────────────────
-
-import type { WNSLandmarks } from '../types/volume';
-import { getThemeColors } from '../hooks/useThemeColors';
 
 /** 5-tier heat-map color based on HU relative to WNS landmarks. */
 export function getWNSHeatMapColor(hu: number, landmarks: WNSLandmarks): string {

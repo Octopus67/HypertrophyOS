@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html as html_mod
 import logging
 import uuid
 
@@ -50,7 +51,8 @@ async def get_shared_workout(
         except (ValueError, Exception):
             pass  # Invalid ref — ignore silently
 
-    title = f"{workout['user_display_name']}'s Workout — Repwise"
+    safe_display_name = html_mod.escape(workout['user_display_name'])
+    title = f"{safe_display_name}'s Workout — Repwise"
     description = (
         f"{workout['exercise_count']} exercises · "
         f"{workout['total_sets']} sets · "
@@ -63,7 +65,7 @@ async def get_shared_workout(
     og_image = "https://repwise.app/og-workout.png"
 
     exercises_html = "".join(
-        f"<li>{ex['name']} — {ex['sets']} sets</li>"
+        f"<li>{html_mod.escape(ex['name'])} — {ex['sets']} sets</li>"
         for ex in workout["exercises"]
     )
 

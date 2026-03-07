@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import datetime, time, timezone
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -191,9 +192,16 @@ class NotificationService:
         if not prefs.push_enabled:
             return 0
 
-        # H2: Quiet hours check
+        # H2: Quiet hours check — compare in user's local timezone
         if prefs.quiet_hours_start is not None and prefs.quiet_hours_end is not None:
-            now_time = datetime.now(timezone.utc).time()
+            from src.modules.user.models import UserProfile
+
+            profile_result = await self.session.execute(
+                select(UserProfile).where(UserProfile.user_id == user_id)
+            )
+            profile = profile_result.scalar_one_or_none()
+            user_tz = ZoneInfo(profile.timezone) if profile and profile.timezone else timezone.utc
+            now_time = datetime.now(user_tz).time()
             start, end = prefs.quiet_hours_start, prefs.quiet_hours_end
             if start <= end:
                 if start <= now_time <= end:

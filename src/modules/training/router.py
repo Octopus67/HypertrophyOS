@@ -524,11 +524,11 @@ async def get_muscle_volume(
 
     if use_wns:
         from src.modules.training.wns_volume_service import WNSVolumeService
-        from src.modules.user.models import UserGoals
+        from src.modules.user.models import UserGoal
         from sqlalchemy import select
         
         # Fetch user's goal to adjust volume landmarks
-        goal_result = await db.execute(select(UserGoals).where(UserGoals.user_id == user.id))
+        goal_result = await db.execute(select(UserGoal).where(UserGoal.user_id == user.id))
         user_goal = goal_result.scalar_one_or_none()
         
         goal_type = user_goal.goal_type if user_goal else None

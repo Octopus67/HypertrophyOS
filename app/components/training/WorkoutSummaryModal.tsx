@@ -32,12 +32,15 @@ const STATUS_LABEL: Record<VolumeStatus, { label: string; emoji: string }> = {
   above_mrv: { label: 'Over limit', emoji: '🔴' },
 };
 
-const STATUS_COLORS: Record<VolumeStatus, string> = {
-  below_mev: getThemeColors().semantic.warning,
-  optimal: getThemeColors().semantic.positive,
-  near_mrv: getThemeColors().semantic.caution,
-  above_mrv: getThemeColors().semantic.negative,
-};
+function useVolumeStatusColors(): Record<VolumeStatus, string> {
+  const c = useThemeColors();
+  return {
+    below_mev: c.semantic.warning,
+    optimal: c.semantic.positive,
+    near_mrv: c.semantic.caution,
+    above_mrv: c.semantic.negative,
+  };
+}
 
 function formatMuscle(muscle: string): string {
   return muscle
@@ -58,6 +61,7 @@ export function WorkoutSummaryModal({
 }: WorkoutSummaryModalProps) {
   const c = useThemeColors();
   const styles = getThemedStyles(c);
+  const STATUS_COLORS = useVolumeStatusColors();
   const muscleEntries = Object.entries(huByMuscle).filter(([, hu]) => hu > 0);
   const totalHU = muscleEntries.reduce((sum, [, hu]) => sum + hu, 0);
 

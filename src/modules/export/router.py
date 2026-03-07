@@ -13,7 +13,7 @@ from src.config.database import get_db
 from src.middleware.authenticate import get_current_user
 from src.modules.auth.models import User
 from src.modules.export.schemas import ExportRequestCreate, ExportRequestResponse
-from src.modules.export.service import ExportService
+from src.modules.export.service import ExportService, EXPORTS_DIR
 
 router = APIRouter()
 
@@ -83,7 +83,11 @@ async def download_export(
     """Download a completed export file."""
     export = await service.mark_downloaded(export_id, user.id)
 
-    path = Path(export.download_url)
+    path = Path(export.download_url).resolve()
+    exports_root = EXPORTS_DIR.resolve()
+    if not str(path).startswith(str(exports_root)):
+        from src.shared.errors import NotFoundError
+        raise NotFoundError("Export file not found on disk")
     if not path.exists():
         from src.shared.errors import NotFoundError
         raise NotFoundError("Export file not found on disk")

@@ -20,9 +20,11 @@ import { GoalStep } from './steps/GoalStep';
 import { DietStyleStep } from './steps/DietStyleStep';
 import { FoodDNAStep } from './steps/FoodDNAStep';
 import { SummaryStep } from './steps/SummaryStep';
+import { OnboardingTrialPrompt } from '../../components/premium/OnboardingTrialPrompt';
+import { useTrial } from '../../hooks/useTrial';
 
 // Total steps - derived from the number of cases in renderStep()
-const TOTAL_STEPS = 11;
+const TOTAL_STEPS = 12;
 
 interface Props {
   onComplete: () => void;
@@ -34,6 +36,7 @@ export function OnboardingWizard({ onComplete }: Props) {
   const currentStep = useOnboardingStore((s) => s.currentStep);
   const setStep = useOnboardingStore((s) => s.setStep);
   const reset = useOnboardingStore((s) => s.reset);
+  const { startTrial, loading: trialLoading } = useTrial();
 
   // Progress bar animation
   const progress = useSharedValue(currentStep / TOTAL_STEPS);
@@ -82,7 +85,14 @@ export function OnboardingWizard({ onComplete }: Props) {
       case 8: return <GoalStep onNext={goNext} onBack={goBack} />;
       case 9: return <DietStyleStep onNext={goNext} onBack={goBack} />;
       case 10: return <FoodDNAStep onNext={goNext} onBack={goBack} onSkip={goNext} />;
-      case 11: return <SummaryStep onComplete={handleComplete} onBack={goBack} onEditStep={jumpToStep} />;
+      case 11: return <SummaryStep onComplete={goNext} onBack={goBack} onEditStep={jumpToStep} />;
+      case 12: return (
+        <OnboardingTrialPrompt
+          onStartTrial={async () => { await startTrial(); handleComplete(); }}
+          onSkip={handleComplete}
+          loading={trialLoading}
+        />
+      );
       default: return null;
     }
   };

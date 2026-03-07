@@ -20,12 +20,15 @@ export interface VolumeLandmarksCardProps {
   status: 'below_mev' | 'optimal' | 'approaching_mrv' | 'above_mrv';
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  below_mev: { label: 'Below MEV', color: getThemeColors().text.muted, bg: getThemeColors().bg.surfaceRaised },
-  optimal: { label: 'Optimal', color: getThemeColors().semantic.positive, bg: getThemeColors().semantic.positiveSubtle },
-  approaching_mrv: { label: 'Near MRV', color: getThemeColors().semantic.caution, bg: getThemeColors().semantic.cautionSubtle },
-  above_mrv: { label: 'Above MRV', color: getThemeColors().semantic.negative, bg: getThemeColors().semantic.negativeSubtle },
-};
+function useStatusConfig() {
+  const c = useThemeColors();
+  return {
+    below_mev: { label: 'Below MEV', color: c.text.muted, bg: c.bg.surfaceRaised },
+    optimal: { label: 'Optimal', color: c.semantic.positive, bg: c.semantic.positiveSubtle },
+    approaching_mrv: { label: 'Near MRV', color: c.semantic.caution, bg: c.semantic.cautionSubtle },
+    above_mrv: { label: 'Above MRV', color: c.semantic.negative, bg: c.semantic.negativeSubtle },
+  } as Record<string, { label: string; color: string; bg: string }>;
+}
 
 const LANDMARK_KEYS: LandmarkKey[] = ['mev', 'mav', 'mrv'];
 
@@ -40,6 +43,7 @@ export function VolumeLandmarksCard({
   const styles = getThemedStyles(c);
   const [expanded, setExpanded] = useState(false);
   const [explainerLandmark, setExplainerLandmark] = useState<LandmarkKey | null>(null);
+  const STATUS_CONFIG = useStatusConfig();
 
   const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.below_mev;
   const displayName = muscleGroup.charAt(0).toUpperCase() + muscleGroup.slice(1);

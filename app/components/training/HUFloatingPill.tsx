@@ -21,12 +21,15 @@ export interface HUFloatingPillProps {
   onPress?: () => void;
 }
 
-const STATUS_COLORS = {
-  below_mev: { bg: getThemeColors().semantic.warningSubtle, text: getThemeColors().semantic.warning },
-  optimal: { bg: getThemeColors().semantic.positiveSubtle, text: getThemeColors().semantic.positive },
-  near_mrv: { bg: getThemeColors().semantic.cautionSubtle, text: getThemeColors().semantic.caution },
-  above_mrv: { bg: getThemeColors().semantic.negativeSubtle, text: getThemeColors().semantic.negative },
-} as const;
+function useStatusColors() {
+  const c = useThemeColors();
+  return {
+    below_mev: { bg: c.semantic.warningSubtle, text: c.semantic.warning },
+    optimal: { bg: c.semantic.positiveSubtle, text: c.semantic.positive },
+    near_mrv: { bg: c.semantic.cautionSubtle, text: c.semantic.caution },
+    above_mrv: { bg: c.semantic.negativeSubtle, text: c.semantic.negative },
+  } as const;
+}
 
 function getBestStatus(statusByMuscle: Record<string, VolumeStatus> | undefined): VolumeStatus {
   if (!statusByMuscle) return 'optimal';
@@ -39,12 +42,13 @@ function getBestStatus(statusByMuscle: Record<string, VolumeStatus> | undefined)
 
 export function HUFloatingPill({ huByMuscle, statusByMuscle, onPress }: HUFloatingPillProps) {
   const c = useThemeColors();
+  const STATUS_COLORS = useStatusColors();
   const entries = Object.entries(huByMuscle).filter(([, hu]) => hu > 0);
   if (entries.length === 0) return null;
 
   const totalHU = entries.reduce((sum, [, hu]) => sum + hu, 0);
   const overallStatus = getBestStatus(statusByMuscle);
-  const pillColor = STATUS_COLORS[overallStatus];
+  const pillColor = STATUS_COLORS[overallStatus] ?? STATUS_COLORS.optimal;
 
   return (
     <TouchableOpacity

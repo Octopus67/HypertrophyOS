@@ -70,7 +70,8 @@ export function Card({
   const theme = useThemeStore((s) => s.theme);
   // Support legacy raised prop
   const resolvedVariant = raised && variant === 'flat' ? 'raised' : variant;
-  const cardStyles = getCardStyles(resolvedVariant, c, theme);
+  const effectiveTheme: 'dark' | 'light' = theme === 'light' ? 'light' : 'dark';
+  const cardStyles = getCardStyles(resolvedVariant, c, effectiveTheme);
 
   const { animatedStyle: pressStyle, onPressIn, onPressOut } = usePressAnimation();
   const { isHovered, hoverProps } = useHoverState();

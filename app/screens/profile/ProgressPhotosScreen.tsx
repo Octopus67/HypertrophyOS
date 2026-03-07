@@ -163,6 +163,13 @@ export function ProgressPhotosScreen() {
         <Text style={[styles.count, { color: c.text.muted }]}>{photos.length}/{MAX_PHOTOS}</Text>
       </View>
 
+      {/* Local-only warning banner */}
+      <View style={[styles.warningBanner, { backgroundColor: c.semantic.warningSubtle }]}>
+        <Text style={[styles.warningText, { color: c.semantic.warning }]}>
+          ⚠ Photos are stored locally on this device only. They are not backed up to the cloud and will be lost if you uninstall the app.
+        </Text>
+      </View>
+
       {photos.length === 0 ? (
         <View style={styles.center}>
           <Text style={[styles.emptyTitle, { color: c.text.primary }]}>No photos yet</Text>
@@ -206,4 +213,6 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   fab: { position: 'absolute', bottom: spacing[8], right: spacing[4], width: 56, height: 56, borderRadius: radius.full, backgroundColor: getThemeColors().accent.primary, alignItems: 'center', justifyContent: 'center', ...shadows.md },
   fabDisabled: { opacity: 0.5 },
   fabText: { color: '#fff', fontSize: 28, fontWeight: typography.weight.bold },
+  warningBanner: { marginHorizontal: spacing[4], marginTop: spacing[2], padding: spacing[3], borderRadius: radius.md },
+  warningText: { fontSize: typography.size.xs, lineHeight: typography.lineHeight.sm },
 });
