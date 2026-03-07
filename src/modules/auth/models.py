@@ -37,6 +37,17 @@ class User(SoftDeleteMixin, Base):
         String(20), nullable=False, default=UserRole.USER
     )
 
+    # Trial fields
+    has_used_trial: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+    trial_started_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    trial_ends_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
     __table_args__ = (
         Index("ix_users_auth_provider_id", "auth_provider", "auth_provider_id"),
     )

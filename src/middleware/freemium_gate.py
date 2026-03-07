@@ -53,7 +53,7 @@ async def require_premium(
     ):
         raise PremiumRequiredError("Active subscription required")
 
-    # Check expiry date
+    # Check expiry date (applies to both trial and paid)
     if subscription.current_period_end:
         from datetime import datetime, timezone
         if datetime.now(timezone.utc) > subscription.current_period_end:

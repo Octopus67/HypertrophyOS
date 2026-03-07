@@ -262,7 +262,7 @@ class PaymentService:
     # ------------------------------------------------------------------
 
     async def _get_or_create_subscription(
-        self, user_id: uuid.UUID
+        self, user_id: uuid.UUID, is_trial: bool = False,
     ) -> Subscription:
         """Get existing subscription or create a new free one."""
         existing = await self.get_subscription_status(user_id)
@@ -275,6 +275,7 @@ class PaymentService:
             status=SubscriptionStatus.FREE,
             currency="USD",
             region="US",
+            is_trial=is_trial,
         )
         self.session.add(subscription)
         await self.session.flush()

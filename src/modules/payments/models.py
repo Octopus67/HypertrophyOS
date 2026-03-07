@@ -41,6 +41,9 @@ class Subscription(Base, SoftDeleteMixin):
     current_period_end: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    is_trial: Mapped[bool] = mapped_column(
+        default=False, server_default="false"
+    )
 
     __table_args__ = (
         Index("ix_subscriptions_user_status", "user_id", "status"),

@@ -59,6 +59,7 @@ async def lifespan(application: FastAPI):
         import src.modules.notifications.models  # noqa: F401
         import src.modules.measurements.models  # noqa: F401
         import src.modules.sharing.models  # noqa: F401
+        import src.modules.export.models  # noqa: F401
         import src.shared.audit  # noqa: F401
 
         # Patch JSONB → JSON for SQLite compatibility
@@ -216,6 +217,9 @@ app.include_router(adaptive_router, prefix="/api/v1/adaptive", tags=["adaptive"]
 from src.modules.payments.router import router as payments_router
 app.include_router(payments_router, prefix="/api/v1/payments", tags=["payments"])
 
+from src.modules.payments.trial_router import router as trial_router
+app.include_router(trial_router, prefix="/api/v1/trial", tags=["trial"])
+
 from src.modules.content.router import router as content_router
 app.include_router(content_router, prefix="/api/v1/content", tags=["content"])
 
@@ -280,3 +284,6 @@ app.include_router(measurements_router, prefix="/api/v1/body", tags=["body-measu
 
 from src.modules.sharing.router import router as sharing_router
 app.include_router(sharing_router, prefix="/api/v1/share", tags=["sharing"])
+
+from src.modules.export.router import router as export_router
+app.include_router(export_router, prefix="/api/v1/export", tags=["export"])

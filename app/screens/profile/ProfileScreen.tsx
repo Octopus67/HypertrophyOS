@@ -220,6 +220,7 @@ export function ProfileScreen() {
             <FeatureNavItem icon={<Icon name="camera" size={22} color={c.text.secondary} />} label="Progress Photos" description="Track your transformation visually" onPress={() => navigation.navigate('ProgressPhotos')} testID="profile-photos-link" />
             <FeatureNavItem icon={<Icon name="scale" size={22} color={c.text.secondary} />} label="Body Measurements" description="Track weight, body fat, and circumferences" onPress={() => navigation.navigate('Measurements')} testID="profile-measurements-link" />
             <FeatureNavItem icon={<Icon name="mail" size={22} color={c.text.secondary} />} label="Notifications" description="Manage push notification preferences" onPress={() => navigation.navigate('NotificationSettings')} testID="profile-notifications-link" />
+            <FeatureNavItem icon={<Icon name="clipboard" size={22} color={c.text.secondary} />} label="Export My Data" description="Download your data (GDPR)" onPress={() => navigation.navigate('DataExport')} testID="profile-data-export-link" />
           </Card>
         </Animated.View>
 

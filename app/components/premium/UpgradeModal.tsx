@@ -17,6 +17,8 @@ import api from '../../services/api';
 interface UpgradeModalProps {
   visible: boolean;
   onClose: () => void;
+  trialEligible?: boolean;
+  onStartTrial?: () => void;
 }
 
 const PLANS = [
@@ -33,18 +35,35 @@ const FEATURES = [
   'Micro-nutrient tracking',
 ];
 
-export function UpgradeModal({ visible, onClose }: UpgradeModalProps) {
+export function UpgradeModal({ visible, onClose, trialEligible, onStartTrial }: UpgradeModalProps) {
   const c = useThemeColors();
   const [selectedPlan, setSelectedPlan] = React.useState<'monthly' | 'yearly'>('yearly');
   const [loading, setLoading] = React.useState(false);
+  const [trialLoading, setTrialLoading] = React.useState(false);
 
-  // Reset state when modal closes so it's fresh on next open
   React.useEffect(() => {
     if (!visible) {
       setSelectedPlan('yearly');
       setLoading(false);
+      setTrialLoading(false);
     }
   }, [visible]);
+
+  const handleStartTrial = async () => {
+    if (!onStartTrial) return;
+    setTrialLoading(true);
+    try {
+      await api.post('trial/start');
+      Alert.alert('Trial Started!', 'Enjoy 7 days of premium features.');
+      onStartTrial();
+      onClose();
+    } catch (err: any) {
+      const message = err?.response?.data?.message ?? 'Could not start trial';
+      Alert.alert('Error', message);
+    } finally {
+      setTrialLoading(false);
+    }
+  };
 
   const handleSubscribe = async () => {
     setLoading(true);
@@ -116,6 +135,15 @@ export function UpgradeModal({ visible, onClose }: UpgradeModalProps) {
               loading={loading}
               style={styles.cta}
             />
+            {trialEligible && (
+              <Button
+                title="Start 7-Day Free Trial"
+                onPress={handleStartTrial}
+                loading={trialLoading}
+                variant="ghost"
+                style={styles.trialCta}
+              />
+            )}
             <TouchableOpacity onPress={onClose} style={styles.cancelBtn}>
               <Text style={[styles.cancelText, { color: c.text.muted }]}>Maybe later</Text>
             </TouchableOpacity>
@@ -217,6 +245,9 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.base,
   },
   cta: {
+    marginBottom: spacing[3],
+  },
+  trialCta: {
     marginBottom: spacing[3],
   },
   cancelBtn: {
