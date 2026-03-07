@@ -9,13 +9,13 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
+import bcrypt
 import httpx
 import jwt as pyjwt
 from jwt import PyJWKClient
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,8 +28,6 @@ APPLE_JWKS_URL = "https://appleid.apple.com/auth/keys"
 APPLE_ISSUER = "https://appleid.apple.com"
 
 _apple_jwk_client = PyJWKClient(APPLE_JWKS_URL, cache_keys=True)
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @dataclass
@@ -358,13 +356,18 @@ class AuthService:
 
 
 def _hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    """Hash password using bcrypt."""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 def _verify_password(plain: str, hashed: Optional[str]) -> bool:
+    """Verify password against bcrypt hash."""
     if hashed is None:
         return False
-    return pwd_context.verify(plain, hashed)
+    try:
+        return bcrypt.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
+    except Exception:
+        return False
 
 
 def _generate_tokens(user_id: uuid.UUID) -> AuthTokens:
