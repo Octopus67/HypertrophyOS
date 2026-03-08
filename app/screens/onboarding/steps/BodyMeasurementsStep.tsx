@@ -427,11 +427,11 @@ export function BodyMeasurementsStep({ onNext }: Props) {
     if (unitSystem === 'metric') {
       return { min: 30, max: 300, step: 0.5, unit: 'kg', format: (v: number) => v.toFixed(1) };
     }
-    return { min: 66, max: 661, step: 1, unit: 'lbs', format: (v: number) => String(Math.round(v)) };
+    return { min: 66, max: 661, step: 0.5, unit: 'lbs', format: (v: number) => v.toFixed(1) };
   }, [unitSystem]);
 
   const weightValue = useMemo(() => {
-    if (unitSystem === 'imperial') return Math.round(kgToLbs(weightKg));
+    if (unitSystem === 'imperial') return Math.round(kgToLbs(weightKg) * 2) / 2; // snap to 0.5
     return weightKg;
   }, [weightKg, unitSystem]);
 

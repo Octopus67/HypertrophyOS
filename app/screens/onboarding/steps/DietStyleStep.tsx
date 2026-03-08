@@ -20,6 +20,7 @@ import {
   computeMacroSplit,
   getProteinRecommendation,
 } from '../../../utils/onboardingCalculations';
+import { useHaptics } from '../../../hooks/useHaptics';
 
 interface Props {
   onNext?: () => void;
@@ -51,6 +52,7 @@ export function DietStyleStep({ onNext }: Props) {
   const scrollRef = useRef<ScrollView>(null);
   const lastProteinValue = useRef(store.proteinPerKg);
   const [showProteinTip, setShowProteinTip] = useState(false);
+  const { impact } = useHaptics();
 
   const tdee = useMemo(() => {
     if (store.tdeeOverride) return store.tdeeOverride;
@@ -112,13 +114,25 @@ export function DietStyleStep({ onNext }: Props) {
       if (value !== lastProteinValue.current) {
         lastProteinValue.current = value;
         store.updateField('proteinPerKg', value);
+        impact('light');
         if (!store.proteinUserModified) {
           store.updateField('proteinUserModified', true);
         }
       }
     },
-    [store],
+    [store, impact],
   );
+
+  const handleResetProtein = useCallback(() => {
+    if (!proteinRec) return;
+    const defaultVal = proteinRec.default;
+    store.updateField('proteinPerKg', defaultVal);
+    store.updateField('proteinUserModified', false);
+    lastProteinValue.current = defaultVal;
+    impact('medium');
+    const idx = Math.round((defaultVal - PROTEIN_MIN) / PROTEIN_STEP);
+    scrollRef.current?.scrollTo({ x: idx * TICK_WIDTH, animated: true });
+  }, [proteinRec, store, impact]);
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -186,8 +200,14 @@ export function DietStyleStep({ onNext }: Props) {
       </Text>
 
       <View style={styles.scaleContainer}>
-        {/* Center indicator line */}
-        <View style={[styles.centerIndicator, { backgroundColor: c.accent.primary }]} />
+        {/* Center indicator line with drag handle */}
+        <View style={[styles.centerIndicator, { backgroundColor: c.accent.primary }]}>
+          <View style={[styles.dragHandle, { backgroundColor: c.accent.primary }]}>
+            <View style={[styles.dragHandleLine, { backgroundColor: '#fff' }]} />
+            <View style={[styles.dragHandleLine, { backgroundColor: '#fff' }]} />
+            <View style={[styles.dragHandleLine, { backgroundColor: '#fff' }]} />
+          </View>
+        </View>
 
         <ScrollView
           ref={scrollRef}
@@ -222,9 +242,21 @@ export function DietStyleStep({ onNext }: Props) {
       </View>
 
       {proteinRec && (
-        <Text style={[styles.recHint, { color: c.semantic.positive }]}>
-          Recommended: {proteinRec.min}–{proteinRec.max} g/kg
-        </Text>
+        <View style={styles.recRow}>
+          <Text style={[styles.recHint, { color: c.semantic.positive }]}>
+            Recommended: {proteinRec.min}–{proteinRec.max} g/kg
+          </Text>
+          {store.proteinUserModified && (
+            <TouchableOpacity
+              onPress={handleResetProtein}
+              style={[styles.resetBtn, { backgroundColor: c.accent.primaryMuted }]}
+              accessibilityRole="button"
+              accessibilityLabel="Reset to recommended protein"
+            >
+              <Text style={[styles.resetText, { color: c.accent.primary }]}>Reset</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       )}
 
       {/* Protein info card */}
@@ -366,6 +398,22 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     width: 2,
     backgroundColor: c.accent.primary,
     zIndex: 10,
+    alignItems: 'center',
+  },
+  dragHandle: {
+    position: 'absolute',
+    top: -6,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  dragHandleLine: {
+    width: 8,
+    height: 1,
+    borderRadius: 0.5,
   },
   scaleContent: {
     paddingHorizontal: '50%',
@@ -405,7 +453,22 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   recHint: {
     color: c.semantic.positive,
     fontSize: typography.size.xs,
+    lineHeight: typography.lineHeight.xs,
+  },
+  recRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: spacing[3],
+  },
+  resetBtn: {
+    borderRadius: radius.full,
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[1],
+  },
+  resetText: {
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
     lineHeight: typography.lineHeight.xs,
   },
 

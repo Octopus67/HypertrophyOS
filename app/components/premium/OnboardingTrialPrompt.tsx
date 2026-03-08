@@ -60,6 +60,13 @@ export function OnboardingTrialPrompt({
         <Text style={styles.subtitle}>{personalCopy}</Text>
         <Text style={styles.noCc}>No credit card required.</Text>
 
+        {/* Social proof */}
+        <View style={styles.socialProof}>
+          <Text style={styles.socialProofText}>
+            ⭐ 4.8 rating · Join 10,000+ users already training smarter
+          </Text>
+        </View>
+
         {/* Free vs Premium comparison */}
         <View style={[styles.comparisonCard, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
           <View style={styles.comparisonHeader}>
@@ -133,7 +140,21 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeight.sm,
     color: 'rgba(255,255,255,0.6)',
     marginTop: spacing[1],
+    marginBottom: spacing[3],
+  },
+  socialProof: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
     marginBottom: spacing[6],
+  },
+  socialProofText: {
+    fontSize: typography.size.sm,
+    lineHeight: typography.lineHeight.sm,
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: typography.weight.medium,
+    textAlign: 'center',
   },
   comparisonCard: {
     alignSelf: 'stretch',

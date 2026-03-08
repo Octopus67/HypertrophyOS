@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { spacing, typography, radius } from '../../../theme/tokens';
 import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { Button } from '../../../components/common/Button';
 import { useOnboardingStore } from '../../../store/onboardingSlice';
 import type { GoalType } from '../../../store/onboardingSlice';
+import { useState } from 'react';
 
 interface Props {
   onNext?: () => void;
@@ -63,12 +64,21 @@ function getGoalLabel(goal: GoalType | null): string {
 export function SmartTrainingStep({ onNext }: Props) {
   const c = useThemeColors();
   const styles = getThemedStyles(c);
-  const { goalType, rateKgPerWeek } = useOnboardingStore();
+  const { goalType, rateKgPerWeek, exerciseSessionsPerWeek } = useOnboardingStore();
+  const [showComparison, setShowComparison] = useState(false);
 
   const key = getCardKey(goalType);
   const card = GOAL_CARDS[key];
   const showRate = goalType === 'lose_fat' || goalType === 'build_muscle';
   const rateLabel = showRate && rateKgPerWeek > 0 ? ` (${rateKgPerWeek} kg/week)` : '';
+
+  // User's actual volume numbers based on sessions/week
+  const baseVolume = exerciseSessionsPerWeek * 4; // ~4 sets per muscle group per session
+  const adjustedVolume = key === 'cutting'
+    ? Math.round(baseVolume * 0.85)
+    : key === 'bulking'
+      ? Math.round(baseVolume * 1.1)
+      : baseVolume;
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -76,6 +86,15 @@ export function SmartTrainingStep({ onNext }: Props) {
       <Text style={[styles.subheading, { color: c.accent.primary }]}>
         Adjusted for your {getGoalLabel(goalType)} goal
       </Text>
+
+      {/* User's volume numbers */}
+      <View style={[styles.volumeCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+        <Text style={[styles.volumeLabel, { color: c.text.secondary }]}>Your weekly volume target</Text>
+        <Text style={[styles.volumeValue, { color: c.accent.primary }]}>~{adjustedVolume} sets/muscle</Text>
+        <Text style={[styles.volumeHint, { color: c.text.muted }]}>
+          Based on {exerciseSessionsPerWeek} sessions/week
+        </Text>
+      </View>
 
       {/* Personalized card */}
       <View style={[styles.card, styles.cardHighlight, { backgroundColor: c.bg.surfaceRaised, borderColor: c.accent.primary }]}>
@@ -89,6 +108,46 @@ export function SmartTrainingStep({ onNext }: Props) {
           ))}
         </View>
       </View>
+
+      {/* Compare toggle */}
+      <TouchableOpacity
+        style={[styles.toggleBtn, { borderColor: c.border.default }]}
+        onPress={() => setShowComparison((v) => !v)}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="Compare all scenarios"
+      >
+        <Text style={[styles.toggleText, { color: c.accent.primary }]}>
+          {showComparison ? 'Hide comparison' : 'Compare all scenarios'}
+        </Text>
+      </TouchableOpacity>
+
+      {showComparison && (
+        <View style={styles.comparisonGrid}>
+          {Object.entries(GOAL_CARDS).map(([k, gc]) => {
+            const isActive = k === key;
+            const vol = k === 'cutting'
+              ? Math.round(baseVolume * 0.85)
+              : k === 'bulking'
+                ? Math.round(baseVolume * 1.1)
+                : baseVolume;
+            return (
+              <View
+                key={k}
+                style={[
+                  styles.compCard,
+                  { backgroundColor: c.bg.surfaceRaised, borderColor: isActive ? c.accent.primary : c.border.default },
+                  isActive && { borderWidth: 2 },
+                ]}
+              >
+                <Text style={styles.emoji}>{gc.emoji}</Text>
+                <Text style={[styles.compTitle, { color: isActive ? c.accent.primary : c.text.primary }]}>{gc.title}</Text>
+                <Text style={[styles.compVolume, { color: c.text.secondary }]}>~{vol} sets/muscle</Text>
+              </View>
+            );
+          })}
+        </View>
+      )}
 
       {/* Science Badge */}
       <View style={[styles.scienceBadge, { backgroundColor: c.accent.primaryMuted }]}>
@@ -185,6 +244,67 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
     lineHeight: typography.lineHeight.xs,
   },
   valueProp: { marginBottom: spacing[6] },
+  volumeCard: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    padding: spacing[4],
+    marginBottom: spacing[4],
+    alignItems: 'center',
+  },
+  volumeLabel: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    lineHeight: typography.lineHeight.sm,
+  },
+  volumeValue: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.bold,
+    marginTop: spacing[1],
+    fontVariant: ['tabular-nums'],
+    lineHeight: typography.lineHeight.xl,
+  },
+  volumeHint: {
+    fontSize: typography.size.xs,
+    marginTop: spacing[1],
+    lineHeight: typography.lineHeight.xs,
+  },
+  toggleBtn: {
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    alignSelf: 'center',
+    marginBottom: spacing[4],
+  },
+  toggleText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    lineHeight: typography.lineHeight.sm,
+  },
+  comparisonGrid: {
+    flexDirection: 'row',
+    gap: spacing[2],
+    marginBottom: spacing[4],
+  },
+  compCard: {
+    flex: 1,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    padding: spacing[3],
+    alignItems: 'center',
+  },
+  compTitle: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    marginTop: spacing[1],
+    lineHeight: typography.lineHeight.sm,
+  },
+  compVolume: {
+    fontSize: typography.size.xs,
+    marginTop: spacing[0.5],
+    fontVariant: ['tabular-nums'],
+    lineHeight: typography.lineHeight.xs,
+  },
   valueTitle: {
     color: c.text.primary,
     fontSize: typography.size.lg,
