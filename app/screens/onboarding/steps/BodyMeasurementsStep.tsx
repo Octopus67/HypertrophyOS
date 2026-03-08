@@ -8,6 +8,8 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   Dimensions,
+  TextInput,
+  Modal,
 } from 'react-native';
 import Animated, { useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { spacing, typography, radius } from '../../../theme/tokens';
@@ -58,6 +60,8 @@ function HorizontalScale({ min, max, step, value, unit, formatLabel, onValueChan
   const scrollRef = useRef<ScrollView>(null);
   const displayValueRef = useRef(value);
   const [displayValue, setDisplayValue] = useState(value);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editText, setEditText] = useState('');
 
   const steps = useMemo(() => {
     const arr: number[] = [];
@@ -102,6 +106,19 @@ function HorizontalScale({ min, max, step, value, unit, formatLabel, onValueChan
     [resolveValue, onValueChange],
   );
 
+  // Scroll to a specific value
+  const scrollToValue = useCallback(
+    (targetVal: number) => {
+      const index = steps.findIndex((s) => s >= targetVal);
+      const targetIndex = index >= 0 ? index : steps.length - 1;
+      scrollRef.current?.scrollTo({ x: targetIndex * TICK_WIDTH, animated: true });
+      displayValueRef.current = steps[targetIndex];
+      setDisplayValue(steps[targetIndex]);
+      onValueChange(steps[targetIndex]);
+    },
+    [steps, onValueChange],
+  );
+
   // Scroll to initial value on mount
   useEffect(() => {
     const index = steps.findIndex((s) => s >= value);
@@ -113,11 +130,58 @@ function HorizontalScale({ min, max, step, value, unit, formatLabel, onValueChan
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [min, max, step]);
 
+  // Tap-to-edit: open numeric input overlay
+  const handleTapValue = useCallback(() => {
+    setEditText(step < 1 ? displayValue.toFixed(1) : String(Math.round(displayValue)));
+    setEditModalVisible(true);
+  }, [displayValue, step]);
+
+  const handleEditSubmit = useCallback(() => {
+    const parsed = parseFloat(editText);
+    if (!isNaN(parsed) && parsed >= min && parsed <= max) {
+      // Snap to nearest step
+      const snapped = Math.round(parsed / step) * step;
+      const clamped = Math.max(min, Math.min(max, Math.round(snapped * 100) / 100));
+      scrollToValue(clamped);
+    }
+    setEditModalVisible(false);
+  }, [editText, min, max, step, scrollToValue]);
+
   return (
     <View style={sStyles.wrapper}>
-      <Text style={sStyles.valueDisplay}>
-        {formatLabel(displayValue)} <Text style={sStyles.unitText}>{unit}</Text>
-      </Text>
+      <TouchableOpacity onPress={handleTapValue} activeOpacity={0.6} accessibilityLabel={`Tap to enter exact ${unit} value`} accessibilityRole="button">
+        <Text style={sStyles.valueDisplay}>
+          {formatLabel(displayValue)} <Text style={sStyles.unitText}>{unit}</Text>
+        </Text>
+      </TouchableOpacity>
+
+      {/* Numeric input overlay */}
+      <Modal visible={editModalVisible} transparent animationType="fade" onRequestClose={() => setEditModalVisible(false)}>
+        <TouchableOpacity style={sStyles.modalOverlay} activeOpacity={1} onPress={() => setEditModalVisible(false)}>
+          <View style={sStyles.modalContent} onStartShouldSetResponder={() => true}>
+            <Text style={sStyles.modalTitle}>Enter exact value</Text>
+            <TextInput
+              style={sStyles.modalInput}
+              value={editText}
+              onChangeText={setEditText}
+              keyboardType="decimal-pad"
+              autoFocus
+              selectTextOnFocus
+              onSubmitEditing={handleEditSubmit}
+              accessibilityLabel={`Exact ${unit} value`}
+            />
+            <View style={sStyles.modalButtons}>
+              <TouchableOpacity onPress={() => setEditModalVisible(false)} style={sStyles.modalCancelBtn}>
+                <Text style={sStyles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleEditSubmit} style={sStyles.modalConfirmBtn}>
+                <Text style={sStyles.modalConfirmText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <View style={sStyles.rulerContainer}>
         <View style={sStyles.fadeLeft} pointerEvents="none" />
         <View style={sStyles.fadeRight} pointerEvents="none" />
@@ -233,6 +297,60 @@ const getScaleStyles = (c: ThemeColors) => StyleSheet.create({
     marginTop: spacing[0.5],
     fontVariant: ['tabular-nums'],
     lineHeight: typography.lineHeight.xs,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: c.bg.surfaceRaised,
+    borderRadius: radius.md,
+    padding: spacing[5],
+    width: 260,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
+    color: c.text.primary,
+    marginBottom: spacing[3],
+  },
+  modalInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: c.border.default,
+    borderRadius: radius.sm,
+    padding: spacing[3],
+    fontSize: typography.size.lg,
+    color: c.text.primary,
+    textAlign: 'center',
+    fontVariant: ['tabular-nums'],
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    marginTop: spacing[4],
+    gap: spacing[3],
+  },
+  modalCancelBtn: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+  },
+  modalCancelText: {
+    color: c.text.muted,
+    fontSize: typography.size.base,
+  },
+  modalConfirmBtn: {
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    backgroundColor: c.accent.primary,
+    borderRadius: radius.sm,
+  },
+  modalConfirmText: {
+    color: '#fff',
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
   },
 });
 

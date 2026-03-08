@@ -107,6 +107,7 @@ const GOAL_LABELS: Record<string, string> = {
   cutting: 'Cutting',
   maintaining: 'Maintaining',
   bulking: 'Bulking',
+  recomposition: 'Recomposition',
 };
 
 // ─── formatSummaryFields ─────────────────────────────────────────────────────

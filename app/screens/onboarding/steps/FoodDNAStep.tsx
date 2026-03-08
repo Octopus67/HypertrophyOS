@@ -4,6 +4,7 @@ import { useThemeColors, ThemeColors } from '../../../hooks/useThemeColors';
 import { useOnboardingStore } from '../../../store/onboardingSlice';
 import { Button } from '../../../components/common/Button';
 import { Icon } from '../../../components/common/Icon';
+import { Tooltip } from '../../../components/common/Tooltip';
 import { useHaptics } from '../../../hooks/useHaptics';
 
 const DIETS = ['Vegetarian', 'Vegan', 'Pescatarian', 'Eggetarian', 'No restrictions'];
@@ -28,6 +29,30 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
 
   const toggleChip = (list: string[], item: string, field: 'dietaryRestrictions' | 'allergies' | 'cuisinePreferences') => {
     impact('light');
+    if (field === 'dietaryRestrictions') {
+      if (item === 'no_restrictions') {
+        // "No restrictions" clears all others
+        store.updateField(field, list.includes(item) ? [] : [item]);
+        return;
+      }
+      // Selecting any restriction clears "no_restrictions"
+      const filtered = list.filter((i) => i !== 'no_restrictions');
+      const updated = filtered.includes(item) ? filtered.filter((i) => i !== item) : [...filtered, item];
+      store.updateField(field, updated);
+      return;
+    }
+    if (field === 'allergies') {
+      if (item === 'none') {
+        // "None" clears all others
+        store.updateField(field, list.includes(item) ? [] : [item]);
+        return;
+      }
+      // Selecting any allergy clears "none"
+      const filtered = list.filter((i) => i !== 'none');
+      const updated = filtered.includes(item) ? filtered.filter((i) => i !== item) : [...filtered, item];
+      store.updateField(field, updated);
+      return;
+    }
     const updated = list.includes(item) ? list.filter((i) => i !== item) : [...list, item];
     store.updateField(field, updated);
   };
@@ -44,16 +69,27 @@ export function FoodDNAStep({ onNext, onBack, onSkip }: Props) {
 
       <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Dietary Identity</Text>
       <View style={styles.chipRow}>
-        {DIETS.map((d) => (
-          <TouchableOpacity
-            key={d}
-            style={[styles.chip, store.dietaryRestrictions.includes(d.toLowerCase().replace(' ', '_')) && styles.chipActive]}
-            onPress={() => toggleChip(store.dietaryRestrictions, d.toLowerCase().replace(' ', '_'), 'dietaryRestrictions')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.chipText, store.dietaryRestrictions.includes(d.toLowerCase().replace(' ', '_')) && styles.chipTextActive]}>{d}</Text>
-          </TouchableOpacity>
-        ))}
+        {DIETS.map((d) => {
+          const chipKey = d.toLowerCase().replace(' ', '_');
+          const chip = (
+            <TouchableOpacity
+              key={d}
+              style={[styles.chip, store.dietaryRestrictions.includes(chipKey) && styles.chipActive]}
+              onPress={() => toggleChip(store.dietaryRestrictions, chipKey, 'dietaryRestrictions')}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.chipText, store.dietaryRestrictions.includes(chipKey) && styles.chipTextActive]}>{d}</Text>
+            </TouchableOpacity>
+          );
+          if (d === 'Eggetarian') {
+            return (
+              <Tooltip key={d} tooltipId="eggetarian-info" text="Vegetarian diet that includes eggs but no meat, fish, or poultry">
+                {chip}
+              </Tooltip>
+            );
+          }
+          return chip;
+        })}
       </View>
 
       <Text style={[styles.sectionLabel, { color: c.text.secondary }]}>Allergies / Intolerances</Text>

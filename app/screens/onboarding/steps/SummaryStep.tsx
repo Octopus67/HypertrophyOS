@@ -8,6 +8,7 @@ import { ErrorBanner } from '../../../components/common/ErrorBanner';
 import { useOnboardingStore, computeAge } from '../../../store/onboardingSlice';
 import { useStore as useMainStore } from '../../../store';
 import { buildOnboardingPayload } from '../../../utils/onboardingPayloadBuilder';
+import { showAlert } from '../../../utils/crossPlatformAlert';
 import api from '../../../services/api';
 import {
   computeTDEEBreakdown,
@@ -15,6 +16,7 @@ import {
   computeMacroSplit,
 } from '../../../utils/onboardingCalculations';
 import { useStaggeredEntrance } from '../../../hooks/useStaggeredEntrance';
+import { ONBOARDING_STEPS } from '../stepConstants';
 
 interface Props { onNext?: () => void; onBack?: () => void; onSkip?: () => void; onComplete?: () => void; onEditStep?: (step: number) => void; }
 
@@ -23,6 +25,7 @@ const GOAL_LABELS: Record<string, string> = {
   build_muscle: 'Build Muscle',
   maintain: 'Maintain',
   eat_healthier: 'Eat Healthier',
+  recomposition: 'Body Recomposition',
 };
 
 const DIET_LABELS: Record<string, string> = {
@@ -30,6 +33,14 @@ const DIET_LABELS: Record<string, string> = {
   high_protein: 'High Protein',
   low_carb: 'Low Carb',
   keto: 'Keto',
+};
+
+const ACTIVITY_LABELS: Record<string, string> = {
+  sedentary: 'Sedentary',
+  lightly_active: 'Lightly Active',
+  moderately_active: 'Moderately Active',
+  highly_active: 'Highly Active',
+  very_highly_active: 'Very Highly Active',
 };
 
 function SummaryRow({ index, children }: { index: number; children: React.ReactNode }) {
@@ -69,6 +80,17 @@ export function SummaryStep({ onComplete, onEditStep }: Props) {
   );
 
   const handleComplete = async () => {
+    showAlert(
+      'Start Your Journey?',
+      'This will finalize your onboarding and create your personalized plan.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Let\'s Go', onPress: doSubmit },
+      ],
+    );
+  };
+
+  const doSubmit = async () => {
     setSubmitting(true);
     setError(null);
 
@@ -126,16 +148,75 @@ export function SummaryStep({ onComplete, onEditStep }: Props) {
     }
   };
 
-  const rows: { label: string; value: string; editStep: number }[] = [
-    { label: 'Daily Calories', value: `${budget.budget.toLocaleString()} kcal`, editStep: 6 },
-    { label: 'Protein', value: `${macros.proteinG}g`, editStep: 7 },
-    { label: 'Carbs', value: `${macros.carbsG}g`, editStep: 7 },
-    { label: 'Fat', value: `${macros.fatG}g`, editStep: 7 },
-    { label: 'Goal', value: GOAL_LABELS[goalType] ?? goalType, editStep: 1 },
-    { label: 'Rate', value: goalType === 'maintain' || goalType === 'eat_healthier' ? '—' : `${store.rateKgPerWeek} kg/wk`, editStep: 6 },
-    { label: 'TDEE', value: `${tdee.toLocaleString()} kcal`, editStep: 5 },
-    { label: 'Diet Style', value: DIET_LABELS[store.dietStyle] ?? store.dietStyle, editStep: 7 },
+  // Macro percentages for stacked bar
+  const totalMacroKcal = macros.proteinG * 4 + macros.carbsG * 4 + macros.fatG * 9;
+  const proteinPct = totalMacroKcal > 0 ? Math.round((macros.proteinG * 4 / totalMacroKcal) * 100) : 0;
+  const carbsPct = totalMacroKcal > 0 ? Math.round((macros.carbsG * 4 / totalMacroKcal) * 100) : 0;
+  const fatPct = 100 - proteinPct - carbsPct;
+
+  // Format height for display
+  const heightDisplay = store.unitSystem === 'imperial'
+    ? `${Math.floor(store.heightCm / 2.54 / 12)}'${Math.round((store.heightCm / 2.54) % 12)}"`
+    : `${Math.round(store.heightCm)} cm`;
+
+  // Format weight for display
+  const weightDisplay = store.unitSystem === 'imperial'
+    ? `${Math.round(store.weightKg * 2.20462)} lbs`
+    : `${store.weightKg.toFixed(1)} kg`;
+
+  // Food DNA summary
+  const foodDnaSummary = store.foodDnaSkipped
+    ? 'Skipped'
+    : [
+        ...store.dietaryRestrictions.map((r) => r.replace(/_/g, ' ')),
+        ...store.allergies.filter((a) => a !== 'none'),
+      ].join(', ') || 'None set';
+
+  type SummarySection = { title: string; rows: { label: string; value: string; editStep: number }[] };
+
+  const sections: SummarySection[] = [
+    {
+      title: 'Body',
+      rows: [
+        { label: 'Height', value: heightDisplay, editStep: ONBOARDING_STEPS.BODY_MEASUREMENTS },
+        { label: 'Weight', value: weightDisplay, editStep: ONBOARDING_STEPS.BODY_MEASUREMENTS },
+        { label: 'Age', value: `${age} years`, editStep: ONBOARDING_STEPS.BODY_BASICS },
+        ...(store.bodyFatPct ? [{ label: 'Body Fat', value: `${store.bodyFatPct}%`, editStep: ONBOARDING_STEPS.BODY_COMPOSITION }] : []),
+      ],
+    },
+    {
+      title: 'Activity',
+      rows: [
+        { label: 'Activity Level', value: ACTIVITY_LABELS[store.activityLevel] ?? store.activityLevel, editStep: ONBOARDING_STEPS.LIFESTYLE },
+        { label: 'Exercise', value: `${store.exerciseSessionsPerWeek}x/week`, editStep: ONBOARDING_STEPS.LIFESTYLE },
+      ],
+    },
+    {
+      title: 'Goal & Nutrition',
+      rows: [
+        { label: 'Goal', value: GOAL_LABELS[goalType] ?? goalType, editStep: ONBOARDING_STEPS.INTENT },
+        { label: 'Rate', value: goalType === 'maintain' || goalType === 'eat_healthier' ? '—' : `${store.rateKgPerWeek} kg/wk`, editStep: ONBOARDING_STEPS.GOAL },
+        { label: 'TDEE', value: `${tdee.toLocaleString()} kcal`, editStep: ONBOARDING_STEPS.TDEE_REVEAL },
+        { label: 'Daily Calories', value: `${budget.budget.toLocaleString()} kcal`, editStep: ONBOARDING_STEPS.GOAL },
+        { label: 'Diet Style', value: DIET_LABELS[store.dietStyle] ?? store.dietStyle, editStep: ONBOARDING_STEPS.DIET_STYLE },
+      ],
+    },
+    {
+      title: 'Food DNA',
+      rows: [
+        { label: 'Preferences', value: foodDnaSummary, editStep: ONBOARDING_STEPS.FOOD_DNA },
+        { label: 'Meals/Day', value: String(store.mealFrequency), editStep: ONBOARDING_STEPS.FOOD_DNA },
+      ],
+    },
   ];
+
+  // Pre-compute row indices to avoid mutable counter during render
+  const sectionRowIndices = useMemo(() => {
+    let idx = 0;
+    return sections.map((section) =>
+      section.rows.map(() => idx++),
+    );
+  }, [sections]);
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -144,26 +225,55 @@ export function SummaryStep({ onComplete, onEditStep }: Props) {
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
-      <View style={[styles.card, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
-        {rows.map((row, i) => (
-          <SummaryRow key={row.label} index={i}>
-            <TouchableOpacity
-              style={[styles.row, i < rows.length - 1 && styles.rowBorder]}
-              onPress={() => onEditStep?.(row.editStep)}
-              activeOpacity={0.6}
-              disabled={submitting}
-              accessibilityLabel={`Edit ${row.label}: ${row.value}`}
-              accessibilityRole="button"
-            >
-              <Text style={[styles.rowLabel, { color: c.text.secondary }]}>{row.label}</Text>
-              <View style={styles.rowRight}>
-                <Text style={[styles.rowValue, { color: c.text.primary }]}>{row.value}</Text>
-                <Text style={[styles.editIcon, { color: c.text.muted }]}>›</Text>
-              </View>
-            </TouchableOpacity>
-          </SummaryRow>
-        ))}
+      {/* Macro breakdown stacked bar */}
+      <View style={[styles.macroBarCard, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+        <View style={styles.macroBarRow}>
+          <View style={[styles.macroBarSegment, { flex: proteinPct, backgroundColor: '#4CAF50' }]} />
+          <View style={[styles.macroBarSegment, { flex: carbsPct, backgroundColor: '#2196F3' }]} />
+          <View style={[styles.macroBarSegment, { flex: fatPct, backgroundColor: '#FF9800' }]} />
+        </View>
+        <View style={styles.macroLegendRow}>
+          <View style={styles.macroLegendItem}>
+            <View style={[styles.macroLegendDot, { backgroundColor: '#4CAF50' }]} />
+            <Text style={[styles.macroLegendText, { color: c.text.secondary }]}>Protein {macros.proteinG}g ({proteinPct}%)</Text>
+          </View>
+          <View style={styles.macroLegendItem}>
+            <View style={[styles.macroLegendDot, { backgroundColor: '#2196F3' }]} />
+            <Text style={[styles.macroLegendText, { color: c.text.secondary }]}>Carbs {macros.carbsG}g ({carbsPct}%)</Text>
+          </View>
+          <View style={styles.macroLegendItem}>
+            <View style={[styles.macroLegendDot, { backgroundColor: '#FF9800' }]} />
+            <Text style={[styles.macroLegendText, { color: c.text.secondary }]}>Fat {macros.fatG}g ({fatPct}%)</Text>
+          </View>
+        </View>
       </View>
+
+      {/* Sections */}
+      {sections.map((section, sectionIdx) => (
+        <View key={section.title}>
+          <Text style={[styles.sectionTitle, { color: c.text.muted }]}>{section.title}</Text>
+          <View style={[styles.card, { backgroundColor: c.bg.surfaceRaised, borderColor: c.border.default }]}>
+            {section.rows.map((row, i) => (
+                <SummaryRow key={row.label} index={sectionRowIndices[sectionIdx][i]}>
+                  <TouchableOpacity
+                    style={[styles.row, i < section.rows.length - 1 && styles.rowBorder]}
+                    onPress={() => onEditStep?.(row.editStep)}
+                    activeOpacity={0.6}
+                    disabled={submitting}
+                    accessibilityLabel={`Edit ${row.label}: ${row.value}`}
+                    accessibilityRole="button"
+                  >
+                    <Text style={[styles.rowLabel, { color: c.text.secondary }]}>{row.label}</Text>
+                    <View style={styles.rowRight}>
+                      <Text style={[styles.rowValue, { color: c.text.primary }]}>{row.value}</Text>
+                      <Text style={[styles.editIcon, { color: c.text.muted }]}>›</Text>
+                    </View>
+                  </TouchableOpacity>
+                </SummaryRow>
+            ))}
+          </View>
+        </View>
+      ))}
 
       {onComplete && (
         <View style={styles.btn}>
@@ -184,13 +294,58 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   scroll: { paddingBottom: spacing[8] },
   heading: { color: c.text.primary, fontSize: typography.size['2xl'], fontWeight: typography.weight.bold, marginBottom: spacing[2] },
   subheading: { color: c.text.secondary, fontSize: typography.size.base, marginBottom: spacing[6] },
+  sectionTitle: {
+    color: c.text.muted,
+    fontSize: typography.size.xs,
+    fontWeight: typography.weight.semibold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: spacing[2],
+    marginTop: spacing[4],
+  },
+  macroBarCard: {
+    backgroundColor: c.bg.surfaceRaised,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: c.border.default,
+    padding: spacing[4],
+    marginBottom: spacing[2],
+  },
+  macroBarRow: {
+    flexDirection: 'row',
+    height: 12,
+    borderRadius: 6,
+    overflow: 'hidden',
+    marginBottom: spacing[3],
+  },
+  macroBarSegment: {
+    height: '100%',
+  },
+  macroLegendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  macroLegendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+  },
+  macroLegendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  macroLegendText: {
+    fontSize: typography.size.xs,
+    color: c.text.secondary,
+  },
   card: {
     backgroundColor: c.bg.surfaceRaised,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: c.border.default,
     overflow: 'hidden',
-    marginBottom: spacing[6],
+    marginBottom: spacing[2],
   },
   row: {
     flexDirection: 'row',
@@ -201,8 +356,8 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: c.border.subtle },
   rowLabel: { color: c.text.secondary, fontSize: typography.size.base },
-  rowRight: { flexDirection: 'row', alignItems: 'center' },
+  rowRight: { flexDirection: 'row', alignItems: 'center', flexShrink: 1 },
   rowValue: { color: c.text.primary, fontSize: typography.size.base, fontWeight: typography.weight.semibold, marginRight: spacing[2] },
   editIcon: { color: c.text.muted, fontSize: typography.size.lg },
-  btn: { marginTop: spacing[2] },
+  btn: { marginTop: spacing[4] },
 });

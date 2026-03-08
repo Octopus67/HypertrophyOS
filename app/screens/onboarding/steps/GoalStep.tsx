@@ -49,7 +49,11 @@ export function GoalStep({ onNext }: Props) {
   const goalType = store.goalType ?? 'maintain';
   const isLose = goalType === 'lose_fat';
   const isBuild = goalType === 'build_muscle';
-  const isMaintain = goalType === 'maintain' || goalType === 'eat_healthier';
+  // Recomposition uses calorie cycling (surplus on training days, deficit on rest)
+  // so it behaves like maintain for rate selection and projected date — no linear
+  // weight trajectory applies.
+  const isRecomp = goalType === 'recomposition';
+  const isMaintain = goalType === 'maintain' || goalType === 'eat_healthier' || isRecomp;
 
   const rates = isLose ? LOSE_RATES : isBuild ? BUILD_RATES : [];
 
@@ -65,6 +69,18 @@ export function GoalStep({ onNext }: Props) {
 
   // Target weight validation
   const targetWeightValid = store.targetWeightKg === null || (store.targetWeightKg >= 30 && store.targetWeightKg <= 300);
+
+  // Directional validation: warn if target contradicts goal
+  const targetDirectionWarning = useMemo(() => {
+    if (!store.targetWeightKg || isMaintain) return null;
+    if (isLose && store.targetWeightKg > store.weightKg) {
+      return 'Your target weight is higher than your current weight, but your goal is to lose fat.';
+    }
+    if (isBuild && store.targetWeightKg < store.weightKg) {
+      return 'Your target weight is lower than your current weight, but your goal is to build muscle.';
+    }
+    return null;
+  }, [store.targetWeightKg, store.weightKg, isLose, isBuild, isMaintain]);
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -140,6 +156,9 @@ export function GoalStep({ onNext }: Props) {
           {!targetWeightValid && (
             <Text style={[styles.errorText, { color: c.semantic.negative }]}>Target weight must be between 30-300 kg</Text>
           )}
+          {targetDirectionWarning && targetWeightValid && (
+            <Text style={[styles.warningHint, { color: c.semantic.warning }]}>⚠ {targetDirectionWarning}</Text>
+          )}
         </View>
       )}
 
@@ -207,6 +226,12 @@ const getThemedStyles = (c: ThemeColors) => StyleSheet.create({
   },
   errorText: {
     color: c.semantic.negative,
+    fontSize: typography.size.sm,
+    marginTop: spacing[1],
+    lineHeight: typography.lineHeight.sm,
+  },
+  warningHint: {
+    color: c.semantic.warning,
     fontSize: typography.size.sm,
     marginTop: spacing[1],
     lineHeight: typography.lineHeight.sm,

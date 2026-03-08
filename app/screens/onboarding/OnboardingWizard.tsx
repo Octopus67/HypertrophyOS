@@ -23,8 +23,7 @@ import { SummaryStep } from './steps/SummaryStep';
 import { OnboardingTrialPrompt } from '../../components/premium/OnboardingTrialPrompt';
 import { useTrial } from '../../hooks/useTrial';
 
-// Total steps - derived from the number of cases in renderStep()
-const TOTAL_STEPS = 12;
+import { ONBOARDING_STEPS, TOTAL_STEPS } from './stepConstants';
 
 interface Props {
   onComplete: () => void;
@@ -76,18 +75,18 @@ export function OnboardingWizard({ onComplete }: Props) {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 1: return <IntentStep onNext={goNext} />;
-      case 2: return <BodyBasicsStep onNext={goNext} onBack={goBack} />;
-      case 3: return <BodyMeasurementsStep onNext={goNext} onBack={goBack} />;
-      case 4: return <BodyCompositionStep onNext={goNext} onBack={goBack} onSkip={goNext} />;
-      case 5: return <LifestyleStep onNext={goNext} onBack={goBack} />;
-      case 6: return <TDEERevealStep onNext={goNext} onBack={goBack} />;
-      case 7: return <SmartTrainingStep onNext={goNext} onBack={goBack} />;
-      case 8: return <GoalStep onNext={goNext} onBack={goBack} />;
-      case 9: return <DietStyleStep onNext={goNext} onBack={goBack} />;
-      case 10: return <FoodDNAStep onNext={goNext} onBack={goBack} onSkip={goNext} />;
-      case 11: return <SummaryStep onComplete={goNext} onBack={goBack} onEditStep={jumpToStep} />;
-      case 12: return (
+      case ONBOARDING_STEPS.INTENT: return <IntentStep onNext={goNext} />;
+      case ONBOARDING_STEPS.BODY_BASICS: return <BodyBasicsStep onNext={goNext} onBack={goBack} />;
+      case ONBOARDING_STEPS.BODY_MEASUREMENTS: return <BodyMeasurementsStep onNext={goNext} onBack={goBack} />;
+      case ONBOARDING_STEPS.BODY_COMPOSITION: return <BodyCompositionStep onNext={goNext} onBack={goBack} onSkip={goNext} />;
+      case ONBOARDING_STEPS.LIFESTYLE: return <LifestyleStep onNext={goNext} onBack={goBack} />;
+      case ONBOARDING_STEPS.TDEE_REVEAL: return <TDEERevealStep onNext={goNext} onBack={goBack} />;
+      case ONBOARDING_STEPS.SMART_TRAINING: return <SmartTrainingStep onNext={goNext} onBack={goBack} />;
+      case ONBOARDING_STEPS.GOAL: return <GoalStep onNext={goNext} onBack={goBack} />;
+      case ONBOARDING_STEPS.DIET_STYLE: return <DietStyleStep onNext={goNext} onBack={goBack} />;
+      case ONBOARDING_STEPS.FOOD_DNA: return <FoodDNAStep onNext={goNext} onBack={goBack} onSkip={goNext} />;
+      case ONBOARDING_STEPS.SUMMARY: return <SummaryStep onComplete={goNext} onBack={goBack} onEditStep={jumpToStep} />;
+      case ONBOARDING_STEPS.TRIAL_PROMPT: return (
         <OnboardingTrialPrompt
           onStartTrial={async () => { await startTrial(); handleComplete(); }}
           onSkip={handleComplete}
