@@ -21,8 +21,7 @@ import {
   cmToFtIn,
   ftInToCm,
 } from '../../utils/unitConversion';
-import { useStore } from '../../store';
-import api from '../../services/api';
+import { useRecalculate } from '../../hooks/useRecalculate';
 
 const ACTIVITY_LEVELS = [
   { value: 'sedentary', label: 'Sedentary' },
@@ -97,7 +96,8 @@ export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps)
   const c = useThemeColors();
   const styles = getThemedStyles(c);
   const navigation = useNavigation<any>();
-  const store = useStore();
+
+  const { recalculate } = useRecalculate();
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -182,27 +182,7 @@ export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps)
       if (heightCm !== undefined) payload.height_cm = heightCm;
       if (bodyFatPct !== undefined) payload.body_fat_pct = bodyFatPct;
 
-      const { data } = await api.post('users/recalculate', { metrics: payload });
-
-      // Update store — map snake_case to camelCase
-      if (data.metrics) {
-        store.setLatestMetrics({
-          id: data.metrics.id,
-          heightCm: data.metrics.height_cm,
-          weightKg: data.metrics.weight_kg,
-          bodyFatPct: data.metrics.body_fat_pct,
-          activityLevel: data.metrics.activity_level,
-          recordedAt: data.metrics.recorded_at,
-        });
-      }
-      if (data.targets) {
-        store.setAdaptiveTargets({
-          calories: data.targets.calories,
-          protein_g: data.targets.protein_g,
-          carbs_g: data.targets.carbs_g,
-          fat_g: data.targets.fat_g,
-        });
-      }
+      await recalculate({ metrics: payload });
 
       setEditing(false);
     } catch {
@@ -210,7 +190,7 @@ export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps)
     } finally {
       setSaving(false);
     }
-  }, [draftWeight, draftHeightCm, draftFeet, draftInches, draftBodyFat, draftActivity, unitSystem, store]);
+  }, [draftWeight, draftHeightCm, draftFeet, draftInches, draftBodyFat, draftActivity, unitSystem, recalculate]);
 
   // Handle single-field save for non-edit-all mode
   const handleHeightSave = useCallback(
@@ -223,27 +203,9 @@ export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps)
       };
       if (metrics?.weightKg != null) payload.weight_kg = metrics.weightKg;
       if (metrics?.bodyFatPct != null) payload.body_fat_pct = metrics.bodyFatPct;
-      const { data } = await api.post('users/recalculate', { metrics: payload });
-      if (data.metrics) {
-        store.setLatestMetrics({
-          id: data.metrics.id,
-          heightCm: data.metrics.height_cm,
-          weightKg: data.metrics.weight_kg,
-          bodyFatPct: data.metrics.body_fat_pct,
-          activityLevel: data.metrics.activity_level,
-          recordedAt: data.metrics.recorded_at,
-        });
-      }
-      if (data.targets) {
-        store.setAdaptiveTargets({
-          calories: data.targets.calories,
-          protein_g: data.targets.protein_g,
-          carbs_g: data.targets.carbs_g,
-          fat_g: data.targets.fat_g,
-        });
-      }
+      await recalculate({ metrics: payload });
     },
-    [metrics, store],
+    [metrics, recalculate],
   );
 
   const handleWeightSave = useCallback(
@@ -256,27 +218,9 @@ export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps)
       };
       if (metrics?.heightCm != null) payload.height_cm = metrics.heightCm;
       if (metrics?.bodyFatPct != null) payload.body_fat_pct = metrics.bodyFatPct;
-      const { data } = await api.post('users/recalculate', { metrics: payload });
-      if (data.metrics) {
-        store.setLatestMetrics({
-          id: data.metrics.id,
-          heightCm: data.metrics.height_cm,
-          weightKg: data.metrics.weight_kg,
-          bodyFatPct: data.metrics.body_fat_pct,
-          activityLevel: data.metrics.activity_level,
-          recordedAt: data.metrics.recorded_at,
-        });
-      }
-      if (data.targets) {
-        store.setAdaptiveTargets({
-          calories: data.targets.calories,
-          protein_g: data.targets.protein_g,
-          carbs_g: data.targets.carbs_g,
-          fat_g: data.targets.fat_g,
-        });
-      }
+      await recalculate({ metrics: payload });
     },
-    [metrics, unitSystem, store],
+    [metrics, unitSystem, recalculate],
   );
 
   const handleBodyFatSave = useCallback(
@@ -289,27 +233,9 @@ export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps)
       };
       if (metrics?.weightKg != null) payload.weight_kg = metrics.weightKg;
       if (metrics?.heightCm != null) payload.height_cm = metrics.heightCm;
-      const { data } = await api.post('users/recalculate', { metrics: payload });
-      if (data.metrics) {
-        store.setLatestMetrics({
-          id: data.metrics.id,
-          heightCm: data.metrics.height_cm,
-          weightKg: data.metrics.weight_kg,
-          bodyFatPct: data.metrics.body_fat_pct,
-          activityLevel: data.metrics.activity_level,
-          recordedAt: data.metrics.recorded_at,
-        });
-      }
-      if (data.targets) {
-        store.setAdaptiveTargets({
-          calories: data.targets.calories,
-          protein_g: data.targets.protein_g,
-          carbs_g: data.targets.carbs_g,
-          fat_g: data.targets.fat_g,
-        });
-      }
+      await recalculate({ metrics: payload });
     },
-    [metrics, store],
+    [metrics, recalculate],
   );
 
   // Handle activity level save
@@ -322,28 +248,9 @@ export function BodyStatsSection({ metrics, unitSystem }: BodyStatsSectionProps)
       if (metrics?.heightCm != null) payload.height_cm = metrics.heightCm;
       if (metrics?.bodyFatPct != null) payload.body_fat_pct = metrics.bodyFatPct;
 
-      const { data } = await api.post('users/recalculate', { metrics: payload });
-
-      if (data.metrics) {
-        store.setLatestMetrics({
-          id: data.metrics.id,
-          heightCm: data.metrics.height_cm,
-          weightKg: data.metrics.weight_kg,
-          bodyFatPct: data.metrics.body_fat_pct,
-          activityLevel: data.metrics.activity_level,
-          recordedAt: data.metrics.recorded_at,
-        });
-      }
-      if (data.targets) {
-        store.setAdaptiveTargets({
-          calories: data.targets.calories,
-          protein_g: data.targets.protein_g,
-          carbs_g: data.targets.carbs_g,
-          fat_g: data.targets.fat_g,
-        });
-      }
+      await recalculate({ metrics: payload });
     },
-    [metrics, store],
+    [metrics, recalculate],
   );
 
   // ── Empty state ──

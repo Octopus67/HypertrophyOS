@@ -13,8 +13,7 @@ import { EditableField } from '../common/EditableField';
 import { EmptyState } from '../common/EmptyState';
 import { Icon } from '../common/Icon';
 import { formatWeight, parseWeightInput } from '../../utils/unitConversion';
-import { useStore } from '../../store';
-import api from '../../services/api';
+import { useRecalculate } from '../../hooks/useRecalculate';
 
 const GOAL_TYPES = [
   { value: 'cutting', label: 'Cutting' },
@@ -120,7 +119,7 @@ function MacroTargets({
 export function GoalsSection({ goals, adaptiveTargets, unitSystem }: GoalsSectionProps) {
   const c = useThemeColors();
   const styles = getThemedStyles(c);
-  const store = useStore();
+  const { recalculate } = useRecalculate();
 
   const [editingGoalType, setEditingGoalType] = useState(false);
   const [draftGoalType, setDraftGoalType] = useState<string>('maintaining');
@@ -147,27 +146,9 @@ export function GoalsSection({ goals, adaptiveTargets, unitSystem }: GoalsSectio
         goalsPayload.goal_rate_per_week = goals.goalRatePerWeek;
       }
 
-      const { data } = await api.post('users/recalculate', { goals: goalsPayload });
-
-      if (data.goals) {
-        store.setGoals({
-          id: data.goals.id,
-          userId: data.goals.user_id,
-          goalType: data.goals.goal_type,
-          targetWeightKg: data.goals.target_weight_kg,
-          goalRatePerWeek: data.goals.goal_rate_per_week,
-        });
-      }
-      if (data.targets) {
-        store.setAdaptiveTargets({
-          calories: data.targets.calories,
-          protein_g: data.targets.protein_g,
-          carbs_g: data.targets.carbs_g,
-          fat_g: data.targets.fat_g,
-        });
-      }
+      await recalculate({ goals: goalsPayload });
     },
-    [goals, store],
+    [goals, recalculate],
   );
 
   const handleGoalTypeStart = useCallback(() => {

@@ -24,6 +24,7 @@ import { CuisinePreferencesPicker } from './CuisinePreferencesPicker';
 import { MealFrequencyStepper } from './MealFrequencyStepper';
 import { useStore } from '../../store';
 import api from '../../services/api';
+import { useRecalculate } from '../../hooks/useRecalculate';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -70,6 +71,7 @@ export function AdvancedSettingsSection() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const { recalculate } = useRecalculate();
 
   // Draft state initialized from profile preferences
   const [draft, setDraft] = useState<DraftState>(() =>
@@ -141,28 +143,7 @@ export function AdvancedSettingsSection() {
         if (latestMetrics.heightCm != null) metricsPayload.height_cm = latestMetrics.heightCm;
         if (latestMetrics.bodyFatPct != null) metricsPayload.body_fat_pct = latestMetrics.bodyFatPct;
 
-        const { data: recalcData } = await api.post('users/recalculate', {
-          metrics: metricsPayload,
-        });
-
-        if (recalcData.metrics) {
-          store.setLatestMetrics({
-            id: recalcData.metrics.id,
-            heightCm: recalcData.metrics.height_cm,
-            weightKg: recalcData.metrics.weight_kg,
-            bodyFatPct: recalcData.metrics.body_fat_pct,
-            activityLevel: recalcData.metrics.activity_level,
-            recordedAt: recalcData.metrics.recorded_at,
-          });
-        }
-        if (recalcData.targets) {
-          store.setAdaptiveTargets({
-            calories: recalcData.targets.calories,
-            protein_g: recalcData.targets.protein_g,
-            carbs_g: recalcData.targets.carbs_g,
-            fat_g: recalcData.targets.fat_g,
-          });
-        }
+        await recalculate({ metrics: metricsPayload });
       }
 
       setSuccess(true);
@@ -171,7 +152,7 @@ export function AdvancedSettingsSection() {
     } finally {
       setSaving(false);
     }
-  }, [draft, profile, latestMetrics, store]);
+  }, [draft, profile, latestMetrics, store, recalculate]);
 
   return (
     <Card>
