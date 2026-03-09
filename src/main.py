@@ -157,8 +157,10 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
-# TODO: HTTPS enforcement should be handled at deployment level (reverse proxy/load balancer)
-# For production, ensure HTTPS redirect is configured in nginx/ALB/CloudFlare
+# HTTPS enforcement in production
+if not settings.DEBUG:
+    from src.middleware.https_redirect import HTTPSRedirectMiddleware
+    app.add_middleware(HTTPSRedirectMiddleware)
 
 app.add_middleware(StructuredLoggingMiddleware)
 
@@ -190,8 +192,17 @@ async def unhandled_exception_handler(_request: Request, exc: Exception) -> JSON
 
 # Health check
 @app.get("/api/v1/health")
-async def health_check() -> dict[str, str]:
-    return {"status": "ok"}
+async def health_check() -> JSONResponse:
+    from sqlalchemy import text
+    from src.config.database import async_session_factory
+
+    try:
+        async with async_session_factory() as session:
+            await session.execute(text("SELECT 1"))
+        return JSONResponse(status_code=200, content={"status": "ok"})
+    except Exception:
+        logger.exception("Health check DB ping failed")
+        return JSONResponse(status_code=503, content={"status": "unhealthy", "reason": "database unreachable"})
 
 # Serve exercise images from local static directory
 _static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
@@ -245,6 +256,9 @@ app.include_router(account_router, prefix="/api/v1/account", tags=["account"])
 
 from src.modules.onboarding.router import router as onboarding_router
 app.include_router(onboarding_router, prefix="/api/v1/onboarding", tags=["onboarding"])
+
+from src.modules.dashboard.router import router as dashboard_router
+app.include_router(dashboard_router, prefix="/api/v1", tags=["dashboard"])
 
 from src.modules.training.analytics_router import router as analytics_router
 app.include_router(analytics_router, prefix="/api/v1/training", tags=["training-analytics"])
