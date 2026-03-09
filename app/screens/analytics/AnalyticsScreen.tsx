@@ -377,6 +377,7 @@ export function AnalyticsScreen() {
                     micro_nutrients: null,
                   }))}
                   targetCalories={adaptiveTarget?.calories ?? 2400}
+                  timeRangeDays={{ '7d': 7, '14d': 14, '30d': 30, '90d': 90 }[timeRange]}
                 />
               </>
             )}

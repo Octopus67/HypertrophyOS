@@ -11,9 +11,10 @@ import {
 interface WeeklySummaryCardProps {
   entries: NutritionEntry[];
   targetCalories: number;
+  timeRangeDays?: number; // Number of days in selected range
 }
 
-export function WeeklySummaryCard({ entries, targetCalories }: WeeklySummaryCardProps) {
+export function WeeklySummaryCard({ entries, targetCalories, timeRangeDays = 7 }: WeeklySummaryCardProps) {
   const c = useThemeColors();
   const styles = getThemedStyles(c);
   const summary = computeWeeklySummary(entries, targetCalories);
@@ -24,7 +25,7 @@ export function WeeklySummaryCard({ entries, targetCalories }: WeeklySummaryCard
       <Card variant="flat">
         <Text style={[getStyles().title, { color: c.text.primary }]}>Weekly Summary</Text>
         <Text style={[getStyles().emptyText, { color: c.text.muted }]}>
-          Log more days to see weekly patterns. ({summary.daysLogged} of 7 days logged)
+          Log more days to see patterns. ({summary.daysLogged} of {timeRangeDays} days logged)
         </Text>
       </Card>
     );
@@ -33,7 +34,7 @@ export function WeeklySummaryCard({ entries, targetCalories }: WeeklySummaryCard
   return (
     <Card variant="flat">
       <Text style={[getStyles().title, { color: c.text.primary }]}>Weekly Summary</Text>
-      <Text style={[getStyles().daysLogged, { color: c.text.muted }]}>{summary.daysLogged} of 7 days logged</Text>
+      <Text style={[getStyles().daysLogged, { color: c.text.muted }]}>{summary.daysLogged} of {timeRangeDays} days logged</Text>
 
       {/* Averages */}
       <View style={getStyles().avgRow}>

@@ -109,6 +109,13 @@ async def generate_nutrition_data(
                 protein_g=round(meal_protein, 1),
                 carbs_g=round(meal_carbs, 1),
                 fat_g=round(meal_fat, 1),
+                micro_nutrients={
+                    "water_ml": random.randint(200, 500),
+                    "fibre_g": round(random.uniform(3, 8), 1),
+                    "vitamin_c_mg": round(random.uniform(10, 50), 1),
+                    "iron_mg": round(random.uniform(2, 8), 1),
+                    "calcium_mg": round(random.uniform(50, 200), 1),
+                },
             )
             session.add(entry)
             entries_created += 1
